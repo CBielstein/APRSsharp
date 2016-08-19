@@ -1,0 +1,1 @@
+APaRSer: an APRS packat parser, encoder, and decoder written in C# by Cameron Bielstein (KG5GHQ).

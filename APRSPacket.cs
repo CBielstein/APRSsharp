@@ -27,6 +27,11 @@ namespace APaRSer
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Takes a string representing the AX.25 Information Field or (as it's called in this case) the APRS Information Field
+        /// and populates this object with the information therein.
+        /// </summary>
+        /// <param name="informationField">string representation of the APRS Information Field</param>
         private void DecodeInformationField(string informationField)
         {
             if (informationField == null)
@@ -101,6 +106,70 @@ namespace APaRSer
             }
 
             throw new NotImplementedException("APRSPacket.DecodeInformationField");
+        }
+
+        /// <summary>
+        /// Takes the APRS Time Format string, detects the formatting, and returns a datetime
+        /// </summary>
+        /// <param name="timestamp">APRS timestamp</param>
+        /// <returns>Decoded DateTime object</returns>
+        private DateTime DecodeTime(string timestamp)
+        {
+            if (timestamp == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (timestamp.Length != 7)
+            {
+                throw new ArgumentException("The given APRS timestamp is " + timestamp.Length + " characters long instead of the required 7.");
+            }
+
+            char timeIndicator = timestamp[6];
+
+            if (timeIndicator == 'z' || timeIndicator == '/')
+            {
+                return DecodeTimeDHM(timestamp);
+            }
+            else if (timeIndicator == 'h')
+            {
+                return DecodeTimeHMS(timestamp);
+            }
+            else if (char.IsNumber(timeIndicator))
+            {
+                return DecodeTimeMDHM(timestamp);
+            }
+
+            throw new ArgumentException("timestamp was not a valid APRS format (did not have a valid Time Indicator character)");
+        }
+
+        /// <summary>
+        /// Takes a Day/Hours/Minutes formatted APRS timestamp and decodes it
+        /// </summary>
+        /// <param name="timestamp">Day/Hours/Minutes formatted APRS timestamp</param>
+        /// <returns>Decoded DateTime object</returns>
+        private DateTime DecodeTimeDHM(string timestamp)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Takes an Hours/Minutes/Seconds formatted APRS timestamp and decodes it
+        /// </summary>
+        /// <param name="timestamp">Hours/Minutes/Seconds formatted APRS timestamp</param>
+        /// <returns>Decoded DateTime object</returns>
+        private DateTime DecodeTimeHMS(string timestamp)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Takes a Month/Day/Hours/Minutes formmatted APRS timestamp and decodes it
+        /// </summary>
+        /// <param name="timestamp">Month/Day/Hours/Minutes forammted APRS timestamp</param>
+        /// <returns>Decoded DateTime object</returns>
+        private DateTime DecodeTimeMDHM(string timestamp)
+        {
+            throw new NotImplementedException();
         }
     }
 }

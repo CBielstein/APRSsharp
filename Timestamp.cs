@@ -111,7 +111,7 @@ namespace APaRSer
             int year = 0;
             int month = 0;
 
-            FindCorrectYearAndMonth(day, out year, out month);
+            FindCorrectYearAndMonth(day, DateTime.Now, out year, out month);
             DateTimeKind dtKind = WasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
 
             dateTime = new DateTime(year, month, day, hour, minute, 0, dtKind);
@@ -124,18 +124,19 @@ namespace APaRSer
         /// </summary>
         /// </summary>
         /// <param name="day">The day number to find</param>
+        /// /// <param name="hint">A hint to the timeframe we're looking for. Generally, DateTime.Now.</param>
         /// <param name="year">The year in which the most recent occurance of that day number occured</param>
         /// <param name="month">The month in which the most recent occurance of that day number occured</param>
-        private void FindCorrectYearAndMonth(int day, out int year, out int month)
+        private void FindCorrectYearAndMonth(int day, DateTime hint, out int year, out int month)
         {
-            if (day > 31)
+            if (day > 31 || day < 1)
             {
-                throw new ArgumentOutOfRangeException("No month has greater than 31 days, but the passed in day number was " + day);
+                throw new ArgumentOutOfRangeException("Day must be in range [1, 31], but the passed in day number was " + day);
             }
 
-            int currYear = DateTime.Now.Year;
-            int currMonth = DateTime.Now.Month;
-            int currDay = DateTime.Now.Day;
+            int currYear = hint.Year;
+            int currMonth = hint.Month;
+            int currDay = hint.Day;
 
             // If that day number has already happened this month, we're done!
             if (day <= currDay)
@@ -145,11 +146,14 @@ namespace APaRSer
             }
             else
             {
-                // Kinda hacky: this doesn't check that the given day number could have actually happened in a given month
-                month = ((currMonth - 1) % 12) + 1;
+                DateTime itrDate = hint;
+                while (itrDate.Day != day)
+                {
+                    itrDate = itrDate.AddDays(-1);
+                }
 
-                // If we wrapped around, then subtract a year
-                year = (month > currMonth) ? currYear - 1 : currYear;
+                month = itrDate.Month;
+                year = itrDate.Year;
             }
         }
 

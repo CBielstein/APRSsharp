@@ -162,5 +162,261 @@ namespace APaRSerUnitTests
             Assert.AreEqual(expectedYear, args[2]);
             Assert.AreEqual(expectedMonth, args[3]);
         }
+
+        /// <summary>
+        /// Tests example given in the APRS101.pdf document for zulu time
+        /// </summary>
+        [TestMethod]
+        public void DMHZuluTimeFromSpec()
+        {
+            Timestamp ts = new Timestamp("092345z");
+
+            Assert.IsTrue(ts.WasZuluTime);
+            Assert.AreEqual(9, ts.dateTime.Day);
+            Assert.AreEqual(23, ts.dateTime.Hour);
+            Assert.AreEqual(45, ts.dateTime.Minute);
+            Assert.AreEqual(DateTimeKind.Utc, ts.dateTime.Kind);
+        }
+
+        /// <summary>
+        /// Tests example given in the APRS101.pdf document for local time
+        /// </summary>
+        [TestMethod]
+        public void DMHNotZuluTimeFromSpec()
+        {
+            Timestamp ts = new Timestamp("092345/");
+
+            Assert.IsFalse(ts.WasZuluTime);
+            Assert.AreEqual(9, ts.dateTime.Day);
+            Assert.AreEqual(23, ts.dateTime.Hour);
+            Assert.AreEqual(45, ts.dateTime.Minute);
+            Assert.AreEqual(DateTimeKind.Local, ts.dateTime.Kind);
+        }
+
+        /// <summary>
+        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
+        /// assuming the packet is from the same day using local
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectDayMonthAndYear_SameDayLocal()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Local);
+            DateTime hint = packet.AddHours(1);
+            int day = 0;
+            int month = 0;
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Hour,
+                packet.Minute,
+                packet.Second,
+                hint,
+                day,
+                month,
+                year };
+
+            pts.Invoke("FindCorrectDayMonthAndYear", args);
+
+            Assert.AreEqual(packet.Day, args[4]);
+            Assert.AreEqual(packet.Month, args[5]);
+            Assert.AreEqual(packet.Year, args[6]);
+        }
+
+        /// <summary>
+        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
+        /// assuming the packet is from yesterday using zulu
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectDayMonthAndYear_YesterdayZulu()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Utc);
+            DateTime hint = packet.AddHours(-2);
+            int day = 0;
+            int month = 0;
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Hour,
+                packet.Minute,
+                packet.Second,
+                hint,
+                day,
+                month,
+                year };
+
+            pts.Invoke("FindCorrectDayMonthAndYear", args);
+
+            Assert.AreEqual(packet.Day - 1, args[4]);
+            Assert.AreEqual(packet.Month, args[5]);
+            Assert.AreEqual(packet.Year, args[6]);
+        }
+
+        /// <summary>
+        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
+        /// with the packet coming from 3 minutes before hint
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectDayMonthAndYear_3MinutesAhead()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
+            DateTime hint = packet.AddMinutes(-3);
+            int day = 0;
+            int month = 0;
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Hour,
+                packet.Minute,
+                packet.Second,
+                hint,
+                day,
+                month,
+                year };
+
+            pts.Invoke("FindCorrectDayMonthAndYear", args);
+
+            Assert.AreEqual(hint.Day, args[4]);
+            Assert.AreEqual(hint.Month, args[5]);
+            Assert.AreEqual(hint.Year, args[6]);
+        }
+
+        /// <summary>
+        /// Test HMS with example from APRS101.pdf
+        /// </summary>
+        [TestMethod]
+        public void HMSTestFromSpec()
+        {
+            Timestamp ts = new Timestamp("234517h");
+
+            Assert.AreEqual(23, ts.dateTime.Hour);
+            Assert.AreEqual(45, ts.dateTime.Minute);
+            Assert.AreEqual(17, ts.dateTime.Second);
+            Assert.IsTrue(ts.WasZuluTime);
+        }
+
+        /// <summary>
+        /// Test FindCorrectYear's 5 minute drift logic
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectYear_3MinutesAhead()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
+            DateTime hint = packet.AddMinutes(-3);
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Month,
+                packet.Day,
+                packet.Hour,
+                packet.Minute,
+                hint,
+                year };
+
+            pts.Invoke("FindCorrectYear", args);
+
+            Assert.AreEqual(hint.Year, args[5]);
+        }
+
+        /// <summary>
+        /// Test FindCorrectYear with a packet from earlier this year
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectYear_ThisYear()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
+            DateTime hint = packet.AddMonths(1);
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Month,
+                packet.Day,
+                packet.Hour,
+                packet.Minute,
+                hint,
+                year };
+
+            pts.Invoke("FindCorrectYear", args);
+
+            Assert.AreEqual(packet.Year, args[5]);
+        }
+
+        /// <summary>
+        /// Test FindCorrectYear with a packet from last year
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectYear_LastYear()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
+            DateTime hint = packet.AddMonths(3);
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Month,
+                packet.Day,
+                packet.Hour,
+                packet.Minute,
+                hint,
+                year };
+
+            pts.Invoke("FindCorrectYear", args);
+
+            Assert.AreEqual(packet.Year, args[5]);
+        }
+
+        /// <summary>
+        /// Test FindCorrectYear leap year edition
+        /// </summary>
+        [TestMethod]
+        public void FindCorrectYear_LeapYear()
+        {
+            Timestamp ts = new Timestamp();
+            PrivateObject pts = new PrivateObject(ts);
+
+            DateTime packet = new DateTime(2015, 2, 28, 0, 1, 1, DateTimeKind.Utc);
+            DateTime hint = packet.AddMonths(1);
+            int year = 0;
+
+            object[] args = new object[] {
+                packet.Month,
+                packet.Day + 1,
+                packet.Hour,
+                packet.Minute,
+                hint,
+                year };
+
+            pts.Invoke("FindCorrectYear", args);
+
+            Assert.AreEqual(2012, args[5]);
+        }
+
+        [TestMethod]
+        public void MDHMTestFromSpec()
+        {
+            Timestamp ts = new Timestamp("10092345");
+
+            Assert.AreEqual(10, ts.dateTime.Month);
+            Assert.AreEqual(9, ts.dateTime.Day);
+            Assert.AreEqual(23, ts.dateTime.Hour);
+            Assert.AreEqual(45, ts.dateTime.Minute);
+            Assert.IsTrue(ts.WasZuluTime);
+        }
     }
 }

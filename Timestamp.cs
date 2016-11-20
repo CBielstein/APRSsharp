@@ -1,15 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace APaRSer
 {
     public class Timestamp
     {
         public DateTime dateTime;
-        public bool WasZuluTime;
+
+        public enum Type
+        {
+            /// <summary>
+            /// Days/Hours/Minutes zulu
+            /// </summary>
+            DHMz,
+            /// <summary>
+            /// Days/Hours/Minutes local
+            /// </summary>
+            DHMl,
+            /// <summary>
+            /// Hours/Minutes/Seconds (always zulu)
+            /// </summary>
+            HMS,
+            /// <summary>
+            /// Hours/Minutes/Seconds (always zulu)
+            /// </summary>
+            MDHM,
+        }
 
         /// <summary>
         /// Initializes this object by decoding the given timestamp in to it
@@ -21,13 +36,124 @@ namespace APaRSer
         }
 
         /// <summary>
-        /// Initializes a timestamp to the current time
+        /// Initializes a Timestamp to the current time, zulu.
         /// </summary>
-        public Timestamp() { }
+        public Timestamp()
+        {
+            dateTime = DateTime.Now.ToUniversalTime();
+        }
 
+        /// <summary>
+        /// Initializes the Timestamp given a DateTime object
+        /// </summary>
+        /// <param name="dt"></param>
         public Timestamp(DateTime dt)
         {
             dateTime = dt;
+        }
+
+        /// <summary>
+        /// Copy constructor. Initializes a Timestamp from a different Timestamp
+        /// </summary>
+        /// <param name="ts"></param>
+        public Timestamp(Timestamp ts)
+        {
+            dateTime = ts.dateTime;
+        }
+
+        /// <summary>
+        /// Encodes the data from the stored datetime as a string with the requested type
+        /// </summary>
+        /// <param name="type">The APRS timestamp type. Read about the types in the documentation for Timestamp.Type</param>
+        /// <returns>String. 7-8 characters as defined by the APRS spec</returns>
+        public string Encode(Timestamp.Type type)
+        {
+            switch (type)
+            {
+                case Type.DHMz:
+                    return EncodeDHM(true /* isZulu*/);
+                case Type.DHMl:
+                    return EncodeDHM(false /* isZulu */);
+                case Type.HMS:
+                    return EncodeHMS();
+                case Type.MDHM:
+                    return EncodeMDHM();
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        /// <summary>
+        /// Encodes to a Day/Hour/Minute (DHM) string in zulu time or local time.
+        /// </summary>
+        /// <param name="isZulu">If true, encodes in DHM with zulu time, else local time. Zulu time should be used.</param>
+        /// <returns>DHM encoded APRS timestamp string</returns>
+        private string EncodeDHM(bool isZulu)
+        {
+            string encodedPacket = String.Empty;
+            DateTime convertedDateTime = isZulu ? dateTime.ToUniversalTime() : dateTime.ToLocalTime();
+
+            // Add day
+            encodedPacket += dateTime.Day.ToString("D2");
+
+            // Add hour
+            encodedPacket += dateTime.Hour.ToString("D2");
+
+            // Add minute
+            encodedPacket += dateTime.Minute.ToString("D2");
+
+            // Add time indicator
+            encodedPacket += isZulu ? "z" : "/";
+
+            return encodedPacket;
+        }
+
+        /// <summary>
+        /// Encodes to an Hour/Minute/Second (HMS) string in zulu time
+        /// </summary>
+        /// <returns>HMS encoded APRS timestamp string</returns>
+        private string EncodeHMS()
+        {
+            string encodedPacket = String.Empty;
+            DateTime convertedDateTime = dateTime.ToUniversalTime();
+
+            // Add hour
+            encodedPacket += dateTime.Hour.ToString("D2");
+
+            // Add minute
+            encodedPacket += dateTime.Minute.ToString("D2");
+
+            // Add second
+            encodedPacket += dateTime.Second.ToString("D2");
+
+            // Add the time indicator
+            encodedPacket += "h";
+
+            return encodedPacket;
+        }
+
+        /// <summary>
+        /// Encodes to an Month/Day/Hour/Minute (MDHM) string in zulu time
+        /// </summary>
+        /// <returns>MDHM encoded APRS timestamp string</returns>
+        private string EncodeMDHM()
+        {
+            string encodedPacket = String.Empty;
+            DateTime convertedDateTime = dateTime.ToUniversalTime();
+
+            // Add month
+            encodedPacket += dateTime.Month.ToString("D2");
+
+            // Add day
+            encodedPacket += dateTime.Day.ToString("D2");
+
+            // Add hour
+            encodedPacket += dateTime.Hour.ToString("D2");
+
+            // Add minute
+            encodedPacket += dateTime.Minute.ToString("D2");
+
+            return encodedPacket;
         }
 
         /// <summary>
@@ -71,6 +197,8 @@ namespace APaRSer
         /// <param name="timestamp">Day/Hours/Minutes formatted APRS timestamp</param>
         private void DecodeDHM(string timestamp)
         {
+            bool wasZuluTime = true;
+
             if (timestamp == null)
             {
                 throw new ArgumentNullException();
@@ -84,11 +212,11 @@ namespace APaRSer
 
             if (timeIndicator == 'z')
             {
-                WasZuluTime = true;
+                wasZuluTime = true;
             }
             else if (timeIndicator == '/')
             {
-                WasZuluTime = false;
+                wasZuluTime = false;
             }
             else
             {
@@ -110,10 +238,10 @@ namespace APaRSer
             int minute = int.Parse(minuteStr);
             int year = 0;
             int month = 0;
-            DateTime hint = WasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
+            DateTime hint = wasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
 
             FindCorrectYearAndMonth(day, hint, out year, out month);
-            DateTimeKind dtKind = WasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
+            DateTimeKind dtKind = wasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
 
             dateTime = new DateTime(year, month, day, hour, minute, 0, dtKind);
         }
@@ -179,9 +307,6 @@ namespace APaRSer
 
             char timeIndicator = timestamp[6];
 
-            // HMS packets are zulu
-            WasZuluTime = true;
-
             string hourStr = timestamp.Substring(0, 2);
             string minuteStr = timestamp.Substring(2, 2);
             string secondStr = timestamp.Substring(4, 2);
@@ -192,7 +317,7 @@ namespace APaRSer
             int year = 0;
             int month = 0;
             int day = 0;
-            DateTime hint = WasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
+            DateTime hint = DateTime.Now.ToUniversalTime();
 
             FindCorrectDayMonthAndYear(
                 hour,
@@ -203,7 +328,7 @@ namespace APaRSer
                 out month,
                 out year);
 
-            DateTimeKind dtKind = WasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
+            DateTimeKind dtKind = DateTimeKind.Utc;
             dateTime = new DateTime(year, month, day, hour, minute, second, dtKind);
         }
 
@@ -256,10 +381,7 @@ namespace APaRSer
             {
                 throw new ArgumentException("timestamp is not in APRS MDHM datetime format. Length is " + timestamp.Length + " when it should be 8");
             }
-
-            // MDHM is always in zulu
-            WasZuluTime = true;
-
+            
             string monthStr = timestamp.Substring(0, 2);
             string dayStr = timestamp.Substring(2, 2);
             string hourStr = timestamp.Substring(4, 2);
@@ -270,7 +392,7 @@ namespace APaRSer
             int hour = int.Parse(hourStr);
             int minute = int.Parse(minuteStr);
             int year = 0;
-            DateTime hint = WasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
+            DateTime hint = DateTime.Now.ToUniversalTime();
 
 
             FindCorrectYear(
@@ -281,7 +403,7 @@ namespace APaRSer
                 hint,
                 out year);
 
-            DateTimeKind dtKind = WasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
+            DateTimeKind dtKind = DateTimeKind.Utc;
             dateTime = new DateTime(year, month, day, hour, minute, 0 /* second */, dtKind);
         }
 

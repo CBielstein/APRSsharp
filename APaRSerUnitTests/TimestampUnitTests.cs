@@ -171,7 +171,6 @@ namespace APaRSerUnitTests
         {
             Timestamp ts = new Timestamp("092345z");
 
-            Assert.IsTrue(ts.WasZuluTime);
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
@@ -186,7 +185,6 @@ namespace APaRSerUnitTests
         {
             Timestamp ts = new Timestamp("092345/");
 
-            Assert.IsFalse(ts.WasZuluTime);
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
@@ -300,7 +298,6 @@ namespace APaRSerUnitTests
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
             Assert.AreEqual(17, ts.dateTime.Second);
-            Assert.IsTrue(ts.WasZuluTime);
         }
 
         /// <summary>
@@ -407,6 +404,9 @@ namespace APaRSerUnitTests
             Assert.AreEqual(2012, args[5]);
         }
 
+        /// <summary>
+        /// Test MDHM with the example from the APRS spec
+        /// </summary>
         [TestMethod]
         public void MDHMTestFromSpec()
         {
@@ -416,7 +416,50 @@ namespace APaRSerUnitTests
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
-            Assert.IsTrue(ts.WasZuluTime);
+        }
+
+        /// <summary>
+        /// Encodes in DHM zulu time with the example from the APRS spec
+        /// </summary>
+        [TestMethod]
+        public void EncodeDHMZuluTestFromSpec()
+        {
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
+            Timestamp ts = new Timestamp(dt);
+            Assert.AreEqual("092345z", ts.Encode(Timestamp.Type.DHMz));
+        }
+
+        /// <summary>
+        /// Encodes in DHM local time with the example from the APRS spec
+        /// </summary>
+        [TestMethod]
+        public void EncodeDHMLocalTestFromSpec()
+        {
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
+            Timestamp ts = new Timestamp(dt);
+            Assert.AreEqual("092345/", ts.Encode(Timestamp.Type.DHMl));
+        }
+
+        /// <summary>
+        /// Encodes in HMS with the example from the APRS spec
+        /// </summary>
+        [TestMethod]
+        public void EncodeHMSTestFromSpec()
+        {
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
+            Timestamp ts = new Timestamp(dt);
+            Assert.AreEqual("234517h", ts.Encode(Timestamp.Type.HMS));
+        }
+
+        /// <summary>
+        /// Encodes in MDHM with the example from the APRS spec
+        /// </summary>
+        [TestMethod]
+        public void EncodeMDHMTestFromSpec()
+        {
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
+            Timestamp ts = new Timestamp(dt);
+            Assert.AreEqual("10092345", ts.Encode(Timestamp.Type.MDHM));
         }
     }
 }

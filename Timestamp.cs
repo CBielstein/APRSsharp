@@ -5,6 +5,7 @@ namespace APaRSer
     public class Timestamp
     {
         public DateTime dateTime;
+        public Type DecodedType = Type.NotDecoded;
 
         public enum Type
         {
@@ -24,6 +25,10 @@ namespace APaRSer
             /// Hours/Minutes/Seconds (always zulu)
             /// </summary>
             MDHM,
+            /// <summary>
+            /// Not a decoded timestamp
+            /// </summary>
+            NotDecoded,
         }
 
         /// <summary>
@@ -223,6 +228,8 @@ namespace APaRSer
                 throw new ArgumentException("timestamp is not in DHM format as time indicator is " + timeIndicator + " when it should be z or /");
             }
 
+            DecodedType = wasZuluTime ? Type.DHMz : Type.DHMl;
+
             int numTryParse = 0;
             if (!int.TryParse(timestamp.Substring(0, 6), out numTryParse))
             {
@@ -300,12 +307,12 @@ namespace APaRSer
             {
                 throw new ArgumentNullException();
             }
-            else if (timestamp.Length != 7)
+            else if (timestamp.Length != 7 || timestamp[6] != 'h')
             {
-                throw new ArgumentException("timestamp is not in APRS HMS datetime format. Length is " + timestamp.Length + " when it should be 7");
+                throw new ArgumentException("timestamp is not in APRS HMS datetime format. Length is " + timestamp.Length + " when it should be 7 or format marker is " + timestamp[6] + " when it should be 'h'");
             }
 
-            char timeIndicator = timestamp[6];
+            DecodedType = Type.HMS;
 
             string hourStr = timestamp.Substring(0, 2);
             string minuteStr = timestamp.Substring(2, 2);
@@ -381,6 +388,8 @@ namespace APaRSer
             {
                 throw new ArgumentException("timestamp is not in APRS MDHM datetime format. Length is " + timestamp.Length + " when it should be 8");
             }
+
+            DecodedType = Type.MDHM;
             
             string monthStr = timestamp.Substring(0, 2);
             string dayStr = timestamp.Substring(2, 2);

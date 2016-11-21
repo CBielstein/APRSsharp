@@ -167,10 +167,11 @@ namespace APaRSerUnitTests
         /// Tests example given in the APRS101.pdf document for zulu time
         /// </summary>
         [TestMethod]
-        public void DMHZuluTimeFromSpec()
+        public void DHMZuluTimeFromSpec()
         {
             Timestamp ts = new Timestamp("092345z");
 
+            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
@@ -181,10 +182,11 @@ namespace APaRSerUnitTests
         /// Tests example given in the APRS101.pdf document for local time
         /// </summary>
         [TestMethod]
-        public void DMHNotZuluTimeFromSpec()
+        public void DHMNotZuluTimeFromSpec()
         {
             Timestamp ts = new Timestamp("092345/");
 
+            Assert.AreEqual(Timestamp.Type.DHMl, ts.DecodedType);
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
@@ -295,6 +297,7 @@ namespace APaRSerUnitTests
         {
             Timestamp ts = new Timestamp("234517h");
 
+            Assert.AreEqual(Timestamp.Type.HMS, ts.DecodedType);
             Assert.AreEqual(23, ts.dateTime.Hour);
             Assert.AreEqual(45, ts.dateTime.Minute);
             Assert.AreEqual(17, ts.dateTime.Second);
@@ -412,6 +415,7 @@ namespace APaRSerUnitTests
         {
             Timestamp ts = new Timestamp("10092345");
 
+            Assert.AreEqual(Timestamp.Type.MDHM, ts.DecodedType);
             Assert.AreEqual(10, ts.dateTime.Month);
             Assert.AreEqual(9, ts.dateTime.Day);
             Assert.AreEqual(23, ts.dateTime.Hour);
@@ -426,6 +430,7 @@ namespace APaRSerUnitTests
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
             Timestamp ts = new Timestamp(dt);
+
             Assert.AreEqual("092345z", ts.Encode(Timestamp.Type.DHMz));
         }
 
@@ -437,6 +442,7 @@ namespace APaRSerUnitTests
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
             Timestamp ts = new Timestamp(dt);
+
             Assert.AreEqual("092345/", ts.Encode(Timestamp.Type.DHMl));
         }
 
@@ -448,6 +454,7 @@ namespace APaRSerUnitTests
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
             Timestamp ts = new Timestamp(dt);
+
             Assert.AreEqual("234517h", ts.Encode(Timestamp.Type.HMS));
         }
 

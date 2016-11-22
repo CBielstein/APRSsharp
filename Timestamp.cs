@@ -4,7 +4,7 @@ namespace APaRSer
 {
     public class Timestamp
     {
-        public DateTime dateTime;
+        public DateTime dateTime = DateTime.Now.ToUniversalTime();
         public Type DecodedType = Type.NotDecoded;
 
         public enum Type
@@ -41,17 +41,14 @@ namespace APaRSer
         }
 
         /// <summary>
-        /// Initializes a Timestamp to the current time, zulu.
+        /// Initializes a Timestamp
         /// </summary>
-        public Timestamp()
-        {
-            dateTime = DateTime.Now.ToUniversalTime();
-        }
+        public Timestamp() { }
 
         /// <summary>
         /// Initializes the Timestamp given a DateTime object
         /// </summary>
-        /// <param name="dt"></param>
+        /// <param name="dt">DateTime object to use for this Timestamp</param>
         public Timestamp(DateTime dt)
         {
             dateTime = dt;
@@ -60,10 +57,11 @@ namespace APaRSer
         /// <summary>
         /// Copy constructor. Initializes a Timestamp from a different Timestamp
         /// </summary>
-        /// <param name="ts"></param>
+        /// <param name="ts">Timestamp to clone</param>
         public Timestamp(Timestamp ts)
         {
             dateTime = ts.dateTime;
+            DecodedType = ts.DecodedType;
         }
 
         /// <summary>

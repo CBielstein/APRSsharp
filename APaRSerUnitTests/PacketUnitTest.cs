@@ -220,7 +220,7 @@ namespace APaRSerUnitTests
             PrivateObject pp = new PrivateObject(p);
             try
             {
-                pp.Invoke("DecodeInformationField", " @092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII ");
+                pp.Invoke("DecodeInformationField", " @092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII");
 
                 throw new System.Exception("Update test. It's now outdated as more functionality has been added.");
             }

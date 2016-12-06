@@ -55,6 +55,7 @@
     <Compile Include="PacketUnitTest.cs" />
     <Compile Include="TimestampUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PositionUnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\APaRSer.csproj">

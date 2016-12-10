@@ -357,7 +357,7 @@ namespace APaRSerUnitTests
         }
 
         [TestMethod]
-        public void Position_Defaults()
+        public void Decode_Defaults()
         {
             Position p = new Position();
 
@@ -368,15 +368,131 @@ namespace APaRSerUnitTests
         }
 
         [TestMethod]
-        public void Position_FromSpec()
+        public void Decode_FromSpec()
         {
-            Position p = new Position("4903.50N/07201.75W-");
+            Position p = new Position();
+            p.Decode("4903.50N/07201.75W-");
 
             Assert.AreEqual(0, p.Ambiguity);
             Assert.AreEqual('/', p.SymbolTableIdentifier);
             Assert.AreEqual('-', p.SymbolCode);
             Assert.AreEqual(49.0583, p.Coordinates.Latitude);
             Assert.AreEqual(-72.0292, p.Coordinates.Longitude);
+        }
+
+        [TestMethod]
+        public void EncodeLatitude_Default()
+        {
+            Position p = new Position();
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLatitude = (string)pp.Invoke("EncodeLatitude");
+
+            Assert.AreEqual("0000.00N", encodedLatitude);
+        }
+
+        [TestMethod]
+        public void EncodeLatitude_FromSpec()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
+            Position p = new Position(gc, '\\', '.', 0);
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLatitude = (string)pp.Invoke("EncodeLatitude");
+
+            Assert.AreEqual("4903.50N", encodedLatitude);
+        }
+
+        [TestMethod]
+        public void EncodeLatitude_FromSpecWithAmbiguity()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
+            Position p = new Position(gc, '\\', '.', 3);
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLatitude = (string)pp.Invoke("EncodeLatitude");
+
+            Assert.AreEqual("490 .  N", encodedLatitude);
+        }
+
+        [TestMethod]
+        public void EncodeLongitude_Default()
+        {
+            Position p = new Position();
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLongitude = (string)pp.Invoke("EncodeLongitude");
+
+            Assert.AreEqual("00000.00W", encodedLongitude);
+        }
+
+        [TestMethod]
+        public void EncodeLongitude_FromSpec()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            Position p = new Position(gc, '\\', '.', 0);
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLongitude = (string)pp.Invoke("EncodeLongitude");
+
+            Assert.AreEqual("07201.75W", encodedLongitude);
+        }
+
+        [TestMethod]
+        public void EncodeLongitude_FromSpecWithAmbiguity()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            Position p = new Position(gc, '\\', '.', 3);
+            PrivateObject pp = new PrivateObject(p);
+
+            string encodedLongitude = (string)pp.Invoke("EncodeLongitude");
+
+            Assert.AreEqual("0720 .  W", encodedLongitude);
+        }
+
+        [TestMethod]
+        public void Encode_Default()
+        {
+            Position p = new Position();
+
+            string encoded = p.Encode();
+
+            Assert.AreEqual("0000.00N\\00000.00W.", encoded);
+        }
+
+        [TestMethod]
+        public void Encode_FromSpec()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            Position p = new Position(gc, '/', '-', 0);
+
+            string encoded = p.Encode();
+
+            Assert.AreEqual("4903.50N/07201.75W-", encoded);
+        }
+
+        [TestMethod]
+        public void Encode_FromSpecWithAmbiguity()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            Position p = new Position(gc, '/', '-', 4);
+
+            string encoded = p.Encode();
+
+            Assert.AreEqual("49  .  N/072  .  W-", encoded);
+        }
+        
+        // I had to add this one because I messed up the constructor. :(
+        [TestMethod]
+        public void PositionConstructor()
+        {
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            Position p = new Position(gc, '/', '-', 4);
+
+            Assert.AreEqual(gc, p.Coordinates);
+            Assert.AreEqual('/', p.SymbolTableIdentifier);
+            Assert.AreEqual('-', p.SymbolCode);
+            Assert.AreEqual(4, p.Ambiguity);
         }
     }
 }

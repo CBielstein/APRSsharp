@@ -1,6 +1,7 @@
 ﻿using System;
 using GeoCoordinatePortable;
 using System.Text;
+using System.Globalization;
 
 namespace APaRSer
 {
@@ -22,11 +23,13 @@ namespace APaRSer
         /// <param name="coords">Coordinates to encode</param>
         /// <param name="table">The primary or secondary symbole table</param>
         /// <param name="symbol">The APRS symbol code from the table given</param>
-        public Position(GeoCoordinate coords, char table, char symbol)
+        /// <param name="amb">Ambiguity to use on the coordinates</param>
+        public Position(GeoCoordinate coords, char table, char symbol, int amb)
         {
             Coordinates = coords;
             SymbolTableIdentifier = table;
             SymbolCode = symbol;
+            Ambiguity = amb;
         }
 
         /// <summary>
@@ -247,6 +250,94 @@ namespace APaRSer
 
             // limit significant figures
             return Math.Round(retval, 4);
+        }
+
+        /// <summary>
+        /// Encodes with the values set on the fields
+        /// </summary>
+        /// <returns>A string encoding of an APRS position</returns>
+        public string Encode()
+        {
+            return EncodeLatitude() + 
+                SymbolTableIdentifier +
+                EncodeLongitude() +
+                SymbolCode;
+        }
+
+        /// <summary>
+        /// Encodes latitude position, enforcing ambiguity
+        /// Really just calls through to EncodeCoordinates, but this is easier to test
+        /// with PrivateObject
+        /// </summary>
+        /// <returns>Encoded APRS latitude position</returns>
+        private string EncodeLatitude()
+        {
+            return EncodeCoordinates(EncodeType.Latitude);
+        }
+
+        /// <summary>
+        /// Encodes longitude position, enforcing ambiguity
+        /// Really just calls through to EncodeCoordinates, but this is easier to test
+        /// with PrivateObject
+        /// </summary>
+        /// <returns>Encoded APRS longitude position</returns>
+        private string EncodeLongitude()
+        {
+            return EncodeCoordinates(EncodeType.Longitude);
+        }
+
+        /// <summary>
+        /// Used to specify the correct encoding type for EncodeCoordinates
+        /// </summary>
+        private enum EncodeType
+        {
+            Latitude,
+            Longitude,
+        }
+
+        /// <summary>
+        /// Encodes latitude or longitude position, enforcing ambiguity
+        /// </summary>
+        /// <param name="type">EncodeType to encode: Latitude or Longitude</param>
+        /// <returns>String of APRS latitude or longitude position</returns>
+        private string EncodeCoordinates(EncodeType type)
+        {
+            double coords;
+            char direction;
+            string decimalFormat;
+
+            if (type == EncodeType.Latitude)
+            {
+                coords = Coordinates.Latitude;
+                direction = coords < 0 ? 'S' : 'N';
+                decimalFormat = "D2";
+            }
+            else if (type == EncodeType.Longitude)
+            {
+                coords = Coordinates.Longitude;
+                direction = coords > 0 ? 'E' : 'W';
+                decimalFormat = "D3";
+            }
+            else
+            {
+                throw new ArgumentException("Invalid EncodeType: " + type);
+            }
+
+            coords = Math.Abs(coords);
+
+            int degrees = (int)Math.Floor(coords);
+            int minutes = (int)Math.Floor((coords - degrees) * 60);
+            int hundMinutes = (int)Math.Round((((coords - degrees) * 60) - minutes) * 100);
+
+            string encoded = degrees.ToString(decimalFormat, CultureInfo.InvariantCulture) + 
+                minutes.ToString("D2", CultureInfo.InvariantCulture) +
+                '.' +
+                hundMinutes.ToString("D2", CultureInfo.InvariantCulture) +
+                direction;
+
+            encoded = EnforceAmbiguity(encoded, Ambiguity);
+
+            return encoded;
         }
     }
 }

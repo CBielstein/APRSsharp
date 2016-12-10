@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GeoCoordinatePortable, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="System" />
   </ItemGroup>
   <Choose>

@@ -7,8 +7,8 @@ namespace APaRSer
     public class Position
     {
         public GeoCoordinate Coordinates = new GeoCoordinate(0, 0);
-        public char SymbolTableIdentifier = '.';
-        public char SymbolCode = '\\';
+        public char SymbolTableIdentifier = '\\';
+        public char SymbolCode = '.';
         public int Ambiguity = 0;
 
         public Position(string coords)
@@ -50,8 +50,8 @@ namespace APaRSer
             }
 
             Ambiguity = 0;
-            double latitude = DecodeLatitude(coords.Substring(0, 8), Ambiguity);
-            double longitude = DecodeLongitude(coords.Substring(9, 9), Ambiguity);
+            double latitude = DecodeLatitude(coords.Substring(0, 8));
+            double longitude = DecodeLongitude(coords.Substring(9, 9));
 
             SymbolTableIdentifier = coords[8];
             SymbolCode = coords[18];
@@ -62,9 +62,8 @@ namespace APaRSer
         /// Decode the latitude section of the coordinate string
         /// </summary>
         /// <param name="coords">APRS encoded latitude coordinates</param>
-        /// <param name="nEnforceAmbiguity">Enforce a certain level of ambiguity</param>
         /// <returns>Decimal latitude</returns>
-        private double DecodeLatitude(string coords, int nEnforceAmbiguity)
+        private double DecodeLatitude(string coords)
         {
             // Ensure latitude is well formatted
             if (coords == null)
@@ -81,19 +80,18 @@ namespace APaRSer
             char direction = upperCoords[7];
             if (upperCoords[7] != 'N' && upperCoords[7] != 'S')
             {
-                throw new ArgumentException("Coordinates should end in N or S. Given string ended in " + upperCoords[7]);
+                throw new ArgumentException("Coordinates should end in N or S. Given string ended in " + direction);
             }
             if (upperCoords[4] != '.')
             {
-                throw new ArgumentException("Coordinates should have '.' at index zero. Given string had " + upperCoords[4]);
+                throw new ArgumentException("Coordinates should have '.' at index 4. Given string had " + upperCoords[4]);
             }
 
             // Count ambiguity and ensure no out of place spaces
             Ambiguity = CountAmbiguity(upperCoords);
-            string modifiedCoords = EnforceAmbiguity(upperCoords, nEnforceAmbiguity);
 
             // replace spaces with zeros
-            modifiedCoords = modifiedCoords.Replace(' ', '0');
+            string modifiedCoords = upperCoords.Replace(' ', '0');
 
             // Break out strings and convert values
             string degreesStr = modifiedCoords.Substring(0, 2);
@@ -195,13 +193,60 @@ namespace APaRSer
         /// Decode the longitude section of the coordinate string
         /// </summary>
         /// <param name="coords">APRS encoded latitude coordinates</param>
-        /// <param name="nEnforceAmbiguity>Enforces a given amount of ambiguity</param>
         /// <returns>Decimal longitude</returns>
-        private double DecodeLongitude(string coords, int nEnforceAmbiguity)
+        private double DecodeLongitude(string coords)
         {
-            // Convert coordinates from egrees, minutes, tenths of minutes
+            if (coords == null)
+            {
+                throw new ArgumentNullException();
+            }
 
-            throw new NotImplementedException();
+            string upperCoords = coords.ToUpperInvariant();
+            if (upperCoords.Length != 9)
+            {
+                throw new ArgumentException("Longitude format calls for 9 characters. Given string is " + coords.Length);
+            }
+
+            char direction = upperCoords[8];
+            if (direction != 'W' && direction != 'E')
+            {
+                throw new ArgumentException("Coordinates should end in E or W. Given string ended in " + direction);
+            }
+            else if (upperCoords[5] != '.')
+            {
+                throw new ArgumentException("Coordinates should have '.' at index 5. Given string had " + upperCoords[5]);
+            }
+
+            // This ensures no spaces are out of place
+            CountAmbiguity(upperCoords);
+
+            // Enforce ambiguity from latitude and replace spaces
+            string modifiedCoords = EnforceAmbiguity(upperCoords, Ambiguity);
+            modifiedCoords = modifiedCoords.Replace(' ', '0');
+
+            // Break out strings and convert values
+            string degreesStr = modifiedCoords.Substring(0, 3);
+            string minutesStr = modifiedCoords.Substring(3, 2);
+            string hundMinuteStr = modifiedCoords.Substring(6, 2);
+
+            double degrees = double.Parse(degreesStr);
+            if (degrees < 000 || degrees > 180)
+            {
+                throw new ArgumentOutOfRangeException("Degrees longitude must be in range [000, 180]. Found: " + degrees + " in coord string " + modifiedCoords + " from given coord string " + coords);
+            }
+
+            double minutes = double.Parse(minutesStr);
+            double hundMinutes = double.Parse(hundMinuteStr);
+
+            double retval = degrees + (((minutes + (hundMinutes / 100)) / 60.0));
+
+            if (direction == 'W')
+            {
+                retval *= -1;
+            }
+
+            // limit significant figures
+            return Math.Round(retval, 4);
         }
     }
 }

@@ -8,9 +8,11 @@ namespace APaRSer
     /// </summary>
     public class Packet
     {
-        public Timestamp timestamp;
+        public Timestamp timestamp = null;
+        public Position position = null;
+        public string comment = null;
         public bool HasMessaging = false;
-        public string DestinationAddress;
+        public string DestinationAddress = null;
         Type DecodedType = Type.NotDecoded;
 
         public enum Type
@@ -182,7 +184,7 @@ namespace APaRSer
             }
 
             DecodedType = GetDataType(informationField);
-            
+
             switch (DecodedType)
             {
                 case Type.CurrentMicEData:
@@ -192,7 +194,15 @@ namespace APaRSer
                 case Type.PositionWithoutTimestampNoMessaging:
                     // handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
                     HasMessaging = false;
-                    throw new NotImplementedException("handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station");
+                    position = new Position(informationField.Substring(1, 19));
+
+                    if (informationField.Length > 20)
+                    {
+                        comment = informationField.Substring(20);
+                    }
+
+                    break;
+
                 case Type.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
                 case Type.RawGPSData:
@@ -212,10 +222,9 @@ namespace APaRSer
                 case Type.SpaceWeather:
                     throw new NotImplementedException("handle Reserved - Space weather");
                 case Type.PositionWithTimestampNoMessaging:
-                    // handle Position with timestamp (no APRS messaging)
-                    HasMessaging = false;
-                    timestamp = new Timestamp(informationField.Substring(1, 7));
-                    throw new NotImplementedException("handle Position with timestamp (no APRS messaging)");
+                    HandlePositionWithTimestamp(informationField, false);
+                    break;
+
                 case Type.Message:
                     throw new NotImplementedException("handle Message");
                 case Type.Object:
@@ -231,10 +240,9 @@ namespace APaRSer
                 case Type.Query:
                     throw new NotImplementedException("handle Query");
                 case Type.PositionWithTimestampWithMessaging:
-                    // handle Position with timestamp (with APRS messaging)
-                    HasMessaging = true;
-                    timestamp = new Timestamp(informationField.Substring(1, 7));
-                    throw new NotImplementedException("handle Position with timestamp (with APRS messaging)");
+                    HandlePositionWithTimestamp(informationField, true);
+                    break;
+
                 case Type.TelemetryData:
                     throw new NotImplementedException("handle Telemetry data");
                 case Type.MaidenheadGridLocatorBeacon:
@@ -316,6 +324,26 @@ namespace APaRSer
                     {
                         return Type.Unknown;
                     }
+            }
+        }
+
+        /// <summary>
+        /// Logic for positin with timestamp with and without messaging
+        /// condensed here to save copy/paste bugs
+        /// </summary>
+        /// <param name="informationField">The packet info field to decode</param>
+        /// <param name="hasMessaging">true if this packet represents messaging capabilities</param>
+        private void HandlePositionWithTimestamp(string informationField, bool hasMessaging)
+        {
+            HasMessaging = hasMessaging;
+
+            timestamp = new Timestamp(informationField.Substring(1, 7));
+
+            position = new Position(informationField.Substring(8, 19));
+
+            if (informationField.Length > 27)
+            {
+                comment = informationField.Substring(27);
             }
         }
     }

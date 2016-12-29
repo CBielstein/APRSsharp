@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace APaRSer
 {
@@ -88,7 +90,7 @@ namespace APaRSer
             /// <summary>
             /// Position without timestamp (with APRS messaging)
             /// </summary>
-            PositionWithoutTimeStampWithMessaging,
+            PositionWithoutTimestampWithMessaging,
             /// <summary>
             /// Status
             /// </summary>
@@ -161,10 +163,57 @@ namespace APaRSer
         /// <summary>
         /// Takes a string encoding of an APRS packet, decodes it, and saves it in to this object.
         /// </summary>
-        /// <param name="encodedPacket">A string encoding of an APRS packet</param>
+        /// <param name="encodedPacket">A string encoding of an AX.25 APRS packet</param>
         public void Decode(string encodedPacket)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns a string version of this packet encoded in the requested type.
+        /// </summary>
+        /// <param name="encodeType">The type of encoding to use</param>
+        /// <returns>AX.25 APRS packet as a string</returns>
+        public string Encode(Type encodeType)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding
+        /// </summary>
+        /// <param name="encodeType">The type of encoding to use</param>
+        /// <returns>APRS Information Field as a string</returns>
+        private string EncodeInformationField(Type encodeType)
+        {
+            return EncodeInformationField(encodeType, Timestamp.Type.DHMz);
+        }
+
+        /// <summary>
+        /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding
+        /// </summary>
+        /// <param name="encodeType">The type of encoding to use</param>
+        /// <param name="timeType">The type of encoding for the timestamp to use</param>
+        /// <returns>APRS Information Field as a string</returns>
+        private string EncodeInformationField(Type encodeType, Timestamp.Type timeType)
+        {
+            string encodedInfoField = string.Empty;
+
+
+            switch (encodeType)
+            {
+                case Type.PositionWithTimestampWithMessaging:
+                case Type.PositionWithTimestampNoMessaging:
+                    encodedInfoField += GetTypeChar(encodeType);
+                    encodedInfoField += timestamp.Encode(timeType);
+                    encodedInfoField += position.Encode();
+                    encodedInfoField += comment;
+                    break;
+
+                default: throw new NotImplementedException();
+            }
+
+            return encodedInfoField;
         }
 
         /// <summary>
@@ -231,7 +280,7 @@ namespace APaRSer
                     throw new NotImplementedException("handle Object");
                 case Type.StationCapabilities:
                     throw new NotImplementedException("handle Station capabilities");
-                case Type.PositionWithoutTimeStampWithMessaging:
+                case Type.PositionWithoutTimestampWithMessaging:
                     // handle Position without timestamp (with APRS messaging)
                     HasMessaging = true;
                     throw new NotImplementedException("handle Position without timestamp (with APRS messaging)");
@@ -268,63 +317,77 @@ namespace APaRSer
             }
         }
 
+        private Dictionary<char, Type> DataTypeMap = new Dictionary<char, Type>()
+        {
+            { (char)0x1c, Type.CurrentMicEData },
+            { (char)0x1d, Type.OldMicEData },
+            { '!', Type.PositionWithoutTimestampNoMessaging },
+            { '\"', Type.Unused },
+            { '#', Type.PeetBrosUIIWeatherStation },
+            { '$', Type.RawGPSData },
+            { '%', Type.AgreloDFJrMicroFinder },
+            { '&', Type.MapFeature },
+            { '\'', Type.OldMicEDataCurrentTMD700 },
+            { '(', Type.Unused },
+            { ')', Type.Item },
+            { '*', Type.PeetBrosUIIWeatherStation },
+            { '+', Type.ShelterDataWithTime },
+            { ',', Type.InvalidOrTestData },
+            { '-', Type.Unused },
+            { '.', Type.SpaceWeather },
+            { '/', Type.PositionWithTimestampNoMessaging },
+            { ':', Type.Message },
+            { ';', Type.Object },
+            { '<', Type.StationCapabilities },
+            { '=', Type.PositionWithoutTimestampWithMessaging },
+            { '>', Type.Status },
+            { '?', Type.Query },
+            { '@', Type.PositionWithTimestampWithMessaging },
+            { 'T', Type.TelemetryData },
+            { '[', Type.MaidenheadGridLocatorBeacon },
+            { '\\', Type.Unused },
+            { ']', Type.Unused },
+            { '^', Type.Unused },
+            { '_', Type.WeatherReport },
+            { '`', Type.CurrentMicEDataNotTMD700 },
+            { '{', Type.UserDefinedAPRSPacketFormat },
+            { '}', Type.ThirdPartyTraffic },
+            { 'A', Type.DoNotUse },
+            { 'S', Type.DoNotUse },
+            { 'U', Type.DoNotUse },
+            { 'Z', Type.DoNotUse },
+            { '0', Type.DoNotUse },
+            { '9', Type.DoNotUse },
+        };
+
+        /// <summary>
+        /// Given an information field, this returns the Type of the APRS packet
+        /// </summary>
+        /// <param name="informationField">A string encoded APRS Information Field</param>
+        /// <returns>Packet.Type of the data type</returns>
         private Type GetDataType(string informationField)
         {
             // TODO: This isn't always true.
             // '!' can come up to the 40th position.
-            char dataTypeIdentifier = informationField[0];
+            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
 
-            switch (dataTypeIdentifier)
+            return DataTypeMap[dataTypeIdentifier];
+        }
+
+        /// <summary>
+        /// Returns the char for a given Packet.Type
+        /// </summary>
+        /// <param name="type">Type to represent</param>
+        /// <returns>A char representing type</returns>
+        private char GetTypeChar(Type type)
+        {
+            if (type == Type.DoNotUse || type == Type.Unused || type == Type.Unknown)
             {
-                case (char)0x1c: return Type.CurrentMicEData;
-                case (char)0x1d: return Type.OldMicEData;
-                case '!': return Type.PositionWithoutTimestampNoMessaging;
-                case '\"': return Type.Unused;
-                case '#': return Type.PeetBrosUIIWeatherStation;
-                case '$': return Type.RawGPSData;
-                case '%': return Type.AgreloDFJrMicroFinder;
-                case '&': return Type.MapFeature;
-                case '\'': return Type.OldMicEDataCurrentTMD700;
-                case '(': return Type.Unused;
-                case ')': return Type.Item;
-                case '*': return Type.PeetBrosUIIWeatherStation;
-                case '+': return Type.ShelterDataWithTime;
-                case ',': return Type.InvalidOrTestData;
-                case '-': return Type.Unused;
-                case '.': return Type.SpaceWeather;
-                case '/': return Type.PositionWithTimestampNoMessaging;
-                case ':': return Type.Message;
-                case ';': return Type.Object;
-                case '<': return Type.StationCapabilities;
-                case '=': return Type.PositionWithoutTimestampNoMessaging;
-                case '>': return Type.Status;
-                case '?': return Type.Query;
-                case '@': return Type.PositionWithTimestampWithMessaging;
-                case 'T': return Type.TelemetryData;
-                case '[': return Type.MaidenheadGridLocatorBeacon;
-                case '\\': return Type.Unused;
-                case ']': return Type.Unused;
-                case '^': return Type.Unused;
-                case '_': return Type.WeatherReport;
-                case '`': return Type.CurrentMicEDataNotTMD700;
-                case '{': return Type.UserDefinedAPRSPacketFormat;
-                case '}': return Type.ThirdPartyTraffic;
-                default:
-                    char upperDataIdentifier = Char.ToUpperInvariant(dataTypeIdentifier);
-                    if (((upperDataIdentifier >= 'A') &&
-                        (upperDataIdentifier <= 'S')) ||
-                        ((upperDataIdentifier >= 'U') &&
-                        (upperDataIdentifier <= 'Z')) ||
-                        ((upperDataIdentifier >= '0') &&
-                        (upperDataIdentifier <= '9')))
-                    {
-                        return Type.DoNotUse;
-                    }
-                    else
-                    {
-                        return Type.Unknown;
-                    }
+                throw new ArgumentException("Used invalid Type " + type);
             }
+
+            IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
+            return keys.Single();
         }
 
         /// <summary>

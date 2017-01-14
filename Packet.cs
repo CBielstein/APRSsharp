@@ -294,8 +294,20 @@ namespace APaRSer
 
                 case Type.TelemetryData:
                     throw new NotImplementedException("handle Telemetry data");
+
                 case Type.MaidenheadGridLocatorBeacon:
-                    throw new NotImplementedException("handle Maidenhead grid locator beacon (obsolete)");
+                    position = new Position();
+
+                    int endGridsquare = informationField.IndexOf(']');
+                    position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+
+                    if (endGridsquare + 1 < informationField.Length)
+                    {
+                        comment = informationField.Substring(endGridsquare + 1);
+                    }
+
+                    break;
+
                 case Type.WeatherReport: // TODO raw weather reports vs positionless?
                     // handle Weather report(without position)
                     timestamp = new Timestamp(informationField.Substring(1, 8));

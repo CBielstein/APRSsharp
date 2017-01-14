@@ -540,5 +540,35 @@ namespace APaRSerUnitTests
 
             Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, value);
         }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", "[IO91SX] 35 miles NNW of London");
+
+            Position pos = (Position)pp.GetField("position");
+
+            Assert.AreEqual(51.96, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.50, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual(" 35 miles NNW of London", (string)pp.GetField("comment"));
+        }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", "[IO91SX]");
+
+            Position pos = (Position)pp.GetField("position");
+
+            Assert.AreEqual(51.96, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.50, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual(null, (string)pp.GetField("comment"));
+        }
     }
 }

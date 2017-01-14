@@ -494,5 +494,62 @@ namespace APaRSerUnitTests
             Assert.AreEqual('-', p.SymbolCode);
             Assert.AreEqual(4, p.Ambiguity);
         }
+
+        /// <summary>
+        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// </summary>
+        [TestMethod]
+        public void DecodeMaidenhead_1()
+        {
+            Position p = new Position();
+            p.DecodeMaidenhead("CN87uo");
+
+            Assert.AreEqual(47.58, Math.Round(p.Coordinates.Latitude, 2));
+            Assert.AreEqual(-122.33, Math.Round(p.Coordinates.Longitude, 2));
+        }
+
+        /// <summary>
+        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// </summary>
+        [TestMethod]
+        public void DecodeMaidenhead_2()
+        {
+            Position p = new Position();
+            p.DecodeMaidenhead("EM10dg");
+
+            Assert.AreEqual(30.25, Math.Round(p.Coordinates.Latitude, 2));
+            Assert.AreEqual(-97.75, Math.Round(p.Coordinates.Longitude, 3));
+        }
+
+        /// <summary>
+        /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
+        /// including symbol
+        /// </summary>
+        [TestMethod]
+        public void DecodeMaidenhead_3()
+        {
+            Position p = new Position();
+            p.DecodeMaidenhead("CN87/-");
+
+            Assert.AreEqual(47.0, Math.Round(p.Coordinates.Latitude, 2));
+            Assert.AreEqual(-124.0, Math.Round(p.Coordinates.Longitude, 2));
+            Assert.AreEqual('/', p.SymbolTableIdentifier);
+            Assert.AreEqual('-', p.SymbolCode);
+        }
+
+        /// <summary>
+        /// Test basic decoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
+        /// </summary>
+        [TestMethod]
+        public void DecodeMaidenhead_4()
+        {
+            Position p = new Position();
+            p.DecodeMaidenhead("EM10dg11/-");
+
+            Assert.AreEqual(30.254, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(-97.742, Math.Round(p.Coordinates.Longitude, 3));
+            Assert.AreEqual('/', p.SymbolTableIdentifier);
+            Assert.AreEqual('-', p.SymbolCode);
+        }
     }
 }

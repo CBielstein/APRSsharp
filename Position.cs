@@ -12,6 +12,10 @@ namespace APaRSer
         public char SymbolCode = '.';
         public int Ambiguity = 0;
 
+        /// <summary>
+        /// Decodes from LAT/LONG coordinates
+        /// </summary>
+        /// <param name="coords">Decodes from LAT/LONG coordinates</param>
         public Position(string coords)
         {
             Decode(coords);
@@ -59,6 +63,181 @@ namespace APaRSer
             SymbolTableIdentifier = coords[8];
             SymbolCode = coords[18];
             Coordinates = new GeoCoordinate(latitude, longitude);
+        }
+
+        /// <summary>
+        /// Decode from Maidenhead Location System gridsquare
+        /// </summary>
+        /// <param name="gridsqure">4 or 6 char Maidenhead gridsquare, optionally followed by symbol table and identifier</param>
+        public void DecodeMaidenhead(string gridsquare)
+        {
+            if (gridsquare == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (gridsquare.Length != 4 && 
+                     gridsquare.Length != 6 &&
+                     gridsquare.Length != 8 &&
+                     gridsquare.Length != 10)
+
+            {
+                throw new ArgumentException("The given Maidenhead Location System gridsquare was " + gridsquare.Length + " characters length when a length of 4, 6, 8, or 10 characters was expected (including an optional two char symbol table and code).");
+            }
+
+            string trimmedGridsquare = gridsquare;
+
+            // If the symbol table identifier is not a letter or digit, assume it's the table.
+            // Because if it is a letter or digit, we'll assume there is no symbol information.
+            // Then trim it off for passing through to the decode functions
+            if (!char.IsLetterOrDigit(gridsquare[gridsquare.Length - 2]))
+            {
+                SymbolTableIdentifier = gridsquare[gridsquare.Length - 2];
+                SymbolCode = gridsquare[gridsquare.Length - 1];
+
+                trimmedGridsquare = gridsquare.Substring(0, gridsquare.Length - 2);
+            }
+
+            double latitude = DecodeLatitudeFromGridsquare(trimmedGridsquare);
+            double longitude = DecodeLongitudeFromGridsquare(trimmedGridsquare);
+            Coordinates = new GeoCoordinate(latitude, longitude);
+        }
+
+        /// <summary>
+        /// Given a maidenhead gridsquare, converts to decimal latitude
+        /// </summary>
+        /// <param name="gridsquare">A Maidenhead Location System gridsquare</param>
+        /// <returns>A double representing latitude [-180.0, 180.0]</returns>
+        private double DecodeLatitudeFromGridsquare(string gridsquare)
+        {
+            if (gridsquare == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (gridsquare.Length != 4 &&
+                     gridsquare.Length != 6 &&
+                     gridsquare.Length != 8)
+            {
+                throw new ArgumentException("The given Maidenhead Location System gridsquare was " + gridsquare.Length + " characters length when a length of 4 or 6 characters was expected.");
+            }
+
+            double latitude = 0;
+
+            gridsquare = gridsquare.ToUpperInvariant();
+
+            if (gridsquare.Length >= 2)
+            {
+                if (gridsquare[1] < 'A' || gridsquare[1] > 'R')
+                {
+                    throw new ArgumentException("Gridsquare should use A-R for first pair of characters. The given string was " + gridsquare);
+                }
+
+                latitude += 10 * (gridsquare[1] - 'A');
+            }
+ 
+            if (gridsquare.Length >= 4)
+            {
+                if (!char.IsDigit(gridsquare[3]))
+                {
+                    throw new ArgumentException("Gridsquare should use 0-9 for second pair of characters. The given string was " + gridsquare);
+                }
+
+                latitude += char.GetNumericValue(gridsquare[3]);
+            }
+
+            if (gridsquare.Length >= 6)
+            {
+                if (gridsquare[5] < 'A' || gridsquare[5] > 'X')
+                {
+                    throw new ArgumentException("Gridsquare should use A-X for third pair of characters. The given string was " + gridsquare);
+                }
+
+                double minutes = 2.5 * (gridsquare[5] - 'A');
+
+                latitude += minutes / 60.0;
+            }
+
+            if (gridsquare.Length >= 8)
+            {
+                if (!char.IsDigit(gridsquare[7]))
+                {
+                    throw new ArgumentException("Gridsquare should use 0-9 for fourth pair of characters. The given string was " + gridsquare);
+                }
+
+                double minuteTenths = 0.25 * char.GetNumericValue(gridsquare[7]);
+
+                latitude += minuteTenths / 60.0;
+            }
+
+            return latitude - 90.0;
+        }
+
+        /// <summary>
+        /// Given a maidenhead gridsquare, converts to decimal longitude 
+        /// </summary>
+        /// <param name="gridsquare">A Maidenhead Location System gridsquare</param>
+        /// <returns>A decimal representation of longitude [-90.0, 90.0]</returns>
+        private double DecodeLongitudeFromGridsquare(string gridsquare)
+        {
+            if (gridsquare == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (gridsquare.Length != 4 &&
+                     gridsquare.Length != 6 &&
+                     gridsquare.Length != 8)
+            {
+                throw new ArgumentException("The given Maidenhead Location System gridsquare was " + gridsquare.Length + " characters length when a length of 4 or 6 characters was expected.");
+            }
+
+            double longitude = 0;
+
+            gridsquare = gridsquare.ToUpperInvariant();
+
+            if (gridsquare.Length >= 2)
+            {
+                if (gridsquare[0] < 'A' || gridsquare[0] > 'R')
+                {
+                    throw new ArgumentException("Gridsquare should use A-R for first pair of characters. The given string was " + gridsquare);
+                }
+
+                longitude += 20.0 * (gridsquare[0] - 'A');
+            }
+ 
+            if (gridsquare.Length >= 4)
+            {
+                if (!char.IsDigit(gridsquare[2]))
+                {
+                    throw new ArgumentException("Gridsquare should use 0-9 for second pair of characters. The given string was " + gridsquare);
+                }
+
+                longitude += 2.0 * char.GetNumericValue(gridsquare[2]);
+            }
+
+            if (gridsquare.Length >= 6)
+            {
+                if (gridsquare[4] < 'A' || gridsquare[4] > 'X')
+                {
+                    throw new ArgumentException("Gridsquare should use A-X for third pair of characters. The given string was " + gridsquare);
+                }
+
+                double minutes = 5.0 * (gridsquare[4] - 'A');
+
+                longitude += minutes / 60.0;
+            }
+
+            if (gridsquare.Length >= 8)
+            {
+                if (!char.IsDigit(gridsquare[6]))
+                {
+                    throw new ArgumentException("Gridsquare should use 0-9 for fourth pair of characters. The given string was " + gridsquare);
+                }
+
+                double minuteTenths = 0.5 * char.GetNumericValue(gridsquare[6]);
+
+                longitude += minuteTenths / 60.0;
+            }
+
+            return longitude - 180.0;
         }
 
         /// <summary>

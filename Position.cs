@@ -97,86 +97,27 @@ namespace APaRSer
                 trimmedGridsquare = gridsquare.Substring(0, gridsquare.Length - 2);
             }
 
-            double latitude = DecodeLatitudeFromGridsquare(trimmedGridsquare);
-            double longitude = DecodeLongitudeFromGridsquare(trimmedGridsquare);
+            double latitude = DecodeFromGridsquare(trimmedGridsquare, CoordinateSystem.Latitude);
+            double longitude = DecodeFromGridsquare(trimmedGridsquare, CoordinateSystem.Longitude);
             Coordinates = new GeoCoordinate(latitude, longitude);
         }
 
         /// <summary>
-        /// Given a maidenhead gridsquare, converts to decimal latitude
+        /// Specifies whether a function is referring to latitude or longitude during Maidenhead gridsquare encode/decode
         /// </summary>
-        /// <param name="gridsquare">A Maidenhead Location System gridsquare</param>
-        /// <returns>A double representing latitude [-180.0, 180.0]</returns>
-        private double DecodeLatitudeFromGridsquare(string gridsquare)
+        public enum CoordinateSystem
         {
-            if (gridsquare == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else if (gridsquare.Length != 4 &&
-                     gridsquare.Length != 6 &&
-                     gridsquare.Length != 8)
-            {
-                throw new ArgumentException("The given Maidenhead Location System gridsquare was " + gridsquare.Length + " characters length when a length of 4 or 6 characters was expected.");
-            }
-
-            double latitude = 0;
-
-            gridsquare = gridsquare.ToUpperInvariant();
-
-            if (gridsquare.Length >= 2)
-            {
-                if (gridsquare[1] < 'A' || gridsquare[1] > 'R')
-                {
-                    throw new ArgumentException("Gridsquare should use A-R for first pair of characters. The given string was " + gridsquare);
-                }
-
-                latitude += 10 * (gridsquare[1] - 'A');
-            }
- 
-            if (gridsquare.Length >= 4)
-            {
-                if (!char.IsDigit(gridsquare[3]))
-                {
-                    throw new ArgumentException("Gridsquare should use 0-9 for second pair of characters. The given string was " + gridsquare);
-                }
-
-                latitude += char.GetNumericValue(gridsquare[3]);
-            }
-
-            if (gridsquare.Length >= 6)
-            {
-                if (gridsquare[5] < 'A' || gridsquare[5] > 'X')
-                {
-                    throw new ArgumentException("Gridsquare should use A-X for third pair of characters. The given string was " + gridsquare);
-                }
-
-                double minutes = 2.5 * (gridsquare[5] - 'A');
-
-                latitude += minutes / 60.0;
-            }
-
-            if (gridsquare.Length >= 8)
-            {
-                if (!char.IsDigit(gridsquare[7]))
-                {
-                    throw new ArgumentException("Gridsquare should use 0-9 for fourth pair of characters. The given string was " + gridsquare);
-                }
-
-                double minuteTenths = 0.25 * char.GetNumericValue(gridsquare[7]);
-
-                latitude += minuteTenths / 60.0;
-            }
-
-            return latitude - 90.0;
+            Latitude,
+            Longitude,
         }
 
         /// <summary>
-        /// Given a maidenhead gridsquare, converts to decimal longitude 
+        /// Given a maidenhead gridsquare, converts to decimal latitude or longitude
         /// </summary>
         /// <param name="gridsquare">A Maidenhead Location System gridsquare</param>
-        /// <returns>A decimal representation of longitude [-90.0, 90.0]</returns>
-        private double DecodeLongitudeFromGridsquare(string gridsquare)
+        /// <param name="coordinateDecode">Latitude or longitude for decode</param>
+        /// <returns>A double representing latitude [-180.0, 180.0] or longitude [-90.0, 90.0]</returns>
+        private double DecodeFromGridsquare(string gridsquare, CoordinateSystem coordinateDecode)
         {
             if (gridsquare == null)
             {
@@ -188,56 +129,70 @@ namespace APaRSer
             {
                 throw new ArgumentException("The given Maidenhead Location System gridsquare was " + gridsquare.Length + " characters length when a length of 4 or 6 characters was expected.");
             }
+            else if (coordinateDecode != CoordinateSystem.Latitude &&
+                     coordinateDecode != CoordinateSystem.Longitude)
+            {
+                throw new ArgumentOutOfRangeException("coordinateDecode must be CoordinateSystem.Latitude or CoordinateSystem.Longitude. Given value was " + coordinateDecode);
+            }
 
-            double longitude = 0;
+            double coord = 0;
+
+            // Chars alternatingly refer to longitude and latitude
+            int index = (coordinateDecode == CoordinateSystem.Latitude) ? 1 : 0;
+
+            // Longitude scales most values by 2 over latitude
+            int multiplier = (coordinateDecode == CoordinateSystem.Longitude) ? 2 : 1;
 
             gridsquare = gridsquare.ToUpperInvariant();
 
             if (gridsquare.Length >= 2)
             {
-                if (gridsquare[0] < 'A' || gridsquare[0] > 'R')
+                if (gridsquare[index] < 'A' || gridsquare[index] > 'R')
                 {
                     throw new ArgumentException("Gridsquare should use A-R for first pair of characters. The given string was " + gridsquare);
                 }
 
-                longitude += 20.0 * (gridsquare[0] - 'A');
+                coord += 10 * multiplier * (gridsquare[index] - 'A');
+                index += 2;
             }
  
             if (gridsquare.Length >= 4)
             {
-                if (!char.IsDigit(gridsquare[2]))
+                if (!char.IsDigit(gridsquare[index]))
                 {
                     throw new ArgumentException("Gridsquare should use 0-9 for second pair of characters. The given string was " + gridsquare);
                 }
 
-                longitude += 2.0 * char.GetNumericValue(gridsquare[2]);
+                coord += multiplier * char.GetNumericValue(gridsquare[index]);
+                index += 2;
             }
 
             if (gridsquare.Length >= 6)
             {
-                if (gridsquare[4] < 'A' || gridsquare[4] > 'X')
+                if (gridsquare[index] < 'A' || gridsquare[index] > 'X')
                 {
                     throw new ArgumentException("Gridsquare should use A-X for third pair of characters. The given string was " + gridsquare);
                 }
 
-                double minutes = 5.0 * (gridsquare[4] - 'A');
+                double minutes = 2.5 * multiplier * (gridsquare[index] - 'A');
 
-                longitude += minutes / 60.0;
+                coord += minutes / 60.0;
+                index += 2;
             }
 
             if (gridsquare.Length >= 8)
             {
-                if (!char.IsDigit(gridsquare[6]))
+                if (!char.IsDigit(gridsquare[index]))
                 {
                     throw new ArgumentException("Gridsquare should use 0-9 for fourth pair of characters. The given string was " + gridsquare);
                 }
 
-                double minuteTenths = 0.5 * char.GetNumericValue(gridsquare[6]);
+                double minuteTenths = 0.25 * multiplier * char.GetNumericValue(gridsquare[index]);
 
-                longitude += minuteTenths / 60.0;
+                coord += minuteTenths / 60.0;
             }
 
-            return longitude - 180.0;
+            return coord - (90.0 * multiplier);
         }
 
         /// <summary>
@@ -432,9 +387,9 @@ namespace APaRSer
         }
 
         /// <summary>
-        /// Encodes with the values set on the fields
+        /// Encodes with the values set on the fields using lat/long
         /// </summary>
-        /// <returns>A string encoding of an APRS position</returns>
+        /// <returns>A string encoding of an APRS position (lat/long)</returns>
         public string Encode()
         {
             return EncodeLatitude() + 

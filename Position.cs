@@ -37,6 +37,29 @@ namespace APaRSer
         }
 
         /// <summary>
+        /// Initializes the Position object given a GeoCoordinate object
+        /// </summary>
+        /// <param name="coords">Coordinates to encode</param>
+        /// <param name="table">The primary or secondary symbole table</param>
+        /// <param name="symbol">The APRS symbol code from the table given</param>
+        public Position(GeoCoordinate coords, char table, char symbol)
+        {
+            Coordinates = coords;
+            SymbolTableIdentifier = table;
+            SymbolCode = symbol;
+        }
+
+
+        /// <summary>
+        /// Initializes the Position object given a GeoCoordinate object
+        /// </summary>
+        /// <param name="coords">Coordinates to encode</param>
+        public Position(GeoCoordinate coords) 
+        {
+            Coordinates = coords;
+        }
+
+        /// <summary>
         /// Defaults to the default null position and unknown/indeterminate position symbol
         /// </summary>
         public Position() { }
@@ -66,7 +89,7 @@ namespace APaRSer
         }
 
         /// <summary>
-        /// Decode from Maidenhead Location System gridsquare
+        /// Decode from Maidenhead Location System gridsquare to a point in the middle of the gridsquare
         /// </summary>
         /// <param name="gridsqure">4 or 6 char Maidenhead gridsquare, optionally followed by symbol table and identifier</param>
         public void DecodeMaidenhead(string gridsquare)
@@ -136,6 +159,7 @@ namespace APaRSer
             }
 
             double coord = 0;
+            double gridsquareSize = 0;
 
             // Chars alternatingly refer to longitude and latitude
             int index = (coordinateDecode == CoordinateSystem.Latitude) ? 1 : 0;
@@ -152,7 +176,8 @@ namespace APaRSer
                     throw new ArgumentException("Gridsquare should use A-R for first pair of characters. The given string was " + gridsquare);
                 }
 
-                coord += 10 * multiplier * (gridsquare[index] - 'A');
+                gridsquareSize = 10 * multiplier;
+                coord += gridsquareSize * (gridsquare[index] - 'A');
                 index += 2;
             }
  
@@ -163,7 +188,8 @@ namespace APaRSer
                     throw new ArgumentException("Gridsquare should use 0-9 for second pair of characters. The given string was " + gridsquare);
                 }
 
-                coord += multiplier * char.GetNumericValue(gridsquare[index]);
+                gridsquareSize = multiplier;
+                coord += gridsquareSize * char.GetNumericValue(gridsquare[index]);
                 index += 2;
             }
 
@@ -174,9 +200,8 @@ namespace APaRSer
                     throw new ArgumentException("Gridsquare should use A-X for third pair of characters. The given string was " + gridsquare);
                 }
 
-                double minutes = 2.5 * multiplier * (gridsquare[index] - 'A');
-
-                coord += minutes / 60.0;
+                gridsquareSize = (2.5 * multiplier) / 60.0;
+                coord += ((2.5 * multiplier) * (gridsquare[index] - 'A')) / 60.0;
                 index += 2;
             }
 
@@ -187,13 +212,136 @@ namespace APaRSer
                     throw new ArgumentException("Gridsquare should use 0-9 for fourth pair of characters. The given string was " + gridsquare);
                 }
 
-                double minuteTenths = 0.25 * multiplier * char.GetNumericValue(gridsquare[index]);
-
-                coord += minuteTenths / 60.0;
+                gridsquareSize = (0.25 * multiplier) / 60.0;
+                coord += ((0.25 * multiplier) * char.GetNumericValue(gridsquare[index])) / 60.0;
+                index += 2;
             }
 
+            // center the coordinate in the grid
+            coord += gridsquareSize / 2.0;
             return coord - (90.0 * multiplier);
         }
+
+        /// <summary>
+        /// Encodes the location as a gridsquare from the coordinates on this object
+        /// </summary>
+        /// <param name="length">Number of characters to use in gridsquare encoding, must be {4, 6, 8}</param>
+        /// <param name="appendSymbol">If true, appends the symbol to the end of the string</param>
+        /// <returns>A string representation of the Maidenhead gridsquare</returns>
+        public string EncodeGridsquare(int length, bool appendSymbol)
+        {
+            if (length != 4 &&
+                length != 6 &&
+                length != 8)
+            {
+                throw new ArgumentException("Length should be 4, 6, or 8. Given value was " + length);
+            }
+            else if (Coordinates == null)
+            {
+                throw new NullReferenceException("Coordinates were null.");
+            }
+
+            string gridsquare = string.Empty;
+
+            string longitude = EncodeGridsquareElement(Coordinates.Longitude, CoordinateSystem.Longitude, length / 2);
+            string latitude = EncodeGridsquareElement(Coordinates.Latitude, CoordinateSystem.Latitude, length / 2);
+
+            for (int i = 0; i < length; ++i)
+            {
+                if (i % 2 == 0)
+                {
+                    gridsquare += longitude[i / 2];
+                }
+                else
+                {
+                    gridsquare += latitude[i / 2];
+                }
+            }
+
+            if (appendSymbol)
+            {
+                gridsquare += SymbolTableIdentifier;
+                gridsquare += SymbolCode;
+            }
+
+            return gridsquare;
+        }
+
+        /// <summary>
+        /// Encode either the latitude or longitude part of a Maidenhead gridsquare
+        /// </summary>
+        /// <param name="coords">The coordinates to use</param>
+        /// <param name="coordinateEncode">Either latitude or longitude encoding</param>
+        /// <param name="length">The number of chars for this encoding (should be half the total length of the gridsquare as this is only lat or long)</param>
+        /// <returns>A string of the lat or long for the gridsquare encoding</returns>
+        private string EncodeGridsquareElement(double coords, CoordinateSystem coordinateEncode, int length)
+        {
+            if (coordinateEncode != CoordinateSystem.Latitude &&
+                coordinateEncode != CoordinateSystem.Longitude)
+            {
+                throw new ArgumentOutOfRangeException("coordinateEncode must be CoordinateSystem.Latitude or CoordinateSystem.Longitude. Given value was " + coordinateEncode);
+            }
+            else if (coordinateEncode == CoordinateSystem.Longitude && Math.Abs(coords) > 180)
+            {
+                throw new ArgumentOutOfRangeException("Longitude coordinates must be inside [-180, 180]");
+            }
+            else if (coordinateEncode == CoordinateSystem.Latitude && Math.Abs(coords) > 90)
+            {
+                throw new ArgumentOutOfRangeException("Longitude coordinates must be inside [-90, 90]");
+            }
+
+            string encoded = string.Empty;
+            int charIndex = 0;
+            double stepDivisor = 0;
+
+            // Longitude scales most values by 2 over latitude
+            int multiplier = (coordinateEncode == CoordinateSystem.Longitude) ? 2 : 1;
+
+            // no negatives here
+            double shiftedCoords = coords + (multiplier * 90.0);
+
+            if (length >= 1)
+            {
+                stepDivisor = 10.0 * multiplier;
+                charIndex = (int)(shiftedCoords / stepDivisor);
+                encoded += char.ConvertFromUtf32('A' + charIndex);
+
+                shiftedCoords %= stepDivisor;
+            }
+ 
+            if (length >= 2)
+            {
+                stepDivisor = 1.0 * multiplier;
+                charIndex = (int)(shiftedCoords / stepDivisor);
+                encoded += charIndex.ToString();
+
+                shiftedCoords %= stepDivisor;
+            }
+
+            // moving in to minutes territory
+            shiftedCoords *= 60.0;
+
+            if (length >= 3)
+            {
+                stepDivisor = 2.5 * multiplier;
+                charIndex = (int)((shiftedCoords) / stepDivisor);
+                encoded += char.ConvertFromUtf32('a' + charIndex);
+
+                shiftedCoords %= stepDivisor;
+            }
+
+            if (length >= 4)
+            {
+                stepDivisor = 0.25 * multiplier;
+                charIndex = (int)(shiftedCoords  / stepDivisor);
+                encoded += charIndex.ToString();
+
+                shiftedCoords %= stepDivisor;
+            }
+
+            return encoded;
+        }
+
 
         /// <summary>
         /// Decode the latitude section of the coordinate string

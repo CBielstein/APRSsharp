@@ -504,8 +504,8 @@ namespace APaRSerUnitTests
             Position p = new Position();
             p.DecodeMaidenhead("CN87uo");
 
-            Assert.AreEqual(47.58, Math.Round(p.Coordinates.Latitude, 2));
-            Assert.AreEqual(-122.33, Math.Round(p.Coordinates.Longitude, 2));
+            Assert.AreEqual(47.604, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(-122.292, Math.Round(p.Coordinates.Longitude, 3));
         }
 
         /// <summary>
@@ -517,8 +517,8 @@ namespace APaRSerUnitTests
             Position p = new Position();
             p.DecodeMaidenhead("EM10dg");
 
-            Assert.AreEqual(30.25, Math.Round(p.Coordinates.Latitude, 2));
-            Assert.AreEqual(-97.75, Math.Round(p.Coordinates.Longitude, 3));
+            Assert.AreEqual(30.271, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(-97.708, Math.Round(p.Coordinates.Longitude, 3));
         }
 
         /// <summary>
@@ -531,8 +531,8 @@ namespace APaRSerUnitTests
             Position p = new Position();
             p.DecodeMaidenhead("CN87/-");
 
-            Assert.AreEqual(47.0, Math.Round(p.Coordinates.Latitude, 2));
-            Assert.AreEqual(-124.0, Math.Round(p.Coordinates.Longitude, 2));
+            Assert.AreEqual(47.5, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(-123.0, Math.Round(p.Coordinates.Longitude, 3));
             Assert.AreEqual('/', p.SymbolTableIdentifier);
             Assert.AreEqual('-', p.SymbolCode);
         }
@@ -546,10 +546,78 @@ namespace APaRSerUnitTests
             Position p = new Position();
             p.DecodeMaidenhead("EM10dg11/-");
 
-            Assert.AreEqual(30.254, Math.Round(p.Coordinates.Latitude, 3));
-            Assert.AreEqual(-97.742, Math.Round(p.Coordinates.Longitude, 3));
+            Assert.AreEqual(30.256, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(-97.738, Math.Round(p.Coordinates.Longitude, 3));
             Assert.AreEqual('/', p.SymbolTableIdentifier);
             Assert.AreEqual('-', p.SymbolCode);
+        }
+
+        /// <summary>
+        /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
+        /// including symbol
+        /// </summary>
+        [TestMethod]
+        public void DecodeMaidenhead_5()
+        {
+            Position p = new Position();
+            p.DecodeMaidenhead("PE23/-");
+
+            Assert.AreEqual(-46.5, Math.Round(p.Coordinates.Latitude, 3));
+            Assert.AreEqual(125.0, Math.Round(p.Coordinates.Longitude, 3));
+            Assert.AreEqual('/', p.SymbolTableIdentifier);
+            Assert.AreEqual('-', p.SymbolCode);
+        }
+
+        /// <summary>
+        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// </summary>
+        [TestMethod]
+        public void EncodeMaidenhead_1()
+        {
+            Position p = new Position(new GeoCoordinate(47.604, -122.292));
+            Assert.AreEqual("CN87uo", p.EncodeGridsquare(6, false));
+        }
+
+        /// <summary>
+        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// </summary>
+        [TestMethod]
+        public void EncodeMaidenhead_2()
+        {
+            Position p = new Position(new GeoCoordinate(30.271, -97.708));
+            Assert.AreEqual("EM10dg", p.EncodeGridsquare(6, false));
+        }
+
+        /// <summary>
+        /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
+        /// including symbol
+        /// </summary>
+        [TestMethod]
+        public void EncodeMaidenhead_3()
+        {
+            Position p = new Position(new GeoCoordinate(47.5, -123.0), '/', '-');
+            Assert.AreEqual("CN87/-", p.EncodeGridsquare(4, true));
+        }
+
+        /// <summary>
+        /// Test basic encoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
+        /// </summary>
+        [TestMethod]
+        public void EncodeMaidenhead_4()
+        {
+            Position p = new Position(new GeoCoordinate(30.256, -97.738), '/', '-');
+            Assert.AreEqual("EM10dg11/-", p.EncodeGridsquare(8, true));
+        }
+
+        /// <summary>
+        /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
+        /// including symbol
+        /// </summary>
+        [TestMethod]
+        public void EncodeMaidenhead_5()
+        {
+            Position p = new Position(new GeoCoordinate(-46.5, 125.0), '/', '-');
+            Assert.AreEqual("PE23/-", p.EncodeGridsquare(4, true));
         }
     }
 }

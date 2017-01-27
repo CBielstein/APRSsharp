@@ -221,7 +221,21 @@ namespace APaRSer
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += position.EncodeGridsquare(6, false);
                     encodedInfoField += ']';
-                    encodedInfoField += comment;
+                    if (comment != null && comment.Length > 0)
+                    {
+                        encodedInfoField += ' ';
+                        encodedInfoField += comment;
+                    }
+                    break;
+
+                case Type.Status:
+                    encodedInfoField += GetTypeChar(encodeType);
+                    encodedInfoField += position.EncodeGridsquare(6, true);
+                    if (comment != null && comment.Length > 0)
+                    {
+                        encodedInfoField += ' ';
+                        encodedInfoField += comment;
+                    }
                     break;
 
                 default: throw new NotImplementedException();
@@ -299,7 +313,27 @@ namespace APaRSer
                     HasMessaging = true;
                     throw new NotImplementedException("handle Position without timestamp (with APRS messaging)");
                 case Type.Status:
-                    throw new NotImplementedException("handle Status");
+
+                    {
+                        position = new Position();
+                        int endGridsquare = informationField.IndexOf(' ');
+                        if (endGridsquare == -1)
+                        {
+                            position.DecodeMaidenhead(informationField.Substring(1));
+                        }
+                        else
+                        {
+                            position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                        }
+
+                        if (endGridsquare + 1 < informationField.Length)
+                        {
+                            comment = informationField.Substring(endGridsquare + 1);
+                        }
+                    }
+
+                    break;
+
                 case Type.Query:
                     throw new NotImplementedException("handle Query");
                 case Type.PositionWithTimestampWithMessaging:
@@ -312,12 +346,15 @@ namespace APaRSer
                 case Type.MaidenheadGridLocatorBeacon:
                     position = new Position();
 
-                    int endGridsquare = informationField.IndexOf(']');
-                    position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
-
-                    if (endGridsquare + 1 < informationField.Length)
                     {
-                        comment = informationField.Substring(endGridsquare + 1);
+                        position = new Position();
+                        int endGridsquare = informationField.IndexOf(']');
+                        position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+
+                        if (endGridsquare + 1 < informationField.Length)
+                        {
+                            comment = informationField.Substring(endGridsquare + 1);
+                        }
                     }
 
                     break;

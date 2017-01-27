@@ -573,7 +573,7 @@ namespace APaRSerUnitTests
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
-            p.comment = " 35 miles NNW of London";
+            p.comment = "35 miles NNW of London";
             p.position = new Position(new GeoCoordinate(51.98, -0.46));
 
             PrivateObject pp = new PrivateObject(p);
@@ -600,7 +600,7 @@ namespace APaRSerUnitTests
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_3()
         {
             Packet p = new Packet();
-            p.comment = " 35 miles NNW of London";
+            p.comment = "35 miles NNW of London";
             p.position = new Position();
             p.position.DecodeMaidenhead("IO91SX");
 
@@ -623,6 +623,124 @@ namespace APaRSerUnitTests
             string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
 
             Assert.AreEqual("[IO91SX]", encoded);
+        }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", ">IO91SX/G");
+ 
+            Position pos = (Position)pp.GetField("position");
+            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual('/', pos.SymbolTableIdentifier);
+            Assert.AreEqual('G', pos.SymbolCode);
+        }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", ">IO91/G");
+ 
+            Position pos = (Position)pp.GetField("position");
+            Assert.AreEqual(51.5, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-1.0, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual('/', pos.SymbolTableIdentifier);
+            Assert.AreEqual('G', pos.SymbolCode);
+        }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", ">IO91SX/- My house");
+ 
+            Position pos = (Position)pp.GetField("position");
+            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual('/', pos.SymbolTableIdentifier);
+            Assert.AreEqual('-', pos.SymbolCode);
+
+            string comment = (string)pp.GetField("comment");
+            Assert.AreEqual("My house", comment);
+        }
+
+        [TestMethod]
+        public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
+        {
+            Packet p = new Packet();
+            PrivateObject pp = new PrivateObject(p);
+
+            pp.Invoke("DecodeInformationField", ">IO91SX/- ^B7");
+ 
+            Position pos = (Position)pp.GetField("position");
+            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual('/', pos.SymbolTableIdentifier);
+            Assert.AreEqual('-', pos.SymbolCode);
+
+            string comment = (string)pp.GetField("comment");
+            Assert.AreEqual("^B7", comment);
+
+            Assert.Fail("Not handling Meteor Scatter beam");
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
+        {
+            Packet p = new Packet();
+            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
+
+            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+
+            Assert.AreEqual(">IO91SX/G", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
+        {
+            Packet p = new Packet();
+            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
+
+            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+
+            Assert.AreEqual(">IO91/G", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
+        {
+            Packet p = new Packet();
+            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
+            p.comment = "My house";
+
+            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+
+            Assert.AreEqual(">IO91SX/- My house", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
+        {
+            Packet p = new Packet();
+            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
+            p.comment = "My house";
+
+            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+
+            Assert.AreEqual(">IO91SX/- My house", encoded);
         }
     }
 }

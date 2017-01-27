@@ -225,7 +225,7 @@ namespace APaRSer
         /// <summary>
         /// Encodes the location as a gridsquare from the coordinates on this object
         /// </summary>
-        /// <param name="length">Number of characters to use in gridsquare encoding, must be {4, 6, 8}</param>
+        /// <param name="length">Max number of characters to use in gridsquare encoding, must be {4, 6, 8}. Ambiguity will subtract from this.</param>
         /// <param name="appendSymbol">If true, appends the symbol to the end of the string</param>
         /// <returns>A string representation of the Maidenhead gridsquare</returns>
         public string EncodeGridsquare(int length, bool appendSymbol)
@@ -240,13 +240,25 @@ namespace APaRSer
             {
                 throw new NullReferenceException("Coordinates were null.");
             }
+            else if (Ambiguity != 0 &&
+                     Ambiguity != 2 &&
+                     Ambiguity != 4 &&
+                     Ambiguity != 6)
+            {
+                throw new ArgumentException("Ambiguity must be {0, 2, 4, 6}, but is " + Ambiguity);
+            }
+            else if (Ambiguity > length - 4)
+            {
+                throw new ArgumentException("Final length of the string must be at least 4. length - Ambiguity >= 4, but length is "
+                                            + length + "and Ambiguity is " + Ambiguity);
+            }
 
             string gridsquare = string.Empty;
 
-            string longitude = EncodeGridsquareElement(Coordinates.Longitude, CoordinateSystem.Longitude, length / 2);
-            string latitude = EncodeGridsquareElement(Coordinates.Latitude, CoordinateSystem.Latitude, length / 2);
+            string longitude = EncodeGridsquareElement(Coordinates.Longitude, CoordinateSystem.Longitude, (length - Ambiguity) / 2);
+            string latitude = EncodeGridsquareElement(Coordinates.Latitude, CoordinateSystem.Latitude, (length - Ambiguity) / 2);
 
-            for (int i = 0; i < length; ++i)
+            for (int i = 0; i < length - Ambiguity; ++i)
             {
                 if (i % 2 == 0)
                 {

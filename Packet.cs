@@ -210,6 +210,13 @@ namespace APaRSer
                     encodedInfoField += comment;
                     break;
 
+                case Type.PositionWithoutTimestampNoMessaging:
+                case Type.PositionWithoutTimestampWithMessaging:
+                    encodedInfoField += GetTypeChar(encodeType);
+                    encodedInfoField += position.Encode();
+                    encodedInfoField += comment;
+                    break;
+
                 default: throw new NotImplementedException();
             }
 

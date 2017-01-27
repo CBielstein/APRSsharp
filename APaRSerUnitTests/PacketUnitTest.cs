@@ -430,8 +430,7 @@ namespace APaRSerUnitTests
             p.HasMessaging = false;
 
             p.comment = "Test 001234";
-
-            Position pos = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
+            p.position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
 
             PrivateObject pp = new PrivateObject(p);
             string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithoutTimestampNoMessaging);
@@ -493,8 +492,7 @@ namespace APaRSerUnitTests
             Packet p = new Packet();
 
             p.HasMessaging = false;
-
-            Position pos = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
+            p.position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
 
             PrivateObject pp = new PrivateObject(p);
             string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithoutTimestampNoMessaging);
@@ -551,8 +549,8 @@ namespace APaRSerUnitTests
 
             Position pos = (Position)pp.GetField("position");
 
-            Assert.AreEqual(51.96, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.50, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.AreEqual(" 35 miles NNW of London", (string)pp.GetField("comment"));
         }
 
@@ -566,8 +564,8 @@ namespace APaRSerUnitTests
 
             Position pos = (Position)pp.GetField("position");
 
-            Assert.AreEqual(51.96, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.50, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.AreEqual(null, (string)pp.GetField("comment"));
         }
     }

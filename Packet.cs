@@ -217,6 +217,13 @@ namespace APaRSer
                     encodedInfoField += comment;
                     break;
 
+                case Type.MaidenheadGridLocatorBeacon:
+                    encodedInfoField += GetTypeChar(encodeType);
+                    encodedInfoField += position.EncodeGridsquare(6, false);
+                    encodedInfoField += ']';
+                    encodedInfoField += comment;
+                    break;
+
                 default: throw new NotImplementedException();
             }
 

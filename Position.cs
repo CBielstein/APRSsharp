@@ -325,7 +325,7 @@ namespace APaRSer
             {
                 stepDivisor = 2.5 * multiplier;
                 charIndex = (int)((shiftedCoords) / stepDivisor);
-                encoded += char.ConvertFromUtf32('a' + charIndex);
+                encoded += char.ConvertFromUtf32('A' + charIndex);
 
                 shiftedCoords %= stepDivisor;
             }

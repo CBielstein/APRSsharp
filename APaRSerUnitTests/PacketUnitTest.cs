@@ -568,5 +568,61 @@ namespace APaRSerUnitTests
             Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.AreEqual(null, (string)pp.GetField("comment"));
         }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
+        {
+            Packet p = new Packet();
+            p.comment = " 35 miles NNW of London";
+            p.position = new Position(new GeoCoordinate(51.98, -0.46));
+
+            PrivateObject pp = new PrivateObject(p);
+
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
+
+            Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
+        {
+            Packet p = new Packet();
+            p.position = new Position(new GeoCoordinate(51.98, -0.46));
+
+            PrivateObject pp = new PrivateObject(p);
+
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
+
+            Assert.AreEqual("[IO91SX]", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_3()
+        {
+            Packet p = new Packet();
+            p.comment = " 35 miles NNW of London";
+            p.position = new Position();
+            p.position.DecodeMaidenhead("IO91SX");
+
+            PrivateObject pp = new PrivateObject(p);
+
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
+
+            Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
+        }
+
+        [TestMethod]
+        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_4()
+        {
+            Packet p = new Packet();
+            p.position = new Position();
+            p.position.DecodeMaidenhead("IO91SX");
+
+            PrivateObject pp = new PrivateObject(p);
+
+            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
+
+            Assert.AreEqual("[IO91SX]", encoded);
+        }
     }
 }

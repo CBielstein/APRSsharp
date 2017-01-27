@@ -575,7 +575,7 @@ namespace APaRSerUnitTests
         public void EncodeMaidenhead_1()
         {
             Position p = new Position(new GeoCoordinate(47.604, -122.292));
-            Assert.AreEqual("CN87uo", p.EncodeGridsquare(6, false));
+            Assert.AreEqual("CN87UO", p.EncodeGridsquare(6, false));
         }
 
         /// <summary>
@@ -585,7 +585,7 @@ namespace APaRSerUnitTests
         public void EncodeMaidenhead_2()
         {
             Position p = new Position(new GeoCoordinate(30.271, -97.708));
-            Assert.AreEqual("EM10dg", p.EncodeGridsquare(6, false));
+            Assert.AreEqual("EM10DG", p.EncodeGridsquare(6, false));
         }
 
         /// <summary>
@@ -606,7 +606,7 @@ namespace APaRSerUnitTests
         public void EncodeMaidenhead_4()
         {
             Position p = new Position(new GeoCoordinate(30.256, -97.738), '/', '-');
-            Assert.AreEqual("EM10dg11/-", p.EncodeGridsquare(8, true));
+            Assert.AreEqual("EM10DG11/-", p.EncodeGridsquare(8, true));
         }
 
         /// <summary>

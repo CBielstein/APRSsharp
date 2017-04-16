@@ -16,6 +16,7 @@ namespace APaRSer
         public bool HasMessaging = false;
         public string DestinationAddress = null;
         Type DecodedType = Type.NotDecoded;
+        RawGpsType DecodedRawGpsType = RawGpsType.NotDecoded;
 
         public enum Type
         {
@@ -143,6 +144,41 @@ namespace APaRSer
             /// This packet was not decoded
             /// </summary>
             NotDecoded,
+        }
+
+        /// <summary>
+        /// Used to specify format during decode of raw GPS data packets
+        /// </summary>
+        public enum RawGpsType
+        {
+            /// <summary>
+            /// GGA: Global Position System Fix Data
+            /// </summary>
+            GGA,
+            /// <summary>
+            /// GLL: Geographic Position, Latitude/Longitude Data
+            /// </summary>
+            GLL,
+            /// <summary>
+            /// RMC: Recommended Minimum Specific GPS/Transit Data
+            /// </summary>
+            RMC,
+            /// <summary>
+            /// VTG: Velocity and Track Data
+            /// </summary>
+            VTG,
+            /// <summary>
+            /// WPT: Way Point Location
+            /// </summary>
+            WPT,
+            /// <summary>
+            /// Not yet decoded
+            /// </summary>
+            NotDecoded,
+            /// <summary>
+            /// Not supported/known type
+            /// </summary>
+            Unknown,
         }
 
         /// <summary>
@@ -283,7 +319,9 @@ namespace APaRSer
                 case Type.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
                 case Type.RawGPSData:
-                    throw new NotImplementedException("handle Raw GPS data or Ultimeter 2000");
+                    HandleRawGps(informationField);
+                    break;
+
                 case Type.AgreloDFJrMicroFinder:
                     throw new NotImplementedException("handle Agrelo DFJr / MicroFinder");
                 case Type.MapFeature:
@@ -380,7 +418,8 @@ namespace APaRSer
             }
         }
 
-        private Dictionary<char, Type> DataTypeMap = new Dictionary<char, Type>()
+        // Maps a type identifying character to a packet Type
+        private static Dictionary<char, Type> DataTypeMap = new Dictionary<char, Type>()
         {
             { (char)0x1c, Type.CurrentMicEData },
             { (char)0x1d, Type.OldMicEData },
@@ -422,6 +461,35 @@ namespace APaRSer
             { '0', Type.DoNotUse },
             { '9', Type.DoNotUse },
         };
+
+        // Maps three-character strings to RawGpsType values
+        private static Dictionary<string, RawGpsType> RawGpsTypeMap = new Dictionary<string, RawGpsType>()
+        {
+            {"GGA", RawGpsType.GGA },
+            {"GLL", RawGpsType.GLL },
+            {"RMC", RawGpsType.RMC },
+            {"VTG", RawGpsType.VTG },
+            {"WPT", RawGpsType.WPT },
+        };
+
+        /// <summary>
+        /// Determines the type of a raw GPS packet determined by a 3 char string
+        /// </summary>
+        /// <param name="rawGpsIdentifier">String of length 3 identifying a raw GPS type</param>
+        /// <returns>The raw GPS type represented by rawGpsIdentifier</returns>
+        private RawGpsType GetRawGpsType(string rawGpsIdentifier)
+        {
+            if (rawGpsIdentifier == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (rawGpsIdentifier.Length != 3)
+            {
+                throw new ArgumentException("rawGpsIdentifier should be 3 characters. Given: " + rawGpsIdentifier.Length);
+            }
+
+            return RawGpsTypeMap[rawGpsIdentifier];
+        }
 
         /// <summary>
         /// Given an information field, this returns the Type of the APRS packet
@@ -471,6 +539,41 @@ namespace APaRSer
             {
                 comment = informationField.Substring(27);
             }
+        }
+
+        /// <summary>
+        /// Decodes a position from raw GPS location (NMEA formats)
+        /// This expects a three letter type to start the string
+        /// Supported formats:
+        ///     None yet
+        /// </summary>
+        /// <param name="rawGpsPacket">The full packet. Decoded</param>
+        /// <param name="rawGpsType"></param>
+        /// <param name="rawGpsTimestamp"></param>
+        public void HandleRawGps(string rawGpsPacket)
+        {
+            DecodedRawGpsType = Packet.RawGpsType.Unknown;
+
+            if (rawGpsPacket == null)
+            {
+                throw new ArgumentNullException();
+            }
+            // 6 is the length of the identifier $GPxxx, so the string is invalid if it isn't at least that long
+            else if (rawGpsPacket.Length < 6)
+            {
+                throw new ArgumentException("rawGpsPacket should be 6 or more characters in length. Given length: " + rawGpsPacket.Length);
+            }
+
+            string upperRawPacket = rawGpsPacket.ToUpperInvariant();
+
+            // Ensure start of identifier is valid
+            if (!upperRawPacket.Substring(0, 3).Equals("$GP"))
+            {
+                throw new ArgumentNullException("rawGpsPacket should have started with $GP. Given packet started with:" + upperRawPacket.Substring(0, 3));
+            }
+
+            // Get type of packet
+            DecodedRawGpsType = GetRawGpsType(upperRawPacket.Substring(3, 3));
         }
     }
 }

@@ -742,16 +742,5 @@ namespace APaRSerUnitTests
 
             Assert.AreEqual(">IO91SX/- My house", encoded);
         }
-
-        [TestMethod]
-        public void GetRawGpsType_1()
-        {
-            Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-
-            Packet.RawGpsType value = (Packet.RawGpsType)pp.Invoke("GetRawGpsType", "GGA");
-
-            Assert.AreEqual(Packet.RawGpsType.GGA, value);
-        }
     }
 }

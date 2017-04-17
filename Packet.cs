@@ -8,7 +8,7 @@ namespace APaRSer
     /// A representation of an APRS Packet.
     /// Does decoding of an APRS packet as a string.
     /// </summary>
-    public class Packet
+    public partial class Packet
     {
         public Timestamp timestamp = null;
         public Position position = null;
@@ -16,10 +16,14 @@ namespace APaRSer
         public bool HasMessaging = false;
         public string DestinationAddress = null;
         Type DecodedType = Type.NotDecoded;
-        RawGpsType DecodedRawGpsType = RawGpsType.NotDecoded;
+        NmeaData RawNmeaData = null;
 
         public enum Type
         {
+            /// <summary>
+            /// This packet was not decoded
+            /// </summary>
+            NotDecoded,
             /// <summary>
             /// Current Mic-E Data (Rev 0 beta)
             /// </summary>
@@ -138,45 +142,6 @@ namespace APaRSer
             ThirdPartyTraffic,
             /// <summary>
             /// Not a recognized symbol
-            /// </summary>
-            Unknown,
-            /// <summary>
-            /// This packet was not decoded
-            /// </summary>
-            NotDecoded,
-        }
-
-        /// <summary>
-        /// Used to specify format during decode of raw GPS data packets
-        /// </summary>
-        public enum RawGpsType
-        {
-            /// <summary>
-            /// GGA: Global Position System Fix Data
-            /// </summary>
-            GGA,
-            /// <summary>
-            /// GLL: Geographic Position, Latitude/Longitude Data
-            /// </summary>
-            GLL,
-            /// <summary>
-            /// RMC: Recommended Minimum Specific GPS/Transit Data
-            /// </summary>
-            RMC,
-            /// <summary>
-            /// VTG: Velocity and Track Data
-            /// </summary>
-            VTG,
-            /// <summary>
-            /// WPT: Way Point Location
-            /// </summary>
-            WPT,
-            /// <summary>
-            /// Not yet decoded
-            /// </summary>
-            NotDecoded,
-            /// <summary>
-            /// Not supported/known type
             /// </summary>
             Unknown,
         }
@@ -462,35 +427,6 @@ namespace APaRSer
             { '9', Type.DoNotUse },
         };
 
-        // Maps three-character strings to RawGpsType values
-        private static Dictionary<string, RawGpsType> RawGpsTypeMap = new Dictionary<string, RawGpsType>()
-        {
-            {"GGA", RawGpsType.GGA },
-            {"GLL", RawGpsType.GLL },
-            {"RMC", RawGpsType.RMC },
-            {"VTG", RawGpsType.VTG },
-            {"WPT", RawGpsType.WPT },
-        };
-
-        /// <summary>
-        /// Determines the type of a raw GPS packet determined by a 3 char string
-        /// </summary>
-        /// <param name="rawGpsIdentifier">String of length 3 identifying a raw GPS type</param>
-        /// <returns>The raw GPS type represented by rawGpsIdentifier</returns>
-        private RawGpsType GetRawGpsType(string rawGpsIdentifier)
-        {
-            if (rawGpsIdentifier == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else if (rawGpsIdentifier.Length != 3)
-            {
-                throw new ArgumentException("rawGpsIdentifier should be 3 characters. Given: " + rawGpsIdentifier.Length);
-            }
-
-            return RawGpsTypeMap[rawGpsIdentifier];
-        }
-
         /// <summary>
         /// Given an information field, this returns the Type of the APRS packet
         /// </summary>
@@ -552,8 +488,6 @@ namespace APaRSer
         /// <param name="rawGpsTimestamp"></param>
         public void HandleRawGps(string rawGpsPacket)
         {
-            DecodedRawGpsType = Packet.RawGpsType.Unknown;
-
             if (rawGpsPacket == null)
             {
                 throw new ArgumentNullException();
@@ -573,7 +507,7 @@ namespace APaRSer
             }
 
             // Get type of packet
-            DecodedRawGpsType = GetRawGpsType(upperRawPacket.Substring(3, 3));
+            NmeaData.Type nmeaDataType = NmeaData.GetType(upperRawPacket.Substring(3, 3));
         }
     }
 }

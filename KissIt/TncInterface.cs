@@ -32,6 +32,36 @@ namespace KissIt
         }
 
         /// <summary>
+        /// Sends bytes on the SerialPort
+        /// </summary>
+        /// <param name="bytes">Bytes to send</param>
+        public void Send(byte[] bytes)
+        {
+            if (bytes == null)
+            {
+                throw new ArgumentNullException();
+            }
+            else if (bytes.Length == 0)
+            {
+                throw new ArgumentException("Bytes to send has length zero.");
+            }
+
+            byte[] encodedBytes = EncodeBytes(bytes);
+
+            serialPort.Write(encodedBytes, 0, encodedBytes.Length);
+        }
+
+        /// <summary>
+        /// Encodes bytes for KISS protocol
+        /// </summary>
+        /// <param name="bytes">Bytes to encode</param>
+        /// <returns>Encoded bytes</returns>
+        private byte[] EncodeBytes(byte[] bytes)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// Handle the DataReceived event from the serialPort
         /// </summary>
         /// <param name="sender">SerialPort which has received data</param>
@@ -60,11 +90,38 @@ namespace KissIt
         {
             foreach (byte newByte in newBytes)
             {
-                // TODO: Handle escaped characters
-                receivedBuffer.Enqueue(newByte);
+                if (newByte == (byte)KISSSpecialCharacters.FEND)
+                {
+                    byte[] deliverBytes = receivedBuffer.ToArray();
+                    receivedBuffer.Clear();
+                    DeliverBytes(deliverBytes);
+                    continue;
+                }
+                else if (newByte == (byte)KISSSpecialCharacters.FESC ||
+                         newByte == (byte)KISSSpecialCharacters.TFEND ||
+                         newByte == (byte)KISSSpecialCharacters.TFESC)
+                {
+                    // TODO: Handle escaped characters
+                    throw new NotImplementedException();
+                }
 
-                // TODO: handle arrival of a frame end for delivery
+                receivedBuffer.Enqueue(newByte);
             }
+        }
+
+        /// <summary>
+        /// Handles delivery of bytes. Called when the contents of the buffer are ready to be delivered
+        /// </summary>
+        /// <param name="bytes">Bytes to be delivered</param>
+        private void DeliverBytes(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return;
+            }
+
+            // TODO: Raise event with bytes received
+            throw new NotImplementedException();
         }
     }
 }

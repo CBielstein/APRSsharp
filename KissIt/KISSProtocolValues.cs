@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace KissIt
+﻿namespace KissIt
 {
     //
     // All values and descriptions taken from KA9Q's KISS paper

@@ -1,6 +1,5 @@
 ﻿using System.IO.Ports;
 using System.Collections.Generic;
-using System.Text;
 using System;
 
 namespace KissIt
@@ -26,14 +25,23 @@ namespace KissIt
         private bool inEscapeMode = false;
 
         /// <summary>
+        /// The port on the TNC used for communication
+        /// </summary>
+        private byte tncPort = 0;
+
+        /// <summary>
         /// Initializes the TNCInterface with a serial port
         /// </summary>
         /// <param name="serialPortName">The name of the SerialPort to use</param>
-        public TNCInterface(string serialPortName)
+        /// <param name="port">The port on the TNC used for communication</param>
+        public TNCInterface(string serialPortName, byte port)
         {
             serialPort = new SerialPort(serialPortName);
             serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);
+
             receivedBuffer = new Queue<byte>();
+
+            tncPort = port;
         }
 
         /// <summary>
@@ -51,19 +59,49 @@ namespace KissIt
                 throw new ArgumentException("Bytes to send has length zero.");
             }
 
-            byte[] encodedBytes = EncodeBytes(bytes);
+            byte[] encodedBytes = EncodeFrame(Commands.DATA_FRAME, tncPort, bytes);
 
             serialPort.Write(encodedBytes, 0, encodedBytes.Length);
         }
 
         /// <summary>
-        /// Encodes bytes for KISS protocol
+        /// Encodes a frame for KISS protocol
         /// </summary>
+        /// <param name="command">The command to use for the frame</param>
+        /// <param name="port">The port to address on the TNC</param>
         /// <param name="bytes">Bytes to encode</param>
         /// <returns>Encoded bytes</returns>
-        private byte[] EncodeBytes(byte[] bytes)
+        private byte[] EncodeFrame(Commands command, byte port, byte[] bytes)
         {
-            throw new NotImplementedException();
+            // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
+            Queue<byte> frame = new Queue<byte>(3 + bytes.Length);
+
+            frame.Enqueue((byte)SpecialCharacters.FEND);
+            frame.Enqueue((byte)((port << 4) | (byte)command));
+
+            foreach (byte b in bytes)
+            {
+                switch (b)
+                {
+                    case (byte)SpecialCharacters.FEND:
+                        frame.Enqueue((byte)SpecialCharacters.FESC);
+                        frame.Enqueue((byte)SpecialCharacters.TFEND);
+                        break;
+
+                    case (byte)SpecialCharacters.FESC:
+                        frame.Enqueue((byte)SpecialCharacters.FESC);
+                        frame.Enqueue((byte)SpecialCharacters.TFESC);
+                        break;
+
+                    default:
+                        frame.Enqueue(b);
+                        break;
+                }
+            }
+
+            frame.Enqueue((byte)SpecialCharacters.FEND);
+
+            return frame.ToArray();
         }
 
         /// <summary>

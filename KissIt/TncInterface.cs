@@ -21,6 +21,11 @@ namespace KissIt
         private Queue<byte> receivedBuffer;
 
         /// <summary>
+        /// Marks if the next character received should be translated as an escaped character
+        /// </summary>
+        private bool inEscapeMode = false;
+
+        /// <summary>
         /// Initializes the TNCInterface with a serial port
         /// </summary>
         /// <param name="serialPortName">The name of the SerialPort to use</param>
@@ -88,24 +93,57 @@ namespace KissIt
         /// <param name="newBytes">Bytes which have just arrived</param>
         private void ReceivedData(byte[] newBytes)
         {
-            foreach (byte newByte in newBytes)
+            foreach (byte recByte in newBytes)
             {
-                if (newByte == (byte)KISSSpecialCharacters.FEND)
+                byte? byteToEnqueue = null;
+
+                // Handle escape mode
+                if (inEscapeMode)
                 {
-                    byte[] deliverBytes = receivedBuffer.ToArray();
-                    receivedBuffer.Clear();
-                    DeliverBytes(deliverBytes);
-                    continue;
-                }
-                else if (newByte == (byte)KISSSpecialCharacters.FESC ||
-                         newByte == (byte)KISSSpecialCharacters.TFEND ||
-                         newByte == (byte)KISSSpecialCharacters.TFESC)
-                {
-                    // TODO: Handle escaped characters
-                    throw new NotImplementedException();
+                    switch (recByte)
+                    {
+                        case (byte)KISSSpecialCharacters.TFESC:
+                            byteToEnqueue = (byte)KISSSpecialCharacters.FESC;
+                            break;
+
+                        case (byte)KISSSpecialCharacters.TFEND:
+                            byteToEnqueue = (byte)KISSSpecialCharacters.FEND;
+                            break;
+
+                        default:
+                            // Not really an escape, push on the previously unused FESC character and move on
+                            receivedBuffer.Enqueue((byte)KISSSpecialCharacters.FESC);
+                            break;
+                    }
+
+                    inEscapeMode = false;
                 }
 
-                receivedBuffer.Enqueue(newByte);
+                // If we have already determined a byte to enqueue, no need to do this step
+                if (!byteToEnqueue.HasValue)
+                {
+                    switch (recByte)
+                    {
+                        case (byte)KISSSpecialCharacters.FEND:
+                            byte[] deliverBytes = receivedBuffer.ToArray();
+                            receivedBuffer.Clear();
+                            DeliverBytes(deliverBytes);
+                            break;
+
+                        case (byte)KISSSpecialCharacters.FESC:
+                            inEscapeMode = true;
+                            break;
+
+                        default:
+                            byteToEnqueue = recByte;
+                            break;
+                    }
+                }
+
+                if (byteToEnqueue.HasValue)
+                {
+                    receivedBuffer.Enqueue(byteToEnqueue.Value);
+                }
             }
         }
 

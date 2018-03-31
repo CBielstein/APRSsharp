@@ -30,6 +30,18 @@ namespace KissIt
         private byte tncPort = 0;
 
         /// <summary>
+        /// Delegate function that will be called when a full frame is received and ready to be delivered
+        /// </summary>
+        /// <param name="sender">The TNCInterface which received the frame</param>
+        /// <param name="a">The event argument, which includes the received data</param>
+        public delegate void FrameReceivedEventHandler(object sender, FrameReceivedEventArgs a);
+
+        /// <summary>
+        /// The event which will be raised when a full frame is received.
+        /// </summary>
+        public event FrameReceivedEventHandler FrameReceivedEvent;
+
+        /// <summary>
         /// Initializes the TNCInterface with a serial port
         /// </summary>
         /// <param name="serialPortName">The name of the SerialPort to use</param>
@@ -196,8 +208,7 @@ namespace KissIt
                 return;
             }
 
-            // TODO: Raise event with bytes received
-            throw new NotImplementedException();
+            FrameReceivedEvent(this, new FrameReceivedEventArgs(bytes));
         }
     }
 }

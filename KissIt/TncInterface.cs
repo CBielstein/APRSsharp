@@ -102,17 +102,17 @@ namespace KissIt
                 {
                     switch (recByte)
                     {
-                        case (byte)KISSSpecialCharacters.TFESC:
-                            byteToEnqueue = (byte)KISSSpecialCharacters.FESC;
+                        case (byte)SpecialCharacters.TFESC:
+                            byteToEnqueue = (byte)SpecialCharacters.FESC;
                             break;
 
-                        case (byte)KISSSpecialCharacters.TFEND:
-                            byteToEnqueue = (byte)KISSSpecialCharacters.FEND;
+                        case (byte)SpecialCharacters.TFEND:
+                            byteToEnqueue = (byte)SpecialCharacters.FEND;
                             break;
 
                         default:
                             // Not really an escape, push on the previously unused FESC character and move on
-                            receivedBuffer.Enqueue((byte)KISSSpecialCharacters.FESC);
+                            receivedBuffer.Enqueue((byte)SpecialCharacters.FESC);
                             break;
                     }
 
@@ -124,13 +124,13 @@ namespace KissIt
                 {
                     switch (recByte)
                     {
-                        case (byte)KISSSpecialCharacters.FEND:
+                        case (byte)SpecialCharacters.FEND:
                             byte[] deliverBytes = receivedBuffer.ToArray();
                             receivedBuffer.Clear();
                             DeliverBytes(deliverBytes);
                             break;
 
-                        case (byte)KISSSpecialCharacters.FESC:
+                        case (byte)SpecialCharacters.FESC:
                             inEscapeMode = true;
                             break;
 

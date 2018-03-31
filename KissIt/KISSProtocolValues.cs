@@ -86,4 +86,20 @@
         /// </summary>
         RETURN = 0xFF,
     }
+
+    /// <summary>
+    /// Used to set duplex mode
+    /// </summary>
+    public enum DuplexState
+    {
+        /// <summary>
+        /// Half duplex
+        /// </summary>
+        HalfDuplex,
+
+        /// <summary>
+        /// Full duplex
+        /// </summary>
+        FullDuplex,
+    }
 }

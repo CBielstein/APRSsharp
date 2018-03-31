@@ -60,7 +60,7 @@ namespace KissIt
         /// Sends bytes on the SerialPort
         /// </summary>
         /// <param name="bytes">Bytes to send</param>
-        public void Send(byte[] bytes)
+        public void SendData(byte[] bytes)
         {
             if (bytes == null)
             {
@@ -71,9 +71,91 @@ namespace KissIt
                 throw new ArgumentException("Bytes to send has length zero.");
             }
 
-            byte[] encodedBytes = EncodeFrame(Commands.DATA_FRAME, tncPort, bytes);
+            EncodeAndSend(Commands.DATA_FRAME, bytes);
+        }
 
+        /// <summary>
+        /// Encodes and sends a frame of the given type with the given data
+        /// </summary>
+        /// <param name="command">Command / frame time to encode</param>
+        /// <param name="data">Data to send</param>
+        private void EncodeAndSend(Commands command, byte[] data)
+        {
+            byte[] encodedBytes = EncodeFrame(command, tncPort, data);
             serialPort.Write(encodedBytes, 0, encodedBytes.Length);
+        }
+
+        /// <summary>
+        /// Sets the transmitter keyup delay in 10 ms units.
+        /// Default is 50, i.e. 500 ms.
+        /// </summary>
+        /// <param name="delay">Delay in 10 ms steps</param>
+        public void SetTxDelay(byte delay)
+        {
+            EncodeAndSend(Commands.TX_DELAY, new byte[1] { delay });
+        }
+
+        /// <summary>
+        /// Sets persistence parameter p in range [0, 255].
+        /// Uses formula P = p * 256 - 1.
+        /// Default is p = 0.25 (such that P = 63)
+        /// </summary>
+        /// <param name="p">Persistence parameter in range [0, 255]</param>
+        public void SetPersistenceParameter(byte p)
+        {
+            if (p < 0 || p > 255)
+            {
+                throw new ArgumentOutOfRangeException("p should be in range [0, 255], but was " + p);
+            }
+            EncodeAndSend(Commands.P, new byte[1] { p });
+        }
+
+        /// <summary>
+        /// Sets slot interval in 10 ms units.
+        /// Default is 10 (i.e., 100ms)
+        /// </summary>
+        /// <param name="slotTime">Slot interval</param>
+        public void SetSlotTime(byte slotTime)
+        {
+            EncodeAndSend(Commands.SLOT_TIME, new byte[1] { slotTime });
+        }
+
+        /// <summary>
+        /// Sets time to hold TX after the frame has been sent, in 10 ms units.
+        /// Obsolete, but included for backward compatibility.
+        /// </summary>
+        /// <param name="time">TX tail time</param>
+        public void SetTxTail(byte time)
+        {
+            EncodeAndSend(Commands.TX_TAIL, new byte[1] { time });
+        }
+
+        /// <summary>
+        /// Sets duplex state.
+        /// </summary>
+        /// <param name="state">Half or full duplex</param>
+        public void SetDuplexMode(DuplexState state)
+        {
+            byte commandByte = (state == DuplexState.FullDuplex) ? (byte)1 : (byte)0;
+
+            EncodeAndSend(Commands.FULL_DUPLEX, new byte[1] { commandByte });
+        }
+
+        /// <summary>
+        /// Sets a hardware specific value
+        /// </summary>
+        /// <param name="value">The value to send to the hardware command</param>
+        public void SetHardwareSpecific(byte value)
+        {
+            EncodeAndSend(Commands.SET_HARDWARE, new byte[1] { value });
+        }
+
+        /// <summary>
+        /// Commands TNC to exit KISS mode
+        /// </summary>
+        public void ExitKISSMode()
+        {
+            EncodeAndSend(Commands.RETURN, null);
         }
 
         /// <summary>
@@ -81,33 +163,36 @@ namespace KissIt
         /// </summary>
         /// <param name="command">The command to use for the frame</param>
         /// <param name="port">The port to address on the TNC</param>
-        /// <param name="bytes">Bytes to encode</param>
+        /// <param name="bytes">Optionally, bytes to encode</param>
         /// <returns>Encoded bytes</returns>
         private byte[] EncodeFrame(Commands command, byte port, byte[] bytes)
         {
             // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
-            Queue<byte> frame = new Queue<byte>(3 + bytes.Length);
+            Queue<byte> frame = new Queue<byte>(3 + ((bytes == null) ? 0 : bytes.Length));
 
             frame.Enqueue((byte)SpecialCharacters.FEND);
             frame.Enqueue((byte)((port << 4) | (byte)command));
 
-            foreach (byte b in bytes)
+            if (bytes != null)
             {
-                switch (b)
+                foreach (byte b in bytes)
                 {
-                    case (byte)SpecialCharacters.FEND:
-                        frame.Enqueue((byte)SpecialCharacters.FESC);
-                        frame.Enqueue((byte)SpecialCharacters.TFEND);
-                        break;
+                    switch (b)
+                    {
+                        case (byte)SpecialCharacters.FEND:
+                            frame.Enqueue((byte)SpecialCharacters.FESC);
+                            frame.Enqueue((byte)SpecialCharacters.TFEND);
+                            break;
 
-                    case (byte)SpecialCharacters.FESC:
-                        frame.Enqueue((byte)SpecialCharacters.FESC);
-                        frame.Enqueue((byte)SpecialCharacters.TFESC);
-                        break;
+                        case (byte)SpecialCharacters.FESC:
+                            frame.Enqueue((byte)SpecialCharacters.FESC);
+                            frame.Enqueue((byte)SpecialCharacters.TFESC);
+                            break;
 
-                    default:
-                        frame.Enqueue(b);
-                        break;
+                        default:
+                            frame.Enqueue(b);
+                            break;
+                    }
                 }
             }
 

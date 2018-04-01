@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using KissIt;
 using System.Text;
-using System;
+using System.Collections.Generic;
 
 namespace KissItUnitTests
 {
@@ -183,6 +183,138 @@ namespace KissItUnitTests
             byte[] receivedData = new byte[15] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0, 0xC0, 0x50, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0xC0 };
 
             byte[][] decodedFrames = tnc.DecodeReceivedData(receivedData);
+
+            Assert.AreEqual(2, decodedFrames.Length);
+            Assert.AreEqual(4, decodedFrames[0].Length);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
+            Assert.AreEqual(5, decodedFrames[1].Length);
+            Assert.AreEqual("Hello", Encoding.ASCII.GetString(decodedFrames[1]));
+        }
+
+        /// <summary>
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// </summary>
+        [TestMethod]
+        public void DelegateReceivedAtOnce()
+        {
+            TNCInterface tnc = new TNCInterface();
+            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+
+            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
+            {
+                qDecodedFrames.Enqueue(arg.Data);
+            };
+
+            byte[] receivedData = new byte[7] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
+
+            tnc.DecodeReceivedData(receivedData);
+
+            byte[][] decodedFrames = qDecodedFrames.ToArray();
+
+            Assert.AreEqual(1, decodedFrames.Length);
+            Assert.AreEqual(4, decodedFrames[0].Length);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
+        }
+
+        /// <summary>
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// </summary>
+        [TestMethod]
+        public void DelegateDataReceivedSplit()
+        {
+            TNCInterface tnc = new TNCInterface();
+            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+
+            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
+            {
+                qDecodedFrames.Enqueue(arg.Data);
+            };
+
+            byte[] dataRec1 = new byte[4] { 0xC0, 0x50, 0x48, 0x65 };
+            byte[] dataRec2 = new byte[4] { 0x6C, 0x6C, 0x6F, 0xC0 };
+
+            tnc.DecodeReceivedData(dataRec1);
+
+            byte[][] decodedFrames = qDecodedFrames.ToArray();
+
+            Assert.AreEqual(0, decodedFrames.Length);
+
+            decodedFrames = tnc.DecodeReceivedData(dataRec2);
+            Assert.AreEqual(1, decodedFrames.Length);
+            Assert.AreEqual(5, decodedFrames[0].Length);
+            Assert.AreEqual("Hello", Encoding.ASCII.GetString(decodedFrames[0]));
+        }
+
+        /// <summary>
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// </summary>
+        [TestMethod]
+        public void DelegateDataReceivedEscapes()
+        {
+            TNCInterface tnc = new TNCInterface();
+            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+
+            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
+            {
+                qDecodedFrames.Enqueue(arg.Data);
+            };
+
+            byte[] recData = new byte[7] { 0xC0, 0x00, 0xDB, 0xDC, 0xDB, 0xDD, 0xC0 };
+
+            tnc.DecodeReceivedData(recData);
+
+            byte[][] decodedFrames = qDecodedFrames.ToArray();
+
+            Assert.AreEqual(1, decodedFrames.Length);
+            Assert.AreEqual(2, decodedFrames[0].Length);
+            Assert.AreEqual((byte)SpecialCharacters.FEND, decodedFrames[0][0]);
+            Assert.AreEqual((byte)SpecialCharacters.FESC, decodedFrames[0][1]);
+        }
+
+        /// <summary>
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// </summary>
+        [TestMethod]
+        public void DelegateDataReceivedAtOncePrefacedMultipleFEND()
+        {
+            TNCInterface tnc = new TNCInterface();
+            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+
+            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
+            {
+                qDecodedFrames.Enqueue(arg.Data);
+            };
+
+            byte[] receivedData = new byte[9] { (byte)SpecialCharacters.FEND, (byte)SpecialCharacters.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
+
+            tnc.DecodeReceivedData(receivedData);
+
+            byte[][] decodedFrames = qDecodedFrames.ToArray();
+
+            Assert.AreEqual(1, decodedFrames.Length);
+            Assert.AreEqual(4, decodedFrames[0].Length);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
+        }
+
+        /// <summary>
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// </summary>
+        [TestMethod]
+        public void DelegateMultipleFramesDataReceivedAtOnce()
+        {
+            TNCInterface tnc = new TNCInterface();
+            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+
+            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
+            {
+                qDecodedFrames.Enqueue(arg.Data);
+            };
+
+            byte[] receivedData = new byte[15] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0, 0xC0, 0x50, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0xC0 };
+
+            tnc.DecodeReceivedData(receivedData);
+
+            byte[][] decodedFrames = qDecodedFrames.ToArray();
 
             Assert.AreEqual(2, decodedFrames.Length);
             Assert.AreEqual(4, decodedFrames[0].Length);

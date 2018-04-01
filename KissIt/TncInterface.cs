@@ -48,10 +48,53 @@ namespace KissIt
         /// <param name="port">The port on the TNC used for communication</param>
         public TNCInterface(string serialPortName, byte port)
         {
-            serialPort = new SerialPort(serialPortName);
-            serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);
+            if (serialPortName != null)
+            {
+                SetSerialPort(serialPortName);
+            }
 
             receivedBuffer = new Queue<byte>();
+
+            SetTncPort(port);
+        }
+
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public TNCInterface() : this(null, 0) { }
+
+        /// <summary>
+        /// Sets a new serial port to use for the TNC.
+        /// If an existing port is open, closes it.
+        /// </summary>
+        /// <param name="serialPortName">New port name</param>
+        public void SetSerialPort(string serialPortName)
+        {
+            if (serialPortName == null)
+            {
+                throw new ArgumentNullException("serialPortName");
+            }
+
+            if (serialPort != null)
+            {
+                serialPort.Close();
+            }
+
+            serialPort = new SerialPort(serialPortName);
+            serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);
+        }
+
+        /// <summary>
+        /// Sets the port on the TNC to usefor transmission
+        /// </summary>
+        /// <param name="port">TNC port</param>
+        public void SetTncPort(byte port)
+        {
+            // ensure this is just the size of a nibble
+            if (port < 0 || port > 0xF)
+            {
+                throw new ArgumentOutOfRangeException("port", "Port value must be a nibble in range [0, 0xF], but was instead " + port);
+            }
 
             tncPort = port;
         }
@@ -60,18 +103,19 @@ namespace KissIt
         /// Sends bytes on the SerialPort
         /// </summary>
         /// <param name="bytes">Bytes to send</param>
-        public void SendData(byte[] bytes)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SendData(byte[] bytes)
         {
             if (bytes == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("bytes");
             }
             else if (bytes.Length == 0)
             {
-                throw new ArgumentException("Bytes to send has length zero.");
+                throw new ArgumentException("Bytes to send has length zero.", "bytes");
             }
 
-            EncodeAndSend(Commands.DATA_FRAME, bytes);
+            return EncodeAndSend(Commands.DATA_FRAME, bytes);
         }
 
         /// <summary>
@@ -79,10 +123,17 @@ namespace KissIt
         /// </summary>
         /// <param name="command">Command / frame time to encode</param>
         /// <param name="data">Data to send</param>
-        private void EncodeAndSend(Commands command, byte[] data)
+        /// <returns>The encoded bytes</returns>
+        private byte[] EncodeAndSend(Commands command, byte[] data)
         {
             byte[] encodedBytes = EncodeFrame(command, tncPort, data);
-            serialPort.Write(encodedBytes, 0, encodedBytes.Length);
+
+            if (serialPort != null && serialPort.IsOpen)
+            {
+                serialPort.Write(encodedBytes, 0, encodedBytes.Length);
+            }
+
+            return encodedBytes;
         }
 
         /// <summary>
@@ -90,9 +141,10 @@ namespace KissIt
         /// Default is 50, i.e. 500 ms.
         /// </summary>
         /// <param name="delay">Delay in 10 ms steps</param>
-        public void SetTxDelay(byte delay)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetTxDelay(byte delay)
         {
-            EncodeAndSend(Commands.TX_DELAY, new byte[1] { delay });
+            return EncodeAndSend(Commands.TX_DELAY, new byte[1] { delay });
         }
 
         /// <summary>
@@ -101,13 +153,15 @@ namespace KissIt
         /// Default is p = 0.25 (such that P = 63)
         /// </summary>
         /// <param name="p">Persistence parameter in range [0, 255]</param>
-        public void SetPersistenceParameter(byte p)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetPersistenceParameter(byte p)
         {
             if (p < 0 || p > 255)
             {
-                throw new ArgumentOutOfRangeException("p should be in range [0, 255], but was " + p);
+                throw new ArgumentOutOfRangeException("p", "p should be in range [0, 255], but was " + p);
             }
-            EncodeAndSend(Commands.P, new byte[1] { p });
+
+            return EncodeAndSend(Commands.P, new byte[1] { p });
         }
 
         /// <summary>
@@ -115,9 +169,10 @@ namespace KissIt
         /// Default is 10 (i.e., 100ms)
         /// </summary>
         /// <param name="slotTime">Slot interval</param>
-        public void SetSlotTime(byte slotTime)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetSlotTime(byte slotTime)
         {
-            EncodeAndSend(Commands.SLOT_TIME, new byte[1] { slotTime });
+            return EncodeAndSend(Commands.SLOT_TIME, new byte[1] { slotTime });
         }
 
         /// <summary>
@@ -125,37 +180,41 @@ namespace KissIt
         /// Obsolete, but included for backward compatibility.
         /// </summary>
         /// <param name="time">TX tail time</param>
-        public void SetTxTail(byte time)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetTxTail(byte time)
         {
-            EncodeAndSend(Commands.TX_TAIL, new byte[1] { time });
+            return EncodeAndSend(Commands.TX_TAIL, new byte[1] { time });
         }
 
         /// <summary>
         /// Sets duplex state.
         /// </summary>
         /// <param name="state">Half or full duplex</param>
-        public void SetDuplexMode(DuplexState state)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetDuplexMode(DuplexState state)
         {
             byte commandByte = (state == DuplexState.FullDuplex) ? (byte)1 : (byte)0;
 
-            EncodeAndSend(Commands.FULL_DUPLEX, new byte[1] { commandByte });
+            return EncodeAndSend(Commands.FULL_DUPLEX, new byte[1] { commandByte });
         }
 
         /// <summary>
         /// Sets a hardware specific value
         /// </summary>
         /// <param name="value">The value to send to the hardware command</param>
-        public void SetHardwareSpecific(byte value)
+        /// <returns>The encoded bytes</returns>
+        public byte[] SetHardwareSpecific(byte value)
         {
-            EncodeAndSend(Commands.SET_HARDWARE, new byte[1] { value });
+            return EncodeAndSend(Commands.SET_HARDWARE, new byte[1] { value });
         }
 
         /// <summary>
         /// Commands TNC to exit KISS mode
         /// </summary>
-        public void ExitKISSMode()
+        /// <returns>The encoded bytes</returns>
+        public byte[] ExitKISSMode()
         {
-            EncodeAndSend(Commands.RETURN, null);
+            return EncodeAndSend(Commands.RETURN, null);
         }
 
         /// <summary>
@@ -226,7 +285,7 @@ namespace KissIt
         /// Adds bytes to the queue, dequeues a complete frame if available
         /// </summary>
         /// <param name="newBytes">Bytes which have just arrived</param>
-        private void ReceivedData(byte[] newBytes)
+        public void ReceivedData(byte[] newBytes)
         {
             foreach (byte recByte in newBytes)
             {

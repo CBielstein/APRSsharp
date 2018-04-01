@@ -25,6 +25,11 @@ namespace KissIt
         private bool inEscapeMode = false;
 
         /// <summary>
+        /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next
+        /// </summary>
+        private bool previousWasFEND = false;
+
+        /// <summary>
         /// The port on the TNC used for communication
         /// </summary>
         private byte tncPort = 0;
@@ -75,10 +80,7 @@ namespace KissIt
                 throw new ArgumentNullException("serialPortName");
             }
 
-            if (serialPort != null)
-            {
-                serialPort.Close();
-            }
+            serialPort?.Close();
 
             serialPort = new SerialPort(serialPortName);
             serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);
@@ -128,7 +130,7 @@ namespace KissIt
         {
             byte[] encodedBytes = EncodeFrame(command, tncPort, data);
 
-            if (serialPort != null && serialPort.IsOpen)
+            if (serialPort?.IsOpen == true)
             {
                 serialPort.Write(encodedBytes, 0, encodedBytes.Length);
             }
@@ -278,18 +280,30 @@ namespace KissIt
                 Array.Resize(ref bytesReceived, numBytesWereRead);
             }
 
-            ReceivedData(bytesReceived);
+            DecodeReceivedData(bytesReceived);
         }
 
         /// <summary>
-        /// Adds bytes to the queue, dequeues a complete frame if available
+        /// Adds bytes to the queue, dequeues a complete frame if available.
+        /// This is public and returns the decoded frames to allow for handling
+        /// the connection to the TNC separately. However, if you're using a serial
+        /// TNC connection, it's likely easiest to set handlers and not call this function directly.
         /// </summary>
         /// <param name="newBytes">Bytes which have just arrived</param>
-        public void ReceivedData(byte[] newBytes)
+        /// <returns>Array of decoded frames as byte arrays</returns>
+        public byte[][] DecodeReceivedData(byte[] newBytes)
         {
+            Queue<byte[]> receivedFrames = new Queue<byte[]>();
+
             foreach (byte recByte in newBytes)
             {
                 byte? byteToEnqueue = null;
+
+                if (previousWasFEND)
+                {
+                    previousWasFEND = recByte == (byte)SpecialCharacters.FEND;
+                    continue;
+                }
 
                 // Handle escape mode
                 if (inEscapeMode)
@@ -321,7 +335,14 @@ namespace KissIt
                         case (byte)SpecialCharacters.FEND:
                             byte[] deliverBytes = receivedBuffer.ToArray();
                             receivedBuffer.Clear();
-                            DeliverBytes(deliverBytes);
+                            previousWasFEND = true;
+
+                            if (deliverBytes.Length > 0)
+                            {
+                                receivedFrames.Enqueue(deliverBytes);
+                                DeliverBytes(deliverBytes);
+                            }
+
                             break;
 
                         case (byte)SpecialCharacters.FESC:
@@ -339,6 +360,8 @@ namespace KissIt
                     receivedBuffer.Enqueue(byteToEnqueue.Value);
                 }
             }
+
+            return receivedFrames.ToArray();
         }
 
         /// <summary>
@@ -352,7 +375,7 @@ namespace KissIt
                 return;
             }
 
-            FrameReceivedEvent(this, new FrameReceivedEventArgs(bytes));
+            FrameReceivedEvent?.Invoke(this, new FrameReceivedEventArgs(bytes));
         }
     }
 }

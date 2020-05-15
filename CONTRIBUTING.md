@@ -13,7 +13,7 @@ Contributions can come in the form of issues, discussion, or code contributions.
 
 ### Issues and Discussion
 
-Please feel free to open, comment on, or otherwise be involved with [issuesin this repository](https://github.com/CBielstein/APRSsharp/issues). All bug reports, feature suggestions, user input, debugging, and more are more than welcome.
+Please feel free to open, comment on, or otherwise be involved with [issues in this repository](https://github.com/CBielstein/APRSsharp/issues). All bug reports, feature suggestions, user input, debugging, and more are more than welcome.
 
 ## Code Contributions
 

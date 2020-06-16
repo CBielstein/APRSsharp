@@ -5,19 +5,23 @@
 Creating a welcoming and inclusive environment is important to the creation of a healthy open source project.
 To that end, all contributions are bound by the [code of conduct](CODE_OF_CONDUCT.md) in this repository.
 
-Above all, please keep in mind that the maintainer(s) of this repository have families, day jobs, and other hobbies and responses might be slow. Please be patient.
+Above all, please be kind and courteous.
 
-## How To Contribute
+In addition, please keep in mind that the maintainer(s) of this repository may have families, jobs, hobbies, or other responsibilities and responses might be slow. Please be patient.
 
-Contributions can come in the form of issues, discussion, or code contributions.
-
-### Issues and Discussion
+## Contributing with Issues and Discussion
 
 Please feel free to open, comment on, or otherwise be involved with [issues in this repository](https://github.com/CBielstein/APRSsharp/issues). All bug reports, feature suggestions, user input, debugging, and more are more than welcome.
 
-## Code Contributions
+## Contribution with code
 
-Code may be submitted for inclusion in to this project. If you would like to contribute code to this repository, please use the following method:
+### Terms of Contributed Code
+
+Please note that by both industry convention and [GitHub policy](https://help.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license), your code is contributed in the same license as the rest of the repository.
+
+### How to Contribute Code
+
+If you would like to contribute code to this repository, please use the following method:
 
 1. Search for a relevant issue first to ensure you are not duplicate work with another individual. If there is an issue for the change you would like, consider commenting there and offering to help or adding your input.
 1. If there is no relevant issue, open an issue of your own with the change you would like to make. Include details on motivation, design, user impact, and other relevant information. This gives the community a chance to discuss and give feedback early in the process.
@@ -29,4 +33,3 @@ Pull requests must meet the following requirements:
 
 * Code must successfully build and pass all tests in the branch
 * The PR must be approved by at least one repository maintainer.
-* The PR description must include an attestation by the author assigning copyright of the code to the project.

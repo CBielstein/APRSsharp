@@ -1,2 +1,3 @@
-KISS I.T. - KISS Interface for TNC
+# KISS I.T. - KISS Interface for TNC
+
 A serial interface for terminal node controllers (TNCs) which use the Keep It Simple, Stupid (KISS) protocol: https://en.wikipedia.org/wiki/KISS_(TNC)

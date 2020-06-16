@@ -17,7 +17,7 @@ Please feel free to open, comment on, or otherwise be involved with [issues in t
 
 ### Terms of Contributed Code
 
-Please note that by both industry convention and [GitHub policy](https://help.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license), your code is contributed in the same license as the rest of the repository.
+Please note that by both industry convention and [GitHub policy](https://help.github.com/en/github/site-policy/github-terms-of-service#6-contributions-under-repository-license), your code is contributed in the same [LICENSE](LICENSE) as the rest of the repository.
 
 ### How to Contribute Code
 

@@ -19,3 +19,8 @@ This project is provided as [open source](LICENSE) and developed by the communit
 ## Contributions
 
 Please see the [code of conduct](CODE_OF_CONDUCT.md) and [contributing document](CONTRIBUTING.MD) for details on contributing to this project.
+
+## Dependencies
+
+The target is .NET Core 3.1 for development (netcoreapp3.1)
+

@@ -4,6 +4,7 @@
   <!-- For detailed rule descriptions, please refer to https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/DOCUMENTATION.md -->
   <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers.Runtime">
     <!-- CA1303:DoNotPassLiteralsAsLocalizedParameters -->
+    <!-- TODO: Should be enabled as part of UI work. Issue #18 -->
     <Rule Id="CA1303" Action="None" />
   </Rules>
 

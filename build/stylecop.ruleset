@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Static Analysis Rules" ToolsVersion="15.0">
+
+  <!-- For detailed rule descriptions, please refer to https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/DOCUMENTATION.md -->
+  <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers.Runtime">
+    <!-- CA1303:DoNotPassLiteralsAsLocalizedParameters -->
+    <Rule Id="CA1303" Action="None" />
+  </Rules>
+
+  <!-- Rule documentation: https://github.com/DotNetAnalyzers/StyleCopAnalyzers/tree/master/documentation -->
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- SA1101:PrefixLocalCallsWithThis -->
+    <Rule Id="SA1101" Action="None" />
+
+    <!-- SX1101:DoNotPrefixLocalMembersWithThis -->
+    <Rule Id="SX1101" Action="Warning" />
+
+    <!-- SA1633:FileMustHaveHeader -->
+    <Rule Id="SA1633" Action="None" />
+  </Rules>
+</RuleSet>

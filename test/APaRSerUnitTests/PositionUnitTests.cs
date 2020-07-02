@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using APaRSer;
 using GeoCoordinatePortable;
 
 namespace APaRSerUnitTests
 {
-    [TestClass]
+    //[TestClass]
     public class PositionUnitTests
     {
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeFromSpec()
         {
             string latitude = "4903.50N";
@@ -20,7 +20,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(0, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeFromSpecNegative()
         {
             string latitude = "4903.50S";
@@ -32,7 +32,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(0, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeOutOfRange()
         {
             string latitude = "9103.50N";
@@ -51,7 +51,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentOutOfRangeException");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeInvalidWithChars()
         {
             string latitude = "4cam.50N";
@@ -70,7 +70,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown a FormatException");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeTooLong()
         {
             string latitude = "4903.500N";
@@ -89,7 +89,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentOutOfRangeException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWrongDirection()
         {
             string latitude = "4903.50E";
@@ -108,7 +108,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWrongDecimalPointLocation()
         {
             string latitude = "490.350N";
@@ -127,7 +127,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec1()
         {
             string latitude = "4903.5 N";
@@ -139,7 +139,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(1, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec2()
         {
             string latitude = "4903.  N";
@@ -151,7 +151,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(2, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec3()
         {
             string latitude = "490 .  N";
@@ -163,7 +163,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(3, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec4()
         {
             string latitude = "49  .  N";
@@ -175,7 +175,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(4, pp.GetField("Ambiguity"));
         }
 
-        [TestMethod]
+        [Fact]
         public void CountAmbiguityInvalid()
         {
             string latitude = "49  .1  N";
@@ -196,7 +196,7 @@ namespace APaRSerUnitTests
             Assert.Fail("This should have thrown an ArgumentException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void EnforceAmbiguityBasic()
         {
             string latitude = "4903.50N";
@@ -207,7 +207,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("4903.  N", ambiguous);
         }
 
-        [TestMethod]
+        [Fact]
         public void EnforceAmbiguityBasic2()
         {
             string latitude = "4903.50N";
@@ -218,7 +218,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("49  .  N", ambiguous);
         }
 
-        [TestMethod]
+        [Fact]
         public void EnforceAmbiguityInvalidArg()
         {
             string latitude = "4903.50N";
@@ -239,7 +239,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentOutOfRangeException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeFromSpec()
         {
             string longitude = "07201.75W";
@@ -250,7 +250,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(-72.0292, decodedLong);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeFromSpecNegative()
         {
             string longitude = "07201.75E";
@@ -261,7 +261,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(72.0292, decodedLong);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeOutOfRange()
         {
             string longitude = "18130.50E";
@@ -280,7 +280,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentOutOfRangeException");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeInvalidWithChars()
         {
             string longitude = "4cam0.50E";
@@ -299,7 +299,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown a FormatException");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeTooLong()
         {
             string longitude = "072010.50W";
@@ -318,7 +318,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentException");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeWrongDirection()
         {
             string longitude = "07201.50N";
@@ -337,7 +337,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeLongitudeWrongDecimalPointLocation()
         {
             string longitude = "072.0175W";
@@ -356,7 +356,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Should have thrown an ArgumentException.");
         }
 
-        [TestMethod]
+        [Fact]
         public void Decode_Defaults()
         {
             Position p = new Position();
@@ -367,7 +367,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(new GeoCoordinate(0, 0), p.Coordinates);
         }
 
-        [TestMethod]
+        [Fact]
         public void Decode_FromSpec()
         {
             Position p = new Position();
@@ -380,7 +380,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(-72.0292, p.Coordinates.Longitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLatitude_Default()
         {
             Position p = new Position();
@@ -391,7 +391,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("0000.00N", encodedLatitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLatitude_FromSpec()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
@@ -403,7 +403,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("4903.50N", encodedLatitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLatitude_FromSpecWithAmbiguity()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
@@ -415,7 +415,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("490 .  N", encodedLatitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLongitude_Default()
         {
             Position p = new Position();
@@ -426,7 +426,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("00000.00W", encodedLongitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLongitude_FromSpec()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
@@ -438,7 +438,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("07201.75W", encodedLongitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeLongitude_FromSpecWithAmbiguity()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
@@ -450,7 +450,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("0720 .  W", encodedLongitude);
         }
 
-        [TestMethod]
+        [Fact]
         public void Encode_Default()
         {
             Position p = new Position();
@@ -460,7 +460,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("0000.00N\\00000.00W.", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Encode_FromSpec()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
@@ -471,7 +471,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("4903.50N/07201.75W-", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void Encode_FromSpecWithAmbiguity()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
@@ -483,7 +483,7 @@ namespace APaRSerUnitTests
         }
         
         // I had to add this one because I messed up the constructor. :(
-        [TestMethod]
+        [Fact]
         public void PositionConstructor()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
@@ -498,7 +498,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeMaidenhead_1()
         {
             Position p = new Position();
@@ -511,7 +511,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeMaidenhead_2()
         {
             Position p = new Position();
@@ -525,7 +525,7 @@ namespace APaRSerUnitTests
         /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
         /// including symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeMaidenhead_3()
         {
             Position p = new Position();
@@ -540,7 +540,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic decoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeMaidenhead_4()
         {
             Position p = new Position();
@@ -556,7 +556,7 @@ namespace APaRSerUnitTests
         /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
         /// including symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeMaidenhead_5()
         {
             Position p = new Position();
@@ -571,7 +571,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMaidenhead_1()
         {
             Position p = new Position(new GeoCoordinate(47.604, -122.292));
@@ -581,7 +581,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMaidenhead_2()
         {
             Position p = new Position(new GeoCoordinate(30.271, -97.708));
@@ -592,7 +592,7 @@ namespace APaRSerUnitTests
         /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
         /// including symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMaidenhead_3()
         {
             Position p = new Position(new GeoCoordinate(47.5, -123.0), '/', '-');
@@ -602,7 +602,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test basic encoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMaidenhead_4()
         {
             Position p = new Position(new GeoCoordinate(30.256, -97.738), '/', '-');
@@ -613,7 +613,7 @@ namespace APaRSerUnitTests
         /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
         /// including symbol
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMaidenhead_5()
         {
             Position p = new Position(new GeoCoordinate(-46.5, 125.0), '/', '-');

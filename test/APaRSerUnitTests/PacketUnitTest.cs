@@ -1,11 +1,11 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using APaRSer;
 using GeoCoordinatePortable;
 
 namespace APaRSerUnitTests
 {
-    [TestClass]
+   // [TestClass]
     public class PacketUnitTest
     {
         //
@@ -16,7 +16,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Dcodes a positionless weather report based on the example given in the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_PositionlessWeatherReportFormat()
         {
             Packet p = new Packet();
@@ -45,7 +45,7 @@ namespace APaRSerUnitTests
         /// Decodes a lat/long position report format with timestamp, no APRS messaging, zulu time, with comment
         /// based on the example given in the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_1()
         {
             Packet p = new Packet();
@@ -74,7 +74,7 @@ namespace APaRSerUnitTests
         /// Decodes a lat/long position report format with timestamp, no APRS messaging, zulu time, with comment
         /// based on the example given in the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_1()
         {
             Packet p = new Packet();
@@ -99,7 +99,7 @@ namespace APaRSerUnitTests
         /// Dcodes a lat/long position report format with timestamp, with APRS messaging, local time, with comment
         /// based on the example given in the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_2()
         {
             Packet p = new Packet();
@@ -128,7 +128,7 @@ namespace APaRSerUnitTests
         /// Dcodes a lat/long position report format with timestamp, with APRS messaging, local time, with comment
         /// based on the example given in the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_2()
         {
             Packet p = new Packet();
@@ -153,7 +153,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, with APRS messaging, local time, course/speed.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
         {
             Packet p = new Packet();
@@ -177,7 +177,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, hours/mins/secs time, PHG
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
         {
             Packet p = new Packet();
@@ -201,7 +201,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, zulu time, radio range.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
         {
             Packet p = new Packet();
@@ -225,7 +225,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, hours/mins/secs time, DF, no APRS messaging
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
         {
             Packet p = new Packet();
@@ -254,7 +254,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// weather report
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
         {
             Packet p = new Packet();
@@ -278,7 +278,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///  with timestamp, course/speed/bearing/NRQ, with APRS messaging. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_1()
         {
             Packet p = new Packet();
@@ -302,7 +302,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///   with timestamp, bearing/NRQ, no course/speed, no APRS messaging.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_2()
         {
             Packet p = new Packet();
@@ -331,7 +331,7 @@ namespace APaRSerUnitTests
         ///  Compressed Lat/Long Position Report Format — with Timestamp
         ///  with APRS messaging, timestamp, radio range
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
@@ -354,7 +354,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Lat/Long position and Timestamp
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
@@ -377,7 +377,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Compressed Lat/Long position, with Timestamp
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
@@ -401,7 +401,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, with comment
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_1()
         {
             Packet p = new Packet();
@@ -422,7 +422,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, with comment
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_1()
         {
             Packet p = new Packet();
@@ -441,7 +441,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, altitude = 1234 ft. 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
@@ -464,7 +464,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, location to nearest degree.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_3()
         {
             Packet p = new Packet();
@@ -486,7 +486,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, location to nearest degree.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_3()
         {
             Packet p = new Packet();
@@ -499,7 +499,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("!49  .  N/072  .  W-", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetTypeChar_DoNotUse()
         {
             Packet p = new Packet();
@@ -517,7 +517,7 @@ namespace APaRSerUnitTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetTypeChar_1()
         {
             Packet p = new Packet();
@@ -528,7 +528,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual('=', value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetDataType_1()
         {
             Packet p = new Packet();
@@ -539,7 +539,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, value);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
@@ -554,7 +554,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(" 35 miles NNW of London", (string)pp.GetField("comment"));
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
         {
             Packet p = new Packet();
@@ -569,7 +569,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(null, (string)pp.GetField("comment"));
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
@@ -583,7 +583,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
         {
             Packet p = new Packet();
@@ -596,7 +596,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("[IO91SX]", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_3()
         {
             Packet p = new Packet();
@@ -611,7 +611,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_4()
         {
             Packet p = new Packet();
@@ -625,7 +625,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("[IO91SX]", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
         {
             Packet p = new Packet();
@@ -640,7 +640,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual('G', pos.SymbolCode);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
         {
             Packet p = new Packet();
@@ -655,7 +655,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual('G', pos.SymbolCode);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
         {
             Packet p = new Packet();
@@ -673,7 +673,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual("My house", comment);
         }
 
-        [TestMethod]
+        [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();
@@ -693,7 +693,7 @@ namespace APaRSerUnitTests
             Assert.Fail("Not handling Meteor Scatter beam");
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
         {
             Packet p = new Packet();
@@ -705,7 +705,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(">IO91SX/G", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
         {
             Packet p = new Packet();
@@ -717,7 +717,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(">IO91/G", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
         {
             Packet p = new Packet();
@@ -730,7 +730,7 @@ namespace APaRSerUnitTests
             Assert.AreEqual(">IO91SX/- My house", encoded);
         }
 
-        [TestMethod]
+        [Fact]
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();

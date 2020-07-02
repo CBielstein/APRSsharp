@@ -1,16 +1,16 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using APaRSer;
 
 namespace APaRSerUnitTests
 {
-    [TestClass]
+   // [TestClass]
     public class TimestampUnitTests
     {
         /// <summary>
         /// Pass a day that is out of the bounds of [1,31] and expect an exception
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_DayOutOfRange()
         {
             Timestamp ts = new Timestamp();
@@ -36,7 +36,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Ensures we find the correct month & year when we're in the same month.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_SameMonth()
         {
             Timestamp ts = new Timestamp();
@@ -57,7 +57,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Ensures we find the correct month & year when the day is from last month.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_PreviousMonth()
         {
             Timestamp ts = new Timestamp();
@@ -78,7 +78,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Ensures we find the correct month & year when the day is from last year.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_PreviousYear()
         {
             Timestamp ts = new Timestamp();
@@ -100,7 +100,7 @@ namespace APaRSerUnitTests
         /// Ensures we find the correct month & year when the day is from two months ago.
         /// Skips 2/30, since that day doesn't exist.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_TwoMonthsAgo()
         {
             Timestamp ts = new Timestamp();
@@ -122,7 +122,7 @@ namespace APaRSerUnitTests
         /// Ensures we find the correct month & year when the day is from two months ago.
         /// Skips 2/29, since that day doesn't exist in 2015.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_NotLeapYear()
         {
             Timestamp ts = new Timestamp();
@@ -145,7 +145,7 @@ namespace APaRSerUnitTests
         /// Ensures we find the correct month & year when the day is from two months ago.
         /// Does NOT skip 2/29, since that day DOES exist in 2016.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYearAndMonth_LeapYear()
         {
             Timestamp ts = new Timestamp();
@@ -166,7 +166,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Tests example given in the APRS101.pdf document for zulu time
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DHMZuluTimeFromSpec()
         {
             Timestamp ts = new Timestamp("092345z");
@@ -181,7 +181,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Tests example given in the APRS101.pdf document for local time
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DHMNotZuluTimeFromSpec()
         {
             Timestamp ts = new Timestamp("092345/");
@@ -197,7 +197,7 @@ namespace APaRSerUnitTests
         /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
         /// assuming the packet is from the same day using local
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectDayMonthAndYear_SameDayLocal()
         {
             Timestamp ts = new Timestamp();
@@ -229,7 +229,7 @@ namespace APaRSerUnitTests
         /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
         /// assuming the packet is from yesterday using zulu
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectDayMonthAndYear_YesterdayZulu()
         {
             Timestamp ts = new Timestamp();
@@ -261,7 +261,7 @@ namespace APaRSerUnitTests
         /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
         /// with the packet coming from 3 minutes before hint
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectDayMonthAndYear_3MinutesAhead()
         {
             Timestamp ts = new Timestamp();
@@ -292,7 +292,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test HMS with example from APRS101.pdf
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void HMSTestFromSpec()
         {
             Timestamp ts = new Timestamp("234517h");
@@ -306,7 +306,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test FindCorrectYear's 5 minute drift logic
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYear_3MinutesAhead()
         {
             Timestamp ts = new Timestamp();
@@ -332,7 +332,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test FindCorrectYear with a packet from earlier this year
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYear_ThisYear()
         {
             Timestamp ts = new Timestamp();
@@ -358,7 +358,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test FindCorrectYear with a packet from last year
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYear_LastYear()
         {
             Timestamp ts = new Timestamp();
@@ -384,7 +384,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test FindCorrectYear leap year edition
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void FindCorrectYear_LeapYear()
         {
             Timestamp ts = new Timestamp();
@@ -410,7 +410,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Test MDHM with the example from the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MDHMTestFromSpec()
         {
             Timestamp ts = new Timestamp("10092345");
@@ -425,7 +425,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Encodes in DHM zulu time with the example from the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeDHMZuluTestFromSpec()
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
@@ -437,7 +437,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Encodes in DHM local time with the example from the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeDHMLocalTestFromSpec()
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
@@ -449,7 +449,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Encodes in HMS with the example from the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeHMSTestFromSpec()
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
@@ -461,7 +461,7 @@ namespace APaRSerUnitTests
         /// <summary>
         /// Encodes in MDHM with the example from the APRS spec
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void EncodeMDHMTestFromSpec()
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);

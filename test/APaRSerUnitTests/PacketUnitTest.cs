@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using Xunit;
 using APaRSer;
 using GeoCoordinatePortable;
@@ -212,8 +213,14 @@ namespace APaRSerUnitTests
             Assert.Equal(45, ts.dateTime.Minute);
 
             Assert.True(false, "Not yet handling data extensions.");
+       
+
+           
+
         }
 
+    
+          
         /// <summary>
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, hours/mins/secs time, DF, no APRS messaging

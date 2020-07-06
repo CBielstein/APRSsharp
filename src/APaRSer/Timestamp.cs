@@ -261,7 +261,7 @@ namespace APaRSer
         /// /// <param name="hint">A hint to the timeframe we're looking for. Generally, DateTime.Now.</param>
         /// <param name="year">The year in which the most recent occurance of that day number occured</param>
         /// <param name="month">The month in which the most recent occurance of that day number occured</param>
-        private void FindCorrectYearAndMonth(
+        public void FindCorrectYearAndMonth(
             int day, 
             DateTime hint, 
             out int year, 
@@ -423,7 +423,7 @@ namespace APaRSer
         /// <param name="minute">Packet minute</param>
         /// <param name="hint">Usually DateTime.Now</param>
         /// <param name="year">Found year</param>
-        private void FindCorrectYear(
+        public void FindCorrectYear(
             int month,
             int day,
             int hour,

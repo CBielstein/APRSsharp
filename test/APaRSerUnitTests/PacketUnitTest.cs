@@ -20,24 +20,25 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_PositionlessWeatherReportFormat()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+      
             try
             {
-                pp.Invoke("DecodeInformationField", "_10090556c220s004g005t077r000p000P000h50b09900wRSW");
+                p.DecodeInformationField ("_10090556c220s004g005t077r000p000P000h50b09900wRSW");
 
                 throw new System.Exception("Update test. It's now outdated as more functionality has been added.");
             }
             catch (System.NotImplementedException)
             {
-                Assert.AreEqual(Packet.Type.WeatherReport, pp.GetField("DecodedType"));
-                Assert.AreEqual(false, pp.GetField("HasMessaging"));
 
-                Timestamp ts = (Timestamp)pp.GetField("timestamp");
-                Assert.AreEqual(Timestamp.Type.MDHM, ts.DecodedType);
-                Assert.AreEqual(10, ts.dateTime.Month);
-                Assert.AreEqual(9, ts.dateTime.Day);
-                Assert.AreEqual(05, ts.dateTime.Hour);
-                Assert.AreEqual(56, ts.dateTime.Minute);
+                Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
+                Assert.Equal(false, p.HasMessaging);
+
+                Timestamp ts = (Timestamp)p.timestamp;
+                Assert.Equal(Timestamp.Type.MDHM, ts.DecodedType);
+                Assert.Equal(10, ts.dateTime.Month);
+                Assert.Equal(9, ts.dateTime.Day);
+                Assert.Equal(05, ts.dateTime.Hour);
+                Assert.Equal(56, ts.dateTime.Minute);
             }
         }
 
@@ -49,25 +50,24 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+           
+            p.DecodeInformationField("/092345z4903.50N/07201.75W>Test1234");
+          
+            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-            pp.Invoke("DecodeInformationField", "/092345z4903.50N/07201.75W>Test1234");
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(9, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('>', pos.SymbolCode);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(9, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('>', pos.SymbolCode);
-
-            Assert.AreEqual("Test1234", pp.GetField("comment"));
+            Assert.Equal("Test1234", p.comment);
         }
 
         /// <summary>
@@ -88,11 +88,10 @@ namespace APaRSerUnitTests
             p.position = new Position(gc, '/', '>', 0);
 
             p.comment = "Test1234";
+          
+            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithTimestampNoMessaging);
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithTimestampNoMessaging);
-
-            Assert.AreEqual("/092345z4903.50N/07201.75W>Test1234", encoded);
+            Assert.Equal("/092345z4903.50N/07201.75W>Test1234", encoded);
         }
 
         /// <summary>
@@ -103,25 +102,24 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+     
+            p.DecodeInformationField ("@092345/4903.50N/07201.75W>Test1234");
 
-            pp.Invoke("DecodeInformationField", "@092345/4903.50N/07201.75W>Test1234");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
+            Assert.Equal(9, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMl, ts.DecodedType);
-            Assert.AreEqual(9, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('>', pos.SymbolCode);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('>', pos.SymbolCode);
-
-            Assert.AreEqual("Test1234", pp.GetField("comment"));
+            Assert.Equal("Test1234", p.comment);
         }
 
         /// <summary>
@@ -142,11 +140,9 @@ namespace APaRSerUnitTests
 
             p.comment = "Test1234";
 
-            PrivateObject pp = new PrivateObject(p);
-
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
-
-            Assert.AreEqual("@092345/4903.50N/07201.75W>Test1234", encoded);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
+                      
+            Assert.Equal("@092345/4903.50N/07201.75W>Test1234", encoded);
         }
 
         /// <summary>
@@ -157,20 +153,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+    
+            p.DecodeInformationField("@092345/4903.50N/07201.75W>088/036");
 
-            pp.Invoke("DecodeInformationField", "@092345/4903.50N/07201.75W>088/036");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
+            Assert.Equal(9, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMl, ts.DecodedType);
-            Assert.AreEqual(9, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling data extension.");
+            Assert.True(false, "Not yet handling data extension.");
         }
 
         /// <summary>
@@ -181,20 +176,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+      
+            p.DecodeInformationField("@234517h4903.50N/07201.75W>PHG5132");
 
-            pp.Invoke("DecodeInformationField", "@234517h4903.50N/07201.75W>PHG5132");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(17, ts.dateTime.Second);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.HMS, ts.DecodedType);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-            Assert.AreEqual(17, ts.dateTime.Second);
-
-            Assert.Fail("Not yet handling data extension.");
+            Assert.True(false, "Not yet handling data extension.");
         }
 
         /// <summary>
@@ -205,20 +199,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+          
+            p.DecodeInformationField("@092345z4903.50N/07201.75W>RNG0050");
 
-            pp.Invoke("DecodeInformationField", "@092345z4903.50N/07201.75W>RNG0050");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling data extensions.");
+            Assert.True(false, "Not yet handling data extensions.");
         }
 
         /// <summary>
@@ -229,25 +222,24 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+       
+            p.DecodeInformationField("/234517h4903.50N/07201.75W>DFS2360");
 
-            pp.Invoke("DecodeInformationField", "/234517h4903.50N/07201.75W>DFS2360");
+            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(17, ts.dateTime.Second);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.HMS, ts.DecodedType);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-            Assert.AreEqual(17, ts.dateTime.Second);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('>', pos.SymbolCode);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('>', pos.SymbolCode);
-
-            Assert.Fail("Not yet handling DF data.");
+            Assert.True(false, "Not yet handling DF data.");
         }
 
         /// <summary>
@@ -258,20 +250,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+   
+            p.DecodeInformationField("@092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII");
 
-            pp.Invoke("DecodeInformationField", "@092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII");
+            Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.WeatherReport, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling weather reports");
+            Assert.True(false, "Not yet handling weather reports");
         }
 
         /// <summary>
@@ -282,20 +273,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+   
+            p.DecodeInformationField("@092345z4903.50N/07201.75W\088/036/270/729");
 
-            pp.Invoke("DecodeInformationField", "@092345z4903.50N/07201.75W\088/036/270/729");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling DF Report.");
+            Assert.True(false, "Not yet handling DF Report.");
         }
 
         /// <summary>
@@ -306,25 +296,24 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+      
+            p.DecodeInformationField(@"/092345z4903.50N/07201.75W\000/000/270/729");
 
-            pp.Invoke("DecodeInformationField", @"/092345z4903.50N/07201.75W\000/000/270/729");
+            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('\\', pos.SymbolCode);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('\\', pos.SymbolCode);
-
-            Assert.Fail("Not yet handling bearing, course/speed.");
+            Assert.True(false, "Not yet handling bearing, course/speed.");
         }
 
         /// <summary>
@@ -335,20 +324,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+    
+            p.DecodeInformationField("@092345z/5L!!<*e7>{?!");
 
-            pp.Invoke("DecodeInformationField", "@092345z/5L!!<*e7>{?!");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling compressed latlong position report format.");
+            Assert.True(false, "Not yet handling compressed latlong position report format.");
         }
 
         /// <summary>
@@ -358,20 +346,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+  
+            p.DecodeInformationField("@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW");
 
-            pp.Invoke("DecodeInformationField", "@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(true, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling weather information.");
+            Assert.True(false, "Not yet handling weather information.");
         }
 
         /// <summary>
@@ -381,20 +368,19 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+ 
+            p.DecodeInformationField("@092345z/5L!!<*e7 _7P[g005t077r000p000P000h50b09900wRSW");
 
-            pp.Invoke("DecodeInformationField", "@092345z/5L!!<*e7 _7P[g005t077r000p000P000h50b09900wRSW");
+            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-            Assert.AreEqual(Packet.Type.PositionWithTimestampWithMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(true, pp.GetField("HasMessaging"));
+            Timestamp ts = (Timestamp)p.timestamp;
+            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(09, ts.dateTime.Day);
+            Assert.Equal(23, ts.dateTime.Hour);
+            Assert.Equal(45, ts.dateTime.Minute);
 
-            Timestamp ts = (Timestamp)pp.GetField("timestamp");
-            Assert.AreEqual(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.AreEqual(09, ts.dateTime.Day);
-            Assert.AreEqual(23, ts.dateTime.Hour);
-            Assert.AreEqual(45, ts.dateTime.Minute);
-
-            Assert.Fail("Not yet handling weather or compressed lat long position.");
+            Assert.True(false, "Not yet handling weather or compressed lat long position.");
         }
 
         /// <summary>
@@ -405,17 +391,16 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-            pp.Invoke("DecodeInformationField", "!4903.50N/07201.75W-Test 001234");
+            p.DecodeInformationField("!4903.50N/07201.75W-Test 001234");
 
-            Assert.AreEqual(Packet.Type.PositionWithoutTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
-            Assert.AreEqual("Test 001234", pp.GetField("comment"));
+            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
+            Assert.Equal("Test 001234", p.comment);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('-', pos.SymbolCode);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('-', pos.SymbolCode);
         }
 
         /// <summary>
@@ -432,9 +417,9 @@ namespace APaRSerUnitTests
             p.comment = "Test 001234";
             p.position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithoutTimestampNoMessaging);
-            Assert.AreEqual("!4903.50N/07201.75W-Test 001234", encoded);
+        
+            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
+            Assert.Equal("!4903.50N/07201.75W-Test 001234", encoded);
         }
 
         /// <summary>
@@ -445,19 +430,18 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-            pp.Invoke("DecodeInformationField", "!4903.50N/07201.75W-Test /A=001234");
+            p.DecodeInformationField("!4903.50N/07201.75W-Test /A=001234");
 
-            Assert.AreEqual(Packet.Type.PositionWithoutTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
-            Assert.AreEqual("Test /A=001234", pp.GetField("comment"));
+            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
+            Assert.Equal("Test /A=001234", p.comment);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('-', pos.SymbolCode);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('-', pos.SymbolCode);
 
-            Assert.Fail("Unhandled altitude.");
+            Assert.True(false, "Unhandled altitude.");
         }
 
         /// <summary>
@@ -468,18 +452,17 @@ namespace APaRSerUnitTests
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_3()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-            pp.Invoke("DecodeInformationField", "!49  .  N/072  .  W-");
+            p.DecodeInformationField("!49  .  N/072  .  W-");
 
-            Assert.AreEqual(Packet.Type.PositionWithoutTimestampNoMessaging, pp.GetField("DecodedType"));
-            Assert.AreEqual(false, pp.GetField("HasMessaging"));
-            Assert.AreEqual(null, pp.GetField("comment"));
+            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
+            Assert.Equal(null, p.comment);
 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(new GeoCoordinate(49, -72), pos.Coordinates);
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('-', pos.SymbolCode);
-            Assert.AreEqual(4, pos.Ambiguity);
+            Position pos = (Position)p.position;
+            Assert.Equal(new GeoCoordinate(49, -72), pos.Coordinates);
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('-', pos.SymbolCode);
+            Assert.Equal(4, pos.Ambiguity);
         }
 
         /// <summary>
@@ -494,22 +477,20 @@ namespace APaRSerUnitTests
             p.HasMessaging = false;
             p.position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.PositionWithoutTimestampNoMessaging);
-            Assert.AreEqual("!49  .  N/072  .  W-", encoded);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
+            Assert.Equal("!49  .  N/072  .  W-", encoded);
         }
 
         [Fact]
         public void GetTypeChar_DoNotUse()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-
+ 
             try
             {
-                pp.Invoke("GetTypeChar", Packet.Type.DoNotUse);
+                p.GetTypeChar(Packet.Type.DoNotUse);
 
-                Assert.Fail("Should have thrown exception.");
+                Assert.True(false, "Should have thrown exception.");
             }
             catch (ArgumentException)
             {
@@ -521,52 +502,47 @@ namespace APaRSerUnitTests
         public void GetTypeChar_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+      
+            char value = (char)p.GetTypeChar(Packet.Type.PositionWithoutTimestampWithMessaging);
 
-            char value = (char)pp.Invoke("GetTypeChar", Packet.Type.PositionWithoutTimestampWithMessaging);
-
-            Assert.AreEqual('=', value);
+            Assert.Equal('=', value);
         }
 
         [Fact]
         public void GetDataType_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+   
+            Packet.Type value = (Packet.Type)p.GetDataType("/092345z4903.50N/07201.75W>Test1234");
 
-            Packet.Type value = (Packet.Type)pp.Invoke("GetDataType", "/092345z4903.50N/07201.75W>Test1234");
-
-            Assert.AreEqual(Packet.Type.PositionWithTimestampNoMessaging, value);
+            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, value);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+  
+            p.DecodeInformationField("[IO91SX] 35 miles NNW of London");
 
-            pp.Invoke("DecodeInformationField", "[IO91SX] 35 miles NNW of London");
+            Position pos = (Position)p.position;
 
-            Position pos = (Position)pp.GetField("position");
-
-            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual(" 35 miles NNW of London", (string)pp.GetField("comment"));
+            Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal(" 35 miles NNW of London", (string)p.comment);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+            p.DecodeInformationField("[IO91SX]");
 
-            pp.Invoke("DecodeInformationField", "[IO91SX]");
+            Position pos = (Position)p.position;
 
-            Position pos = (Position)pp.GetField("position");
-
-            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual(null, (string)pp.GetField("comment"));
+            Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal(null, (string)p.comment);
         }
 
         [Fact]
@@ -576,11 +552,9 @@ namespace APaRSerUnitTests
             p.comment = "35 miles NNW of London";
             p.position = new Position(new GeoCoordinate(51.98, -0.46));
 
-            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
+            Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
         }
 
         [Fact]
@@ -589,11 +563,9 @@ namespace APaRSerUnitTests
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46));
 
-            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.AreEqual("[IO91SX]", encoded);
+            Assert.Equal("[IO91SX]", encoded);
         }
 
         [Fact]
@@ -604,11 +576,9 @@ namespace APaRSerUnitTests
             p.position = new Position();
             p.position.DecodeMaidenhead("IO91SX");
 
-            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.AreEqual("[IO91SX] 35 miles NNW of London", encoded);
+            Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
         }
 
         [Fact]
@@ -618,79 +588,73 @@ namespace APaRSerUnitTests
             p.position = new Position();
             p.position.DecodeMaidenhead("IO91SX");
 
-            PrivateObject pp = new PrivateObject(p);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.AreEqual("[IO91SX]", encoded);
+            Assert.Equal("[IO91SX]", encoded);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-
-            pp.Invoke("DecodeInformationField", ">IO91SX/G");
+   
+            p.DecodeInformationField(">IO91SX/G");
  
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('G', pos.SymbolCode);
+            Position pos = (Position)p.position;
+            Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('G', pos.SymbolCode);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
 
-            pp.Invoke("DecodeInformationField", ">IO91/G");
+            p.DecodeInformationField(">IO91/G");
  
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(51.5, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-1.0, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('G', pos.SymbolCode);
+            Position pos = (Position)p.position;
+            Assert.Equal(51.5, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-1.0, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('G', pos.SymbolCode);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
+  
+            p.DecodeInformationField(">IO91SX/- My house");
+    
+            Position pos = (Position)p.position;
+            Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('-', pos.SymbolCode);
 
-            pp.Invoke("DecodeInformationField", ">IO91SX/- My house");
- 
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('-', pos.SymbolCode);
-
-            string comment = (string)pp.GetField("comment");
-            Assert.AreEqual("My house", comment);
+            string comment = (string)p.comment;
+            Assert.Equal("My house", comment);
         }
 
         [Fact]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();
-            PrivateObject pp = new PrivateObject(p);
-
-            pp.Invoke("DecodeInformationField", ">IO91SX/- ^B7");
  
-            Position pos = (Position)pp.GetField("position");
-            Assert.AreEqual(51.98, Math.Round(pos.Coordinates.Latitude, 2));
-            Assert.AreEqual(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.AreEqual('/', pos.SymbolTableIdentifier);
-            Assert.AreEqual('-', pos.SymbolCode);
+            p.DecodeInformationField(">IO91SX/- ^B7");
+ 
+            Position pos = (Position)p.position;
+            Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
+            Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
+            Assert.Equal('/', pos.SymbolTableIdentifier);
+            Assert.Equal('-', pos.SymbolCode);
 
-            string comment = (string)pp.GetField("comment");
-            Assert.AreEqual("^B7", comment);
+            string comment = (string)p.comment;
+            Assert.Equal("^B7", comment);
 
-            Assert.Fail("Not handling Meteor Scatter beam");
+            Assert.True(false, "Not handling Meteor Scatter beam");
         }
 
         [Fact]
@@ -698,11 +662,9 @@ namespace APaRSerUnitTests
         {
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
+            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
-
-            Assert.AreEqual(">IO91SX/G", encoded);
+            Assert.Equal(">IO91SX/G", encoded);
         }
 
         [Fact]
@@ -711,10 +673,9 @@ namespace APaRSerUnitTests
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
 
-            Assert.AreEqual(">IO91/G", encoded);
+            Assert.Equal(">IO91/G", encoded);
         }
 
         [Fact]
@@ -724,10 +685,9 @@ namespace APaRSerUnitTests
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
             p.comment = "My house";
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
 
-            Assert.AreEqual(">IO91SX/- My house", encoded);
+            Assert.Equal(">IO91SX/- My house", encoded);
         }
 
         [Fact]
@@ -737,10 +697,9 @@ namespace APaRSerUnitTests
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
             p.comment = "My house";
 
-            PrivateObject pp = new PrivateObject(p);
-            string encoded = (string)pp.Invoke("EncodeInformationField", Packet.Type.Status);
+            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
 
-            Assert.AreEqual(">IO91SX/- My house", encoded);
+            Assert.Equal(">IO91SX/- My house", encoded);
         }
     }
 }

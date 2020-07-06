@@ -2,7 +2,7 @@
 
 
 //namespace AprsSharp.Protocols
-namespace KissTnc
+namespace AprsSharp.Protocols
 {
     /// <summary>
     /// Caries the bytes delivered in a single frame by the TNC

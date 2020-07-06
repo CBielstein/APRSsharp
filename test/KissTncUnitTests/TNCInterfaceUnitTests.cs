@@ -1,10 +1,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using KissTnc;
+using AprsSharp.Protocols;
 using System.Text;
 using System.Collections.Generic;
 
-namespace KissTncUnitTests
-//namespace AprsSharpUnitTests.Protocols
+namespace AprsSharpUnitTests.Protocols
 {
     [TestClass]
     public class TNCInterfaceUnitTests

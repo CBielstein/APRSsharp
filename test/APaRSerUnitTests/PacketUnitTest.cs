@@ -150,7 +150,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, with APRS messaging, local time, course/speed.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
         {
             Packet p = new Packet();
@@ -173,7 +173,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, hours/mins/secs time, PHG
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
         {
             Packet p = new Packet();
@@ -196,7 +196,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, zulu time, radio range.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
         {
             Packet p = new Packet();
@@ -214,9 +214,7 @@ namespace APaRSerUnitTests
 
             Assert.True(false, "Not yet handling data extensions.");
        
-
            
-
         }
 
     
@@ -225,7 +223,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, hours/mins/secs time, DF, no APRS messaging
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
         {
             Packet p = new Packet();
@@ -253,7 +251,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// weather report
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
         {
             Packet p = new Packet();
@@ -276,7 +274,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///  with timestamp, course/speed/bearing/NRQ, with APRS messaging. 
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_1()
         {
             Packet p = new Packet();
@@ -299,7 +297,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///   with timestamp, bearing/NRQ, no course/speed, no APRS messaging.
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_2()
         {
             Packet p = new Packet();
@@ -327,7 +325,7 @@ namespace APaRSerUnitTests
         ///  Compressed Lat/Long Position Report Format — with Timestamp
         ///  with APRS messaging, timestamp, radio range
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
@@ -349,7 +347,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Lat/Long position and Timestamp
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
@@ -371,7 +369,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Compressed Lat/Long position, with Timestamp
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
@@ -433,7 +431,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, altitude = 1234 ft. 
         /// </summary>
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
@@ -645,7 +643,7 @@ namespace APaRSerUnitTests
             Assert.Equal("My house", comment);
         }
 
-        [Fact]
+        [Fact (Skip = "24 Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();

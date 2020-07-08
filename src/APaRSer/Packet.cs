@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AprsSharp.Parsers
+namespace APaRSer
 {
     /// <summary>
     /// A representation of an APRS Packet.

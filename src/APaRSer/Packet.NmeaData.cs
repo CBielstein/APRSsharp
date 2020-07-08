@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AprsSharp.Parsers
+namespace APaRSer
 {
     public partial class Packet
     {

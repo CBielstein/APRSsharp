@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AprsParser;
+using APaRSer;
 using GeoCoordinatePortable;
 
-namespace AprsParserUnitTests
+namespace APaRSerUnitTests
 {
     [TestClass]
     public class PositionUnitTests

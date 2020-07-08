@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AprsParser;
+using APaRSer;
 
-namespace AprsParserUnitTests
+namespace APaRSerUnitTests
 {
     [TestClass]
     public class PacketNmeaDataUnitTests

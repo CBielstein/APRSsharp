@@ -5,6 +5,8 @@
     <NullableReferenceTypes>true</NullableReferenceTypes>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\analyzers.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <Import Project="Packages.props"/>
 </Project>

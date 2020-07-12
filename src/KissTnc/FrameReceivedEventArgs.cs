@@ -1,7 +1,5 @@
 ﻿using System;
 
-
-//namespace AprsSharp.Protocols
 namespace AprsSharp.Protocols
 {
     /// <summary>

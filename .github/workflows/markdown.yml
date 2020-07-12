@@ -1,4 +1,4 @@
-name: Lint
+name: Markdown
 
 on:
   push:
@@ -8,6 +8,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.md'
 
 jobs:
   lint:

@@ -1,12 +1,9 @@
 namespace AprsSharp.Protocols
 {
-    //
-    // All values and descriptions taken from KA9Q's KISS paper
-    // http://www.ka9q.net/papers/kiss.html
-    //
-
     /// <summary>
-    /// Represents special characters in the KISS protocol
+    /// Represents special characters in the KISS protocol.
+    /// All values and descriptions taken from KA9Q's KISS paper.
+    /// http://www.ka9q.net/papers/kiss.html.
     /// </summary>
     public enum SpecialCharacters
     {
@@ -32,8 +29,8 @@ namespace AprsSharp.Protocols
     }
 
     /// <summary>
-    /// Represents codes used to command the TNC in the KISS protocol
-    /// These are embedded in the encoding of frames sent to the TNC
+    /// Represents codes used to command the TNC in the KISS protocol.
+    /// These are embedded in the encoding of frames sent to the TNC.
     /// </summary>
     public enum Commands
     {
@@ -88,7 +85,7 @@ namespace AprsSharp.Protocols
     }
 
     /// <summary>
-    /// Used to set duplex mode
+    /// Used to set duplex mode.
     /// </summary>
     public enum DuplexState
     {

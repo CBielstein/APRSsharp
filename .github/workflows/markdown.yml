@@ -13,7 +13,7 @@ on:
 
 jobs:
   lint:
-    name: Lint Markdown
+    name: Lint
 
     runs-on: ubuntu-latest
 

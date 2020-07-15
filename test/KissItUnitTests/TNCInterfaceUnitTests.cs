@@ -1,5 +1,4 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using KissIt;
 using AprsSharp.Protocols;
 using System.Text;
 using System.Collections.Generic;

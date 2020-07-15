@@ -49,7 +49,6 @@ namespace APaRSer
             SymbolCode = symbol;
         }
 
-
         /// <summary>
         /// Initializes the Position object given a GeoCoordinate object
         /// </summary>
@@ -353,7 +352,6 @@ namespace APaRSer
 
             return encoded;
         }
-
 
         /// <summary>
         /// Decode the latitude section of the coordinate string

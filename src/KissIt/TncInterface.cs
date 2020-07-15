@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System;
 
-//namespace KissIt
 namespace AprsSharp.Protocols
 {
     /// <summary>

@@ -200,7 +200,6 @@ namespace APaRSer
         {
             string encodedInfoField = string.Empty;
 
-
             switch (encodeType)
             {
                 case Type.PositionWithTimestampWithMessaging:

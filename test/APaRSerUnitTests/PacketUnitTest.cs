@@ -6,7 +6,6 @@ using GeoCoordinatePortable;
 
 namespace APaRSerUnitTests
 {
-   // [TestClass]
     public class PacketUnitTest
     {
         //
@@ -90,7 +89,7 @@ namespace APaRSerUnitTests
 
             p.comment = "Test1234";
           
-            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithTimestampNoMessaging);
+            string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampNoMessaging);
 
             Assert.Equal("/092345z4903.50N/07201.75W>Test1234", encoded);
         }
@@ -141,7 +140,7 @@ namespace APaRSerUnitTests
 
             p.comment = "Test1234";
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
+            string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
                       
             Assert.Equal("@092345/4903.50N/07201.75W>Test1234", encoded);
         }
@@ -150,7 +149,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, with APRS messaging, local time, course/speed.
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
         {
             Packet p = new Packet();
@@ -173,7 +172,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, hours/mins/secs time, PHG
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
         {
             Packet p = new Packet();
@@ -196,7 +195,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, APRS messaging, zulu time, radio range.
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
         {
             Packet p = new Packet();
@@ -217,13 +216,12 @@ namespace APaRSerUnitTests
            
         }
 
-    
-          
+              
         /// <summary>
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// with timestamp, hours/mins/secs time, DF, no APRS messaging
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
         {
             Packet p = new Packet();
@@ -251,7 +249,7 @@ namespace APaRSerUnitTests
         /// Lat/Long Position Report Format — with Data Extension and Timestamp 
         /// weather report
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
         {
             Packet p = new Packet();
@@ -274,7 +272,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///  with timestamp, course/speed/bearing/NRQ, with APRS messaging. 
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_1()
         {
             Packet p = new Packet();
@@ -297,7 +295,7 @@ namespace APaRSerUnitTests
         ///  DF Report Format — with Timestamp
         ///   with timestamp, bearing/NRQ, no course/speed, no APRS messaging.
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_DFReportFormat_2()
         {
             Packet p = new Packet();
@@ -325,7 +323,7 @@ namespace APaRSerUnitTests
         ///  Compressed Lat/Long Position Report Format — with Timestamp
         ///  with APRS messaging, timestamp, radio range
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
@@ -347,7 +345,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Lat/Long position and Timestamp
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
@@ -369,7 +367,7 @@ namespace APaRSerUnitTests
         /// <summary>
         ///  Complete Weather Report Format — with Compressed Lat/Long position, with Timestamp
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
@@ -423,7 +421,7 @@ namespace APaRSerUnitTests
             p.position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
 
         
-            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
+            string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
             Assert.Equal("!4903.50N/07201.75W-Test 001234", encoded);
         }
 
@@ -431,7 +429,7 @@ namespace APaRSerUnitTests
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, altitude = 1234 ft. 
         /// </summary>
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
@@ -482,7 +480,7 @@ namespace APaRSerUnitTests
             p.HasMessaging = false;
             p.position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
+            string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
             Assert.Equal("!49  .  N/072  .  W-", encoded);
         }
 
@@ -534,7 +532,7 @@ namespace APaRSerUnitTests
 
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.Equal(" 35 miles NNW of London", (string)p.comment);
+            Assert.Equal(" 35 miles NNW of London", p.comment);
         }
 
         [Fact]
@@ -547,7 +545,7 @@ namespace APaRSerUnitTests
 
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.Equal(null, (string)p.comment);
+            Assert.Equal(null, p.comment);
         }
 
         [Fact]
@@ -557,7 +555,7 @@ namespace APaRSerUnitTests
             p.comment = "35 miles NNW of London";
             p.position = new Position(new GeoCoordinate(51.98, -0.46));
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
             Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
         }
@@ -568,7 +566,7 @@ namespace APaRSerUnitTests
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46));
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
             Assert.Equal("[IO91SX]", encoded);
         }
@@ -581,7 +579,7 @@ namespace APaRSerUnitTests
             p.position = new Position();
             p.position.DecodeMaidenhead("IO91SX");
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
             Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
         }
@@ -593,7 +591,7 @@ namespace APaRSerUnitTests
             p.position = new Position();
             p.position.DecodeMaidenhead("IO91SX");
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
             Assert.Equal("[IO91SX]", encoded);
         }
@@ -639,11 +637,11 @@ namespace APaRSerUnitTests
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
 
-            string comment = (string)p.comment;
+            string comment = p.comment;
             Assert.Equal("My house", comment);
         }
 
-        [Fact (Skip = "24 Fix skipped tests from old repository")]
+        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();
@@ -656,7 +654,7 @@ namespace APaRSerUnitTests
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
 
-            string comment = (string)p.comment;
+            string comment = p.comment;
             Assert.Equal("^B7", comment);
 
             Assert.True(false, "Not handling Meteor Scatter beam");
@@ -667,7 +665,7 @@ namespace APaRSerUnitTests
         {
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
-            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
+            string encoded = p.EncodeInformationField(Packet.Type.Status);
 
             Assert.Equal(">IO91SX/G", encoded);
         }
@@ -678,7 +676,7 @@ namespace APaRSerUnitTests
             Packet p = new Packet();
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
+            string encoded = p.EncodeInformationField(Packet.Type.Status);
 
             Assert.Equal(">IO91/G", encoded);
         }
@@ -690,7 +688,7 @@ namespace APaRSerUnitTests
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
             p.comment = "My house";
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
+            string encoded = p.EncodeInformationField(Packet.Type.Status);
 
             Assert.Equal(">IO91SX/- My house", encoded);
         }
@@ -702,7 +700,7 @@ namespace APaRSerUnitTests
             p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
             p.comment = "My house";
 
-            string encoded = (string)p.EncodeInformationField(Packet.Type.Status);
+            string encoded = p.EncodeInformationField(Packet.Type.Status);
 
             Assert.Equal(">IO91SX/- My house", encoded);
         }

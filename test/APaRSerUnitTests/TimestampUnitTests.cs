@@ -4,7 +4,6 @@ using APaRSer;
 
 namespace APaRSerUnitTests
 {
-   // [TestClass]
     public class TimestampUnitTests
     {
         /// <summary>
@@ -22,13 +21,12 @@ namespace APaRSerUnitTests
             {
                 ts.FindCorrectYearAndMonth(32, DateTime.Now, out outYear, out outDay);
                 
-
                 // Should not reach here as an ArgumentOutOfRangeException should be thrown
                 Assert.True(false);
             }
             catch (Exception e)
             {
-                //Assert.IsInstanceOfType(e, typeof(ArgumentOutOfRangeException));
+                
                 Assert.IsType<ArgumentOutOfRangeException>(e);
             }
         }
@@ -44,13 +42,13 @@ namespace APaRSerUnitTests
             int expectedYear = 2016;
             int expectedMonth = 10;
             DateTime MidMonth = new DateTime(expectedYear, expectedMonth, 24);
-            int Year = 0;
-            int Month = 0;
+            int year = 0;
+            int month = 0;
 
-            ts.FindCorrectYearAndMonth(7, MidMonth, /* year */ out Year, out Month);
+            ts.FindCorrectYearAndMonth(7, MidMonth, out year, out month);
 
-            Assert.Equal(expectedYear, Year);
-            Assert.Equal(expectedMonth, Month);
+            Assert.Equal(expectedYear, year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -60,18 +58,17 @@ namespace APaRSerUnitTests
         public void FindCorrectYearAndMonth_PreviousMonth()
         {
             Timestamp ts = new Timestamp();
-            //PrivateObject pts = new PrivateObject(ts);
-
+           
             int expectedYear = 2016;
             int expectedMonth = 9;
             DateTime MidMonth = new DateTime(expectedYear, 10, 24);
-            int Year = 0;
-            int Month = 0;
+            int year = 0;
+            int month = 0;
 
-            ts.FindCorrectYearAndMonth(25, MidMonth, /* year */ out Year, /* month */ out Month);
+            ts.FindCorrectYearAndMonth(25, MidMonth, out year,  out month);
 
-            Assert.Equal(expectedYear, Year);
-            Assert.Equal(expectedMonth, Month);
+            Assert.Equal(expectedYear, year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -81,18 +78,17 @@ namespace APaRSerUnitTests
         public void FindCorrectYearAndMonth_PreviousYear()
         {
             Timestamp ts = new Timestamp();
-            //PrivateObject pts = new PrivateObject(ts);
-
+            
             int expectedYear = 2015;
             int expectedMonth = 12;
             DateTime MidMonth = new DateTime(2016, 1, 1);
-            int Month = 0;
-            int Year = 0;
+            int month = 0;
+            int year = 0;
 
-            ts.FindCorrectYearAndMonth(31, MidMonth, /* year */out Year, /* month */ out Month);
+            ts.FindCorrectYearAndMonth(31, MidMonth, out year, out month);
 
-            Assert.Equal(expectedYear, Year);
-            Assert.Equal(expectedMonth, /* month */ Month);
+            Assert.Equal(expectedYear, year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -107,13 +103,13 @@ namespace APaRSerUnitTests
             int expectedYear = 2016;
             int expectedMonth = 1;
             DateTime MidMonth = new DateTime(expectedYear, 3, 1);
-            int Year = 0;
-            int Month = 0;
+            int year = 0;
+            int month = 0;
 
-            ts.FindCorrectYearAndMonth(30, MidMonth, /* year */out Year, /* month */ out Month);
+            ts.FindCorrectYearAndMonth(30, MidMonth, out year, out month);
 
-            Assert.Equal(expectedYear, /* year */ Year);
-            Assert.Equal(expectedMonth, /* month */ Month);
+            Assert.Equal(expectedYear,  year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -129,13 +125,13 @@ namespace APaRSerUnitTests
             int expectedMonth = 1;
 
             DateTime MidMonth = new DateTime(expectedYear, 3, 1);
-            int Year = 0;
-            int Month = 0;
+            int year = 0;
+            int month = 0;
 
-            ts.FindCorrectYearAndMonth(29, MidMonth, /* year */ out Year, /* month */out Month);
+            ts.FindCorrectYearAndMonth(29, MidMonth, out year, out month);
 
-            Assert.Equal(expectedYear, /* year */ Year);
-            Assert.Equal(expectedMonth, /* month */ Month);
+            Assert.Equal(expectedYear, year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -150,13 +146,13 @@ namespace APaRSerUnitTests
             int expectedYear = 2016;
             int expectedMonth = 2;
             DateTime MidMonth = new DateTime(expectedYear, 3, 1);
-            int Year = 0;
-            int Month = 0;
+            int year = 0;
+            int month = 0;
 
-            ts.FindCorrectYearAndMonth(29, MidMonth, out Year,  out Month );
+            ts.FindCorrectYearAndMonth(29, MidMonth, out year,  out month );
 
-            Assert.Equal(expectedYear, /* year */ Year);
-            Assert.Equal(expectedMonth, /* month */ Month);
+            Assert.Equal(expectedYear, year);
+            Assert.Equal(expectedMonth, month);
         }
 
         /// <summary>
@@ -197,24 +193,20 @@ namespace APaRSerUnitTests
         public void FindCorrectDayMonthAndYear_SameDayLocal()
         {
             Timestamp ts = new Timestamp();
-            //PrivateObject pts = new PrivateObject(ts);
-
+            
             DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Local);
             DateTime hint = packet.AddHours(1);
             int day = 0;
             int month = 0;
             int year = 0;
 
-            
-
-            //pts.Invoke("FindCorrectDayMonthAndYear", args);
             ts.FindCorrectDayMonthAndYear(packet.Hour,
-                packet.Minute,
-                packet.Second,
-                hint,
-                out day,
-                out month,
-                out year);
+            packet.Minute,
+            packet.Second,
+            hint,
+            out day,
+            out month,
+            out year);
 
             Assert.Equal(packet.Day, day);
             Assert.Equal(packet.Month, month);
@@ -354,7 +346,6 @@ namespace APaRSerUnitTests
                 hint,
                 out year);
             
-
             Assert.Equal(packet.Year, year);
         }
 
@@ -369,17 +360,14 @@ namespace APaRSerUnitTests
             DateTime packet = new DateTime(2015, 2, 28, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMonths(1);
             int year = 0;
-
             
-
             ts.FindCorrectYear(packet.Month,
                 packet.Day + 1,
                 packet.Hour,
                 packet.Minute,
                 hint,
                 out year);
-            // pts.Invoke("FindCorrectYear", args);
-
+            
             Assert.Equal(2012, year);
         }
 

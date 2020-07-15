@@ -5,8 +5,7 @@ using GeoCoordinatePortable;
 
 namespace APaRSerUnitTests
 {
-    //[TestClass]
-    public class PositionUnitTests
+     public class PositionUnitTests
     {
         [Fact]
         public void DecodeLatitudeFromSpec()
@@ -190,7 +189,7 @@ namespace APaRSerUnitTests
             string latitude = "4903.50N";
             Position p = new Position();
             
-            string ambiguous = (string)p.EnforceAmbiguity(latitude, 2);
+            string ambiguous = p.EnforceAmbiguity(latitude, 2);
             Assert.Equal("4903.  N", ambiguous);
         }
 
@@ -200,7 +199,7 @@ namespace APaRSerUnitTests
             string latitude = "4903.50N";
             Position p = new Position();
 
-            string ambiguous = (string)p.EnforceAmbiguity(latitude, 4);
+            string ambiguous = p.EnforceAmbiguity(latitude, 4);
             Assert.Equal("49  .  N", ambiguous);
         }
 
@@ -212,7 +211,7 @@ namespace APaRSerUnitTests
         
             try
             {               
-                string ambiguous = (string)p.EnforceAmbiguity(latitude, 7);
+                string ambiguous = p.EnforceAmbiguity(latitude, 7);
 
                 Assert.True(false,"Should have thrown an exception.");
             }

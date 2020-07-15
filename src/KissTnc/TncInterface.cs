@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System;
 
 namespace AprsSharp.Protocols
-
 {
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol

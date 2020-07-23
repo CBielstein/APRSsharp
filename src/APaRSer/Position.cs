@@ -49,7 +49,6 @@ namespace APaRSer
             SymbolCode = symbol;
         }
 
-
         /// <summary>
         /// Initializes the Position object given a GeoCoordinate object
         /// </summary>
@@ -354,13 +353,12 @@ namespace APaRSer
             return encoded;
         }
 
-
         /// <summary>
         /// Decode the latitude section of the coordinate string
         /// </summary>
         /// <param name="coords">APRS encoded latitude coordinates</param>
         /// <returns>Decimal latitude</returns>
-        private double DecodeLatitude(string coords)
+        public double DecodeLatitude(string coords)
         {
             // Ensure latitude is well formatted
             if (coords == null)
@@ -421,7 +419,7 @@ namespace APaRSer
         /// <param name="coords">String to convert</param>
         /// <param name="nEnforceAmbiguity">Amount of ambiguity to emplace</param>
         /// <returns></returns>
-        private string EnforceAmbiguity(string coords, int nEnforceAmbiguity)
+        public string EnforceAmbiguity(string coords, int nEnforceAmbiguity)
         {
             if (coords == null)
             {
@@ -455,7 +453,7 @@ namespace APaRSer
         /// </summary>
         /// <param name="coords">An APRS latitude or longitude string</param>
         /// <returns></returns>
-        private int CountAmbiguity(string coords)
+        public int CountAmbiguity(string coords)
         {
             int ambiguity = 0;
             bool foundDigit = false;
@@ -491,7 +489,7 @@ namespace APaRSer
         /// </summary>
         /// <param name="coords">APRS encoded latitude coordinates</param>
         /// <returns>Decimal longitude</returns>
-        private double DecodeLongitude(string coords)
+        public double DecodeLongitude(string coords)
         {
             if (coords == null)
             {
@@ -564,7 +562,7 @@ namespace APaRSer
         /// with PrivateObject
         /// </summary>
         /// <returns>Encoded APRS latitude position</returns>
-        private string EncodeLatitude()
+        public string EncodeLatitude()
         {
             return EncodeCoordinates(EncodeType.Latitude);
         }
@@ -575,7 +573,7 @@ namespace APaRSer
         /// with PrivateObject
         /// </summary>
         /// <returns>Encoded APRS longitude position</returns>
-        private string EncodeLongitude()
+        public string EncodeLongitude()
         {
             return EncodeCoordinates(EncodeType.Longitude);
         }

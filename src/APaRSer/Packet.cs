@@ -15,7 +15,7 @@ namespace APaRSer
         public string comment = null;
         public bool HasMessaging = false;
         public string DestinationAddress = null;
-        Type DecodedType = Type.NotDecoded;
+        public Type DecodedType = Type.NotDecoded;
         NmeaData RawNmeaData = null;
 
         public enum Type
@@ -185,7 +185,7 @@ namespace APaRSer
         /// </summary>
         /// <param name="encodeType">The type of encoding to use</param>
         /// <returns>APRS Information Field as a string</returns>
-        private string EncodeInformationField(Type encodeType)
+        public string EncodeInformationField(Type encodeType)
         {
             return EncodeInformationField(encodeType, Timestamp.Type.DHMz);
         }
@@ -196,10 +196,9 @@ namespace APaRSer
         /// <param name="encodeType">The type of encoding to use</param>
         /// <param name="timeType">The type of encoding for the timestamp to use</param>
         /// <returns>APRS Information Field as a string</returns>
-        private string EncodeInformationField(Type encodeType, Timestamp.Type timeType)
+        public string EncodeInformationField(Type encodeType, Timestamp.Type timeType)
         {
             string encodedInfoField = string.Empty;
-
 
             switch (encodeType)
             {
@@ -250,7 +249,7 @@ namespace APaRSer
         /// and populates this object with the information therein.
         /// </summary>
         /// <param name="informationField">string representation of the APRS Information Field</param>
-        private void DecodeInformationField(string informationField)
+        public void DecodeInformationField(string informationField)
         {
             if (informationField == null)
             {
@@ -432,7 +431,7 @@ namespace APaRSer
         /// </summary>
         /// <param name="informationField">A string encoded APRS Information Field</param>
         /// <returns>Packet.Type of the data type</returns>
-        private Type GetDataType(string informationField)
+        public Type GetDataType(string informationField)
         {
             // TODO: This isn't always true.
             // '!' can come up to the 40th position.
@@ -446,7 +445,7 @@ namespace APaRSer
         /// </summary>
         /// <param name="type">Type to represent</param>
         /// <returns>A char representing type</returns>
-        private char GetTypeChar(Type type)
+        public char GetTypeChar(Type type)
         {
             if (type == Type.DoNotUse || type == Type.Unused || type == Type.Unknown)
             {

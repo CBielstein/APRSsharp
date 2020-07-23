@@ -1,35 +1,34 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using APaRSer;
 
 namespace APaRSerUnitTests
 {
-    [TestClass]
     public class PacketNmeaDataUnitTests
     {
-        [TestMethod]
+        [Fact]
         public void GetType_FromIdentifier_1()
         {
-            Assert.AreEqual(Packet.NmeaData.Type.GGA, Packet.NmeaData.GetType("GGA"));
+            Assert.Equal(Packet.NmeaData.Type.GGA, Packet.NmeaData.GetType("GGA"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetType_FromIdentifier_2()
         {
-            Assert.AreEqual(Packet.NmeaData.Type.Unknown, Packet.NmeaData.GetType("POO"));
+            Assert.Equal(Packet.NmeaData.Type.Unknown, Packet.NmeaData.GetType("POO"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetType_FromIdentifier_3()
         {
-            Assert.AreEqual(Packet.NmeaData.Type.WPT, Packet.NmeaData.GetType("wpt"));
-            Assert.AreEqual(Packet.NmeaData.Type.WPT, Packet.NmeaData.GetType("wpl"));
+            Assert.Equal(Packet.NmeaData.Type.WPT, Packet.NmeaData.GetType("wpt"));
+            Assert.Equal(Packet.NmeaData.Type.WPT, Packet.NmeaData.GetType("wpl"));
         }
 
-        [TestMethod]
+        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void GetType_FromRawString_4()
         {
-            Assert.AreEqual(Packet.NmeaData.Type.RMC, Packet.NmeaData.GetType("$GPRMC,063909,A,3349.4302,N,11700.3721,W,43.022,89.3,291099,13.6,E*52"));
+            Assert.Equal(Packet.NmeaData.Type.RMC, Packet.NmeaData.GetType("$GPRMC,063909,A,3349.4302,N,11700.3721,W,43.022,89.3,291099,13.6,E*52"));
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿namespace KissIt
+﻿
+namespace AprsSharp.Protocols
 {
     //
     // All values and descriptions taken from KA9Q's KISS paper

@@ -3,7 +3,7 @@ using GeoCoordinatePortable;
 using System.Text;
 using System.Globalization;
 
-namespace AprsSharp.Parsers
+namespace AprsSharp.Parsers.Aprs
 {
     public class Position
     {

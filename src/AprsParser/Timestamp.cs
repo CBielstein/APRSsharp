@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AprsSharp.Parsers
+namespace AprsSharp.Parsers.Aprs
 {
     public class Timestamp
     {

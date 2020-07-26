@@ -1,8 +1,8 @@
 ﻿using System;
 using Xunit;
-using APaRSer;
+using AprsSharp.Parsers.Aprs;
 
-namespace APaRSerUnitTests
+namespace AprsSharpUnitTests.Parsers.Aprs
 {
     public class TimestampUnitTests
     {

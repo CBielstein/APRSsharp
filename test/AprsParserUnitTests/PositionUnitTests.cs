@@ -1,9 +1,9 @@
 ﻿using System;
 using Xunit;
-using APaRSer;
+using AprsSharp.Parsers.Aprs;
 using GeoCoordinatePortable;
 
-namespace APaRSerUnitTests
+namespace AprsSharpUnitTests.Parsers.Aprs
 {
      public class PositionUnitTests
     {

@@ -1,4 +1,4 @@
-# APaRSer
+# AprsParser
 
 APRS packet parser, encoder, and decoder.
 

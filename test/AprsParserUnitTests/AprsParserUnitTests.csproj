@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\APaRSer\APaRSer.csproj" />
+    <ProjectReference Include="..\..\src\AprsParser\AprsParser.csproj" />
   </ItemGroup>
 
 </Project>

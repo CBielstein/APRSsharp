@@ -11,11 +11,13 @@ namespace ConsoleApplication.Aprs
             Console.WriteLine("Enter the packet name ");
             var packetName = Console.ReadLine();
 
-            Packet p = new Packet();
-      
-            p.DecodeInformationField (packetName);           
-      
-            Console.WriteLine($"\nHello, your packet is , {packetName}");
+            Packet p = new Packet();      
+            p.DecodeInformationField (packetName);  
+
+            Timestamp ts = (Timestamp)p.timestamp;
+            Position pos = (Position)p.position;
+
+            Console.WriteLine($"\nHello, your packet name is, {p.comment}, at cordinates, {pos.Coordinates}, and time, {ts.dateTime.Hour}");
                            
         }
     }

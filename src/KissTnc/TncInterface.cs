@@ -1,57 +1,45 @@
-﻿using System.IO.Ports;
-using System.Collections.Generic;
-using System;
-
 namespace AprsSharp.Protocols
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO.Ports;
+
     /// <summary>
-    /// Represents an interface through a serial connection to a TNC using the KISS protocol
+    /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
     public class TNCInterface
     {
         /// <summary>
-        /// The serial port to which the TNC is connected
+        /// The serial port to which the TNC is connected.
         /// </summary>
-        private SerialPort serialPort;
+        private SerialPort? serialPort;
 
         /// <summary>
-        /// A queue of received bytes waiting to be delivered (at the end of a frame)
+        /// A queue of received bytes waiting to be delivered (at the end of a frame).
         /// </summary>
         private Queue<byte> receivedBuffer;
 
         /// <summary>
-        /// Marks if the next character received should be translated as an escaped character
+        /// Marks if the next character received should be translated as an escaped character.
         /// </summary>
         private bool inEscapeMode = false;
 
         /// <summary>
-        /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next
+        /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next.
         /// </summary>
         private bool previousWasFEND = false;
 
         /// <summary>
-        /// The port on the TNC used for communication
+        /// The port on the TNC used for communication.
         /// </summary>
         private byte tncPort = 0;
 
         /// <summary>
-        /// Delegate function that will be called when a full frame is received and ready to be delivered
+        /// Initializes a new instance of the <see cref="TNCInterface"/> class.
         /// </summary>
-        /// <param name="sender">The TNCInterface which received the frame</param>
-        /// <param name="a">The event argument, which includes the received data</param>
-        public delegate void FrameReceivedEventHandler(object sender, FrameReceivedEventArgs a);
-
-        /// <summary>
-        /// The event which will be raised when a full frame is received.
-        /// </summary>
-        public event FrameReceivedEventHandler FrameReceivedEvent;
-
-        /// <summary>
-        /// Initializes the TNCInterface with a serial port
-        /// </summary>
-        /// <param name="serialPortName">The name of the SerialPort to use</param>
-        /// <param name="port">The port on the TNC used for communication</param>
-        public TNCInterface(string serialPortName, byte port)
+        /// <param name="serialPortName">The name of the SerialPort to use.</param>
+        /// <param name="port">The port on the TNC used for communication.</param>
+        public TNCInterface(string? serialPortName, byte port)
         {
             if (serialPortName != null)
             {
@@ -64,15 +52,30 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Default constructor
+        /// Initializes a new instance of the <see cref="TNCInterface"/> class.
         /// </summary>
-        public TNCInterface() : this(null, 0) { }
+        public TNCInterface()
+            : this(null, 0)
+        {
+        }
+
+        /// <summary>
+        /// Delegate function that will be called when a full frame is received and ready to be delivered.
+        /// </summary>
+        /// <param name="sender">The TNCInterface which received the frame.</param>
+        /// <param name="a">The event argument, which includes the received data.</param>
+        public delegate void FrameReceivedEventHandler(object sender, FrameReceivedEventArgs a);
+
+        /// <summary>
+        /// The event which will be raised when a full frame is received.
+        /// </summary>
+        public event FrameReceivedEventHandler? FrameReceivedEvent;
 
         /// <summary>
         /// Sets a new serial port to use for the TNC.
         /// If an existing port is open, closes it.
         /// </summary>
-        /// <param name="serialPortName">New port name</param>
+        /// <param name="serialPortName">New port name.</param>
         public void SetSerialPort(string serialPortName)
         {
             if (serialPortName == null)
@@ -87,9 +90,9 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Sets the port on the TNC to usefor transmission
+        /// Sets the port on the TNC to usefor transmission.
         /// </summary>
-        /// <param name="port">TNC port</param>
+        /// <param name="port">TNC port.</param>
         public void SetTncPort(byte port)
         {
             // ensure this is just the size of a nibble
@@ -102,10 +105,10 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Sends bytes on the SerialPort
+        /// Sends bytes on the SerialPort.
         /// </summary>
-        /// <param name="bytes">Bytes to send</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="bytes">Bytes to send.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SendData(byte[] bytes)
         {
             if (bytes == null)
@@ -121,29 +124,11 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Encodes and sends a frame of the given type with the given data
-        /// </summary>
-        /// <param name="command">Command / frame time to encode</param>
-        /// <param name="data">Data to send</param>
-        /// <returns>The encoded bytes</returns>
-        private byte[] EncodeAndSend(Commands command, byte[] data)
-        {
-            byte[] encodedBytes = EncodeFrame(command, tncPort, data);
-
-            if (serialPort?.IsOpen == true)
-            {
-                serialPort.Write(encodedBytes, 0, encodedBytes.Length);
-            }
-
-            return encodedBytes;
-        }
-
-        /// <summary>
         /// Sets the transmitter keyup delay in 10 ms units.
         /// Default is 50, i.e. 500 ms.
         /// </summary>
-        /// <param name="delay">Delay in 10 ms steps</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="delay">Delay in 10 ms steps.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetTxDelay(byte delay)
         {
             return EncodeAndSend(Commands.TX_DELAY, new byte[1] { delay });
@@ -152,10 +137,10 @@ namespace AprsSharp.Protocols
         /// <summary>
         /// Sets persistence parameter p in range [0, 255].
         /// Uses formula P = p * 256 - 1.
-        /// Default is p = 0.25 (such that P = 63)
+        /// Default is p = 0.25 (such that P = 63).
         /// </summary>
-        /// <param name="p">Persistence parameter in range [0, 255]</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="p">Persistence parameter in range [0, 255].</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetPersistenceParameter(byte p)
         {
             if (p < 0 || p > 255)
@@ -168,10 +153,10 @@ namespace AprsSharp.Protocols
 
         /// <summary>
         /// Sets slot interval in 10 ms units.
-        /// Default is 10 (i.e., 100ms)
+        /// Default is 10 (i.e., 100ms).
         /// </summary>
-        /// <param name="slotTime">Slot interval</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="slotTime">Slot interval.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetSlotTime(byte slotTime)
         {
             return EncodeAndSend(Commands.SLOT_TIME, new byte[1] { slotTime });
@@ -181,8 +166,8 @@ namespace AprsSharp.Protocols
         /// Sets time to hold TX after the frame has been sent, in 10 ms units.
         /// Obsolete, but included for backward compatibility.
         /// </summary>
-        /// <param name="time">TX tail time</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="time">TX tail time.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetTxTail(byte time)
         {
             return EncodeAndSend(Commands.TX_TAIL, new byte[1] { time });
@@ -191,8 +176,8 @@ namespace AprsSharp.Protocols
         /// <summary>
         /// Sets duplex state.
         /// </summary>
-        /// <param name="state">Half or full duplex</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="state">Half or full duplex.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetDuplexMode(DuplexState state)
         {
             byte commandByte = (state == DuplexState.FullDuplex) ? (byte)1 : (byte)0;
@@ -201,86 +186,22 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Sets a hardware specific value
+        /// Sets a hardware specific value.
         /// </summary>
-        /// <param name="value">The value to send to the hardware command</param>
-        /// <returns>The encoded bytes</returns>
+        /// <param name="value">The value to send to the hardware command.</param>
+        /// <returns>The encoded bytes.</returns>
         public byte[] SetHardwareSpecific(byte value)
         {
             return EncodeAndSend(Commands.SET_HARDWARE, new byte[1] { value });
         }
 
         /// <summary>
-        /// Commands TNC to exit KISS mode
+        /// Commands TNC to exit KISS mode.
         /// </summary>
-        /// <returns>The encoded bytes</returns>
+        /// <returns>The encoded bytes.</returns>
         public byte[] ExitKISSMode()
         {
-            return EncodeAndSend(Commands.RETURN, null);
-        }
-
-        /// <summary>
-        /// Encodes a frame for KISS protocol
-        /// </summary>
-        /// <param name="command">The command to use for the frame</param>
-        /// <param name="port">The port to address on the TNC</param>
-        /// <param name="bytes">Optionally, bytes to encode</param>
-        /// <returns>Encoded bytes</returns>
-        private byte[] EncodeFrame(Commands command, byte port, byte[] bytes)
-        {
-            // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
-            Queue<byte> frame = new Queue<byte>(3 + ((bytes == null) ? 0 : bytes.Length));
-
-            frame.Enqueue((byte)SpecialCharacters.FEND);
-            frame.Enqueue((byte)((port << 4) | (byte)command));
-
-            if (bytes != null)
-            {
-                foreach (byte b in bytes)
-                {
-                    switch (b)
-                    {
-                        case (byte)SpecialCharacters.FEND:
-                            frame.Enqueue((byte)SpecialCharacters.FESC);
-                            frame.Enqueue((byte)SpecialCharacters.TFEND);
-                            break;
-
-                        case (byte)SpecialCharacters.FESC:
-                            frame.Enqueue((byte)SpecialCharacters.FESC);
-                            frame.Enqueue((byte)SpecialCharacters.TFESC);
-                            break;
-
-                        default:
-                            frame.Enqueue(b);
-                            break;
-                    }
-                }
-            }
-
-            frame.Enqueue((byte)SpecialCharacters.FEND);
-
-            return frame.ToArray();
-        }
-
-        /// <summary>
-        /// Handle the DataReceived event from the serialPort
-        /// </summary>
-        /// <param name="sender">SerialPort which has received data</param>
-        /// <param name="args">Additional args</param>
-        private void TNCDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs args)
-        {
-            SerialPort sp = (SerialPort)sender;
-
-            int numBytesToRead = sp.BytesToRead;
-            byte[] bytesReceived = new byte[numBytesToRead];
-            int numBytesWereRead = sp.Read(bytesReceived, 0, numBytesToRead);
-
-            if (numBytesWereRead < numBytesToRead)
-            {
-                Array.Resize(ref bytesReceived, numBytesWereRead);
-            }
-
-            DecodeReceivedData(bytesReceived);
+            return EncodeAndSend(Commands.RETURN, Array.Empty<byte>());
         }
 
         /// <summary>
@@ -289,8 +210,8 @@ namespace AprsSharp.Protocols
         /// the connection to the TNC separately. However, if you're using a serial
         /// TNC connection, it's likely easiest to set handlers and not call this function directly.
         /// </summary>
-        /// <param name="newBytes">Bytes which have just arrived</param>
-        /// <returns>Array of decoded frames as byte arrays</returns>
+        /// <param name="newBytes">Bytes which have just arrived.</param>
+        /// <returns>Array of decoded frames as byte arrays.</returns>
         public byte[][] DecodeReceivedData(byte[] newBytes)
         {
             Queue<byte[]> receivedFrames = new Queue<byte[]>();
@@ -365,9 +286,88 @@ namespace AprsSharp.Protocols
         }
 
         /// <summary>
-        /// Handles delivery of bytes. Called when the contents of the buffer are ready to be delivered
+        /// Encodes a frame for KISS protocol.
         /// </summary>
-        /// <param name="bytes">Bytes to be delivered</param>
+        /// <param name="command">The command to use for the frame.</param>
+        /// <param name="port">The port to address on the TNC.</param>
+        /// <param name="bytes">Optionally, bytes to encode.</param>
+        /// <returns>Encoded bytes.</returns>
+        private byte[] EncodeFrame(Commands command, byte port, byte[] bytes)
+        {
+            // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
+            Queue<byte> frame = new Queue<byte>(3 + ((bytes == null) ? 0 : bytes.Length));
+
+            frame.Enqueue((byte)SpecialCharacters.FEND);
+            frame.Enqueue((byte)((port << 4) | (byte)command));
+
+            foreach (byte b in bytes ?? Array.Empty<byte>())
+            {
+                switch (b)
+                {
+                    case (byte)SpecialCharacters.FEND:
+                        frame.Enqueue((byte)SpecialCharacters.FESC);
+                        frame.Enqueue((byte)SpecialCharacters.TFEND);
+                        break;
+
+                    case (byte)SpecialCharacters.FESC:
+                        frame.Enqueue((byte)SpecialCharacters.FESC);
+                        frame.Enqueue((byte)SpecialCharacters.TFESC);
+                        break;
+
+                    default:
+                        frame.Enqueue(b);
+                        break;
+                }
+            }
+
+            frame.Enqueue((byte)SpecialCharacters.FEND);
+
+            return frame.ToArray();
+        }
+
+        /// <summary>
+        /// Handle the DataReceived event from the serialPort.
+        /// </summary>
+        /// <param name="sender">SerialPort which has received data.</param>
+        /// <param name="args">Additional args.</param>
+        private void TNCDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs args)
+        {
+            SerialPort sp = (SerialPort)sender;
+
+            int numBytesToRead = sp.BytesToRead;
+            byte[] bytesReceived = new byte[numBytesToRead];
+            int numBytesWereRead = sp.Read(bytesReceived, 0, numBytesToRead);
+
+            if (numBytesWereRead < numBytesToRead)
+            {
+                Array.Resize(ref bytesReceived, numBytesWereRead);
+            }
+
+            DecodeReceivedData(bytesReceived);
+        }
+
+        /// <summary>
+        /// Encodes and sends a frame of the given type with the given data.
+        /// </summary>
+        /// <param name="command">Command / frame time to encode.</param>
+        /// <param name="data">Data to send.</param>
+        /// <returns>The encoded bytes.</returns>
+        private byte[] EncodeAndSend(Commands command, byte[] data)
+        {
+            byte[] encodedBytes = EncodeFrame(command, tncPort, data);
+
+            if (serialPort?.IsOpen == true)
+            {
+                serialPort.Write(encodedBytes, 0, encodedBytes.Length);
+            }
+
+            return encodedBytes;
+        }
+
+        /// <summary>
+        /// Handles delivery of bytes. Called when the contents of the buffer are ready to be delivered.
+        /// </summary>
+        /// <param name="bytes">Bytes to be delivered.</param>
         private void DeliverBytes(byte[] bytes)
         {
             if (bytes == null || bytes.Length == 0)

@@ -1,15 +1,18 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AprsSharp.Protocols;
-using System.Text;
-using System.Collections.Generic;
-
 namespace AprsSharpUnitTests.Protocols
 {
+    using System.Collections.Generic;
+    using System.Text;
+    using AprsSharp.Protocols;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    /// <summary>
+    /// Test <see cref="TNCInterface"/> class.
+    /// </summary>
     [TestClass]
     public class TNCInterfaceUnitTests
     {
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void EncodeFrameData1()
@@ -34,7 +37,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void EncodeFrameData2()
@@ -57,7 +60,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void EncodeFrameDataWithEscapes()
@@ -80,7 +83,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void EncodeFrameExitKissMode()
@@ -101,7 +104,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DataReceivedAtOnce()
@@ -118,7 +121,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DataReceivedSplit()
@@ -138,7 +141,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DataReceivedEscapes()
@@ -156,7 +159,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DataReceivedAtOncePrefacedMultipleFEND()
@@ -173,7 +176,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void MultipleFramesDataReceivedAtOnce()
@@ -192,7 +195,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DelegateReceivedAtOnce()
@@ -200,10 +203,7 @@ namespace AprsSharpUnitTests.Protocols
             TNCInterface tnc = new TNCInterface();
             Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
 
-            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
-            {
-                qDecodedFrames.Enqueue(arg.Data);
-            };
+            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[7] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
@@ -217,7 +217,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DelegateDataReceivedSplit()
@@ -225,10 +225,7 @@ namespace AprsSharpUnitTests.Protocols
             TNCInterface tnc = new TNCInterface();
             Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
 
-            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
-            {
-                qDecodedFrames.Enqueue(arg.Data);
-            };
+            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
             byte[] dataRec1 = new byte[4] { 0xC0, 0x50, 0x48, 0x65 };
             byte[] dataRec2 = new byte[4] { 0x6C, 0x6C, 0x6F, 0xC0 };
@@ -246,7 +243,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DelegateDataReceivedEscapes()
@@ -254,10 +251,7 @@ namespace AprsSharpUnitTests.Protocols
             TNCInterface tnc = new TNCInterface();
             Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
 
-            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
-            {
-                qDecodedFrames.Enqueue(arg.Data);
-            };
+            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
             byte[] recData = new byte[7] { 0xC0, 0x00, 0xDB, 0xDC, 0xDB, 0xDD, 0xC0 };
 
@@ -272,7 +266,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DelegateDataReceivedAtOncePrefacedMultipleFEND()
@@ -280,10 +274,7 @@ namespace AprsSharpUnitTests.Protocols
             TNCInterface tnc = new TNCInterface();
             Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
 
-            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
-            {
-                qDecodedFrames.Enqueue(arg.Data);
-            };
+            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[9] { (byte)SpecialCharacters.FEND, (byte)SpecialCharacters.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
@@ -297,7 +288,7 @@ namespace AprsSharpUnitTests.Protocols
         }
 
         /// <summary>
-        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format
+        /// Test sample taken from https://en.wikipedia.org/wiki/KISS_(TNC)#Packet_format.
         /// </summary>
         [TestMethod]
         public void DelegateMultipleFramesDataReceivedAtOnce()
@@ -305,10 +296,7 @@ namespace AprsSharpUnitTests.Protocols
             TNCInterface tnc = new TNCInterface();
             Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
 
-            tnc.FrameReceivedEvent += delegate (object sender, FrameReceivedEventArgs arg)
-            {
-                qDecodedFrames.Enqueue(arg.Data);
-            };
+            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[15] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0, 0xC0, 0x50, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0xC0 };
 

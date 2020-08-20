@@ -1,0 +1,37 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+   
+
+jobs:
+  build:
+    name: build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: DotnetVersion
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+          
+      - name: restore
+        run: dotnet restore
+
+      - name: Builds
+        run: dotnet build --configuration Release --no-restore
+        
+      - name: Test
+        run: dotnet test --no-restore
+
+

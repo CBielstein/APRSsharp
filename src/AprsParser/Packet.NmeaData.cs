@@ -1,14 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AprsSharp.Parsers.Aprs
+﻿namespace AprsSharp.Parsers.Aprs
 {
+    using System;
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// A representation of an APRS Packet.
+    /// Does decoding of an APRS packet as a string.
+    /// </summary>
     public partial class Packet
     {
+        /// <summary>
+        /// Represents the NMEA data in an APRS packets.
+        /// </summary>
         public class NmeaData
         {
             /// <summary>
-            /// Used to specify format during decode of raw GPS data packets
+            /// Maps three-character strings to RawGpsType values.
+            /// </summary>
+            private static readonly Dictionary<string, Type> RawGpsTypeMap = new Dictionary<string, Type>()
+            {
+                { "GGA", Type.GGA },
+                { "GLL", Type.GLL },
+                { "RMC", Type.RMC },
+                { "VTG", Type.VTG },
+                { "WPT", Type.WPT },
+                { "WPL", Type.WPT },
+            };
+
+            /// <summary>
+            /// Used to specify format during decode of raw GPS data packets.
             /// </summary>
             public enum Type
             {
@@ -16,26 +36,32 @@ namespace AprsSharp.Parsers.Aprs
                 /// Not yet decoded
                 /// </summary>
                 NotDecoded,
+
                 /// <summary>
                 /// GGA: Global Position System Fix Data
                 /// </summary>
                 GGA,
+
                 /// <summary>
                 /// GLL: Geographic Position, Latitude/Longitude Data
                 /// </summary>
                 GLL,
+
                 /// <summary>
                 /// RMC: Recommended Minimum Specific GPS/Transit Data
                 /// </summary>
                 RMC,
+
                 /// <summary>
                 /// VTG: Velocity and Track Data
                 /// </summary>
                 VTG,
+
                 /// <summary>
                 /// WPT: Way Point Location (also WPL)
                 /// </summary>
                 WPT,
+
                 /// <summary>
                 /// Not supported/known type
                 /// </summary>
@@ -45,10 +71,10 @@ namespace AprsSharp.Parsers.Aprs
             /// <summary>
             /// Determines the type of a raw GPS packet determined by a string.
             /// If the string is length 3, the three letters are taken as is.
-            /// If the string is length 6 or longer, the indentifier is expected in the place dictated by the NMEA formats
+            /// If the string is length 6 or longer, the indentifier is expected in the place dictated by the NMEA formats.
             /// </summary>
-            /// <param name="nmeaInput">String of length 3 identifying a raw GPS type or an entire NMEA string</param>
-            /// <returns>The raw GPS type represented by the argument</returns>
+            /// <param name="nmeaInput">String of length 3 identifying a raw GPS type or an entire NMEA string.</param>
+            /// <returns>The raw GPS type represented by the argument.</returns>
             public static Type GetType(string nmeaInput)
             {
                 if (nmeaInput == null)
@@ -56,7 +82,7 @@ namespace AprsSharp.Parsers.Aprs
                     throw new ArgumentNullException();
                 }
 
-                string nmeaIdentifier = null;
+                string nmeaIdentifier;
 
                 if (nmeaInput.Length == 3)
                 {
@@ -80,18 +106,6 @@ namespace AprsSharp.Parsers.Aprs
                     return Type.Unknown;
                 }
             }
-
-            // Maps three-character strings to RawGpsType values
-            private static Dictionary<string, Type> RawGpsTypeMap = new Dictionary<string, Type>()
-            {
-                {"GGA", Type.GGA },
-                {"GLL", Type.GLL },
-                {"RMC", Type.RMC },
-                {"VTG", Type.VTG },
-                {"WPT", Type.WPT },
-                {"WPL", Type.WPT },
-            };
-            
         }
     }
 }

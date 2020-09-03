@@ -1,4 +1,4 @@
-﻿namespace AprsSharp.Applications.APRS_IS_Conn
+﻿namespace AprsSharp.Applications.APRS_IS_Connection
 {
  using System;
  using System.IO;
@@ -6,12 +6,13 @@
  using System.Text;
 
  /// <summary>
- /// This is the APRS IS TCPClient class that establishes a connection to the server.
+ /// This is the APRS IS TCPClient class that establishes a connection to the APRS-IS server.
+ /// The program shows any packets flowing through.
  /// </summary>
  public class APRS_IS_TcpClientEx
  {
    /// <summary>
-   /// This is the main method for which the different connections to the IS server is done.
+   /// This is the main method (entry point of the program) where the program control starts and ends.
    /// </summary>
     public static void Main()
     {

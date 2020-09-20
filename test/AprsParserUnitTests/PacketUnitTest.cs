@@ -34,10 +34,10 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
                 Timestamp ts = (Timestamp)p.Timestamp;
                 Assert.Equal(Timestamp.Type.MDHM, ts.DecodedType);
-                Assert.Equal(10, ts.dateTime.Month);
-                Assert.Equal(9, ts.dateTime.Day);
-                Assert.Equal(05, ts.dateTime.Hour);
-                Assert.Equal(56, ts.dateTime.Minute);
+                Assert.Equal(10, ts.DateTime.Month);
+                Assert.Equal(9, ts.DateTime.Day);
+                Assert.Equal(05, ts.DateTime.Hour);
+                Assert.Equal(56, ts.DateTime.Minute);
             }
         }
 
@@ -57,9 +57,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(9, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(9, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
@@ -109,9 +109,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
-            Assert.Equal(9, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(9, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
@@ -160,9 +160,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
-            Assert.Equal(9, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(9, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling data extension.");
         }
@@ -183,9 +183,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
-            Assert.Equal(17, ts.dateTime.Second);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
+            Assert.Equal(17, ts.DateTime.Second);
 
             Assert.True(false, "Not yet handling data extension.");
         }
@@ -206,9 +206,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling data extensions.");  
         
@@ -230,9 +230,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
-            Assert.Equal(17, ts.dateTime.Second);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
+            Assert.Equal(17, ts.DateTime.Second);
 
             Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
@@ -258,9 +258,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling weather reports");
         }
@@ -281,9 +281,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling DF Report.");
         }
@@ -304,9 +304,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
@@ -332,9 +332,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling compressed latlong position report format.");
         }
@@ -354,9 +354,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling weather information.");
         }
@@ -376,9 +376,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
-            Assert.Equal(09, ts.dateTime.Day);
-            Assert.Equal(23, ts.dateTime.Hour);
-            Assert.Equal(45, ts.dateTime.Minute);
+            Assert.Equal(09, ts.DateTime.Day);
+            Assert.Equal(23, ts.DateTime.Hour);
+            Assert.Equal(45, ts.DateTime.Minute);
 
             Assert.True(false, "Not yet handling weather or compressed lat long position.");
         }

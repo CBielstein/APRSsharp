@@ -10,7 +10,9 @@
     /// </summary>
     public partial class Packet
     {
-        // Maps a type identifying character to a packet Type
+        /// <summary>
+        /// Maps a type-identifying character to a packet Type.
+        /// </summary>
         private static readonly Dictionary<char, Type> DataTypeMap = new Dictionary<char, Type>()
         {
             { (char)0x1c, Type.CurrentMicEData },
@@ -53,14 +55,6 @@
             { '0', Type.DoNotUse },
             { '9', Type.DoNotUse },
         };
-
-        public Timestamp? timestamp = null;
-        public Position? position = null;
-        public string? comment = null;
-        public bool? HasMessaging = false;
-        public string? DestinationAddress = null;
-        public Type DecodedType = Type.NotDecoded;
-        NmeaData? RawNmeaData = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Packet"/> class.
@@ -243,6 +237,41 @@
         }
 
         /// <summary>
+        /// Gets or sets the time at which the packet was sent.
+        /// </summary>
+        public Timestamp? Timestamp { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the location from which the packet was sent.
+        /// </summary>
+        public Position? Position { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the packet comment.
+        /// </summary>
+        public string? Comment { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets if the sender of the packet supports messaging.
+        /// </summary>
+        public bool? HasMessaging { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the packet's destination address.
+        /// </summary>
+        public string? DestinationAddress { get; set; } = null;
+
+        /// <summary>
+        /// Gets or sets the software decode status for this packet.
+        /// </summary>
+        public Type DecodedType { get; set; } = Type.NotDecoded;
+
+        /// <summary>
+        /// Gets or sets the packet's raw NMEA data.
+        /// </summary>
+        public NmeaData? RawNmeaData { get; set; } = null;
+
+        /// <summary>
         /// Takes a string encoding of an APRS packet, decodes it, and saves it in to this object.
         /// </summary>
         /// <param name="encodedPacket">A string encoding of an AX.25 APRS packet.</param>
@@ -286,37 +315,37 @@
                 case Type.PositionWithTimestampWithMessaging:
                 case Type.PositionWithTimestampNoMessaging:
                     encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += timestamp!.Encode(timeType);
-                    encodedInfoField += position!.Encode();
-                    encodedInfoField += comment;
+                    encodedInfoField += Timestamp!.Encode(timeType);
+                    encodedInfoField += Position!.Encode();
+                    encodedInfoField += Comment;
                     break;
 
                 case Type.PositionWithoutTimestampNoMessaging:
                 case Type.PositionWithoutTimestampWithMessaging:
                     encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += position!.Encode();
-                    encodedInfoField += comment;
+                    encodedInfoField += Position!.Encode();
+                    encodedInfoField += Comment;
                     break;
 
                 case Type.MaidenheadGridLocatorBeacon:
                     encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += position!.EncodeGridsquare(6, false);
+                    encodedInfoField += Position!.EncodeGridsquare(6, false);
                     encodedInfoField += ']';
-                    if (comment != null && comment.Length > 0)
+                    if (Comment != null && Comment.Length > 0)
                     {
                         encodedInfoField += ' ';
-                        encodedInfoField += comment;
+                        encodedInfoField += Comment;
                     }
 
                     break;
 
                 case Type.Status:
                     encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += position!.EncodeGridsquare(6, true);
-                    if (comment != null && comment.Length > 0)
+                    encodedInfoField += Position!.EncodeGridsquare(6, true);
+                    if (Comment != null && Comment.Length > 0)
                     {
                         encodedInfoField += ' ';
-                        encodedInfoField += comment;
+                        encodedInfoField += Comment;
                     }
 
                     break;
@@ -354,11 +383,11 @@
                 case Type.PositionWithoutTimestampNoMessaging:
                     // handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
                     HasMessaging = false;
-                    position = new Position(informationField.Substring(1, 19));
+                    Position = new Position(informationField.Substring(1, 19));
 
                     if (informationField.Length > 20)
                     {
-                        comment = informationField.Substring(20);
+                        Comment = informationField.Substring(20);
                     }
 
                     break;
@@ -399,20 +428,20 @@
                     throw new NotImplementedException("handle Position without timestamp (with APRS messaging)");
                 case Type.Status:
                     {
-                        position = new Position();
+                        Position = new Position();
                         int endGridsquare = informationField.IndexOf(' ');
                         if (endGridsquare == -1)
                         {
-                            position.DecodeMaidenhead(informationField.Substring(1));
+                            Position.DecodeMaidenhead(informationField.Substring(1));
                         }
                         else
                         {
-                            position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                            Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
                         }
 
                         if (endGridsquare + 1 < informationField.Length)
                         {
-                            comment = informationField.Substring(endGridsquare + 1);
+                            Comment = informationField.Substring(endGridsquare + 1);
                         }
                     }
 
@@ -428,15 +457,15 @@
                     throw new NotImplementedException("handle Telemetry data");
 
                 case Type.MaidenheadGridLocatorBeacon:
-                    position = new Position();
+                    Position = new Position();
                     {
-                        position = new Position();
+                        Position = new Position();
                         int endGridsquare = informationField.IndexOf(']');
-                        position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                        Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
 
                         if (endGridsquare + 1 < informationField.Length)
                         {
-                            comment = informationField.Substring(endGridsquare + 1);
+                            Comment = informationField.Substring(endGridsquare + 1);
                         }
                     }
 
@@ -444,7 +473,7 @@
 
                 case Type.WeatherReport: // TODO raw weather reports vs positionless?
                     // handle Weather report(without position)
-                    timestamp = new Timestamp(informationField.Substring(1, 8));
+                    Timestamp = new Timestamp(informationField.Substring(1, 8));
                     throw new NotImplementedException("handle Weather report (without position)");
                 case Type.CurrentMicEDataNotTMD700:
                     throw new NotImplementedException("handle Current Mic-E Data (not used in TM-D700");
@@ -534,13 +563,13 @@
         {
             HasMessaging = hasMessaging;
 
-            timestamp = new Timestamp(informationField.Substring(1, 7));
+            Timestamp = new Timestamp(informationField.Substring(1, 7));
 
-            position = new Position(informationField.Substring(8, 19));
+            Position = new Position(informationField.Substring(8, 19));
 
             if (informationField.Length > 27)
             {
-                comment = informationField.Substring(27);
+                Comment = informationField.Substring(27);
             }
         }
     }

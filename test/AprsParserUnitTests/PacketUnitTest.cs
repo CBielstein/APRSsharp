@@ -32,7 +32,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
                 Assert.Equal(false, p.HasMessaging);
 
-                Timestamp ts = (Timestamp)p.timestamp;
+                Timestamp ts = (Timestamp)p.Timestamp;
                 Assert.Equal(Timestamp.Type.MDHM, ts.DecodedType);
                 Assert.Equal(10, ts.dateTime.Month);
                 Assert.Equal(9, ts.dateTime.Day);
@@ -55,18 +55,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(9, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
             Assert.Equal(45, ts.dateTime.Minute);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('>', pos.SymbolCode);
 
-            Assert.Equal("Test1234", p.comment);
+            Assert.Equal("Test1234", p.Comment);
         }
 
         /// <summary>
@@ -79,14 +79,14 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Packet p = new Packet();
 
             DateTime dt = new DateTime(2016, 12, 9, 23, 45, 0, 0, DateTimeKind.Utc);
-            p.timestamp = new Timestamp(dt);
+            p.Timestamp = new Timestamp(dt);
 
             p.HasMessaging = false;
 
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
-            p.position = new Position(gc, '/', '>', 0);
+            p.Position = new Position(gc, '/', '>', 0);
 
-            p.comment = "Test1234";
+            p.Comment = "Test1234";
           
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampNoMessaging);
 
@@ -107,18 +107,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
             Assert.Equal(9, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
             Assert.Equal(45, ts.dateTime.Minute);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('>', pos.SymbolCode);
 
-            Assert.Equal("Test1234", p.comment);
+            Assert.Equal("Test1234", p.Comment);
         }
 
         /// <summary>
@@ -131,13 +131,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Packet p = new Packet();
 
             DateTime dt = new DateTime(2016, 12, 9, 23, 45, 00, DateTimeKind.Local);
-            p.timestamp = new Timestamp(dt);
+            p.Timestamp = new Timestamp(dt);
 
             p.HasMessaging = true;
 
-            p.position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '>', 0);
+            p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '>', 0);
 
-            p.comment = "Test1234";
+            p.Comment = "Test1234";
 
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
                       
@@ -158,7 +158,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
             Assert.Equal(9, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -181,7 +181,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
             Assert.Equal(23, ts.dateTime.Hour);
             Assert.Equal(45, ts.dateTime.Minute);
@@ -204,7 +204,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -228,13 +228,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
             Assert.Equal(23, ts.dateTime.Hour);
             Assert.Equal(45, ts.dateTime.Minute);
             Assert.Equal(17, ts.dateTime.Second);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('>', pos.SymbolCode);
@@ -256,7 +256,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -279,7 +279,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -302,13 +302,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
             Assert.Equal(45, ts.dateTime.Minute);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('\\', pos.SymbolCode);
@@ -330,7 +330,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -352,7 +352,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -374,7 +374,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
-            Timestamp ts = (Timestamp)p.timestamp;
+            Timestamp ts = (Timestamp)p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
             Assert.Equal(09, ts.dateTime.Day);
             Assert.Equal(23, ts.dateTime.Hour);
@@ -395,9 +395,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
-            Assert.Equal("Test 001234", p.comment);
+            Assert.Equal("Test 001234", p.Comment);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
@@ -413,8 +413,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Packet p = new Packet();
             p.HasMessaging = false;
 
-            p.comment = "Test 001234";
-            p.position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
+            p.Comment = "Test 001234";
+            p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
 
         
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
@@ -433,9 +433,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
-            Assert.Equal("Test /A=001234", p.comment);
+            Assert.Equal("Test /A=001234", p.Comment);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
@@ -455,9 +455,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
-            Assert.Equal(null, p.comment);
+            Assert.Equal(null, p.Comment);
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(new GeoCoordinate(49, -72), pos.Coordinates);
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
@@ -474,7 +474,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Packet p = new Packet();
 
             p.HasMessaging = false;
-            p.position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
+            p.Position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
 
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
             Assert.Equal("!49  .  N/072  .  W-", encoded);
@@ -524,11 +524,11 @@ namespace AprsSharpUnitTests.Parsers.Aprs
   
             p.DecodeInformationField("[IO91SX] 35 miles NNW of London");
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
 
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.Equal(" 35 miles NNW of London", p.comment);
+            Assert.Equal(" 35 miles NNW of London", p.Comment);
         }
 
         [Fact]
@@ -537,19 +537,19 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Packet p = new Packet();
             p.DecodeInformationField("[IO91SX]");
 
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
 
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
-            Assert.Equal(null, p.comment);
+            Assert.Equal(null, p.Comment);
         }
 
         [Fact]
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
-            p.comment = "35 miles NNW of London";
-            p.position = new Position(new GeoCoordinate(51.98, -0.46));
+            p.Comment = "35 miles NNW of London";
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46));
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
@@ -560,7 +560,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
         {
             Packet p = new Packet();
-            p.position = new Position(new GeoCoordinate(51.98, -0.46));
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46));
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
@@ -571,9 +571,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_3()
         {
             Packet p = new Packet();
-            p.comment = "35 miles NNW of London";
-            p.position = new Position();
-            p.position.DecodeMaidenhead("IO91SX");
+            p.Comment = "35 miles NNW of London";
+            p.Position = new Position();
+            p.Position.DecodeMaidenhead("IO91SX");
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
@@ -584,8 +584,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_4()
         {
             Packet p = new Packet();
-            p.position = new Position();
-            p.position.DecodeMaidenhead("IO91SX");
+            p.Position = new Position();
+            p.Position.DecodeMaidenhead("IO91SX");
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
@@ -599,7 +599,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
    
             p.DecodeInformationField(">IO91SX/G");
  
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.Equal('/', pos.SymbolTableIdentifier);
@@ -613,7 +613,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             p.DecodeInformationField(">IO91/G");
  
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(51.5, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-1.0, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.Equal('/', pos.SymbolTableIdentifier);
@@ -627,13 +627,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
   
             p.DecodeInformationField(">IO91SX/- My house");
     
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
 
-            string comment = p.comment;
+            string comment = p.Comment;
             Assert.Equal("My house", comment);
         }
 
@@ -644,13 +644,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
  
             p.DecodeInformationField(">IO91SX/- ^B7");
  
-            Position pos = (Position)p.position;
+            Position pos = (Position)p.Position;
             Assert.Equal(51.98, Math.Round(pos.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos.Coordinates.Longitude, 2));
             Assert.Equal('/', pos.SymbolTableIdentifier);
             Assert.Equal('-', pos.SymbolCode);
 
-            string comment = p.comment;
+            string comment = p.Comment;
             Assert.Equal("^B7", comment);
 
             Assert.True(false, "Not handling Meteor Scatter beam");
@@ -660,7 +660,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
         {
             Packet p = new Packet();
-            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
             string encoded = p.EncodeInformationField(Packet.Type.Status);
 
             Assert.Equal(">IO91SX/G", encoded);
@@ -670,7 +670,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
         {
             Packet p = new Packet();
-            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
 
             string encoded = p.EncodeInformationField(Packet.Type.Status);
 
@@ -681,8 +681,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
         {
             Packet p = new Packet();
-            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
-            p.comment = "My house";
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
+            p.Comment = "My house";
 
             string encoded = p.EncodeInformationField(Packet.Type.Status);
 
@@ -693,8 +693,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();
-            p.position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
-            p.comment = "My house";
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
+            p.Comment = "My house";
 
             string encoded = p.EncodeInformationField(Packet.Type.Status);
 

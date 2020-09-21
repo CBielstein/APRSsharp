@@ -412,24 +412,32 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
         /// <summary>
         /// Encodes in HMS with the example from the APRS spec
+        /// The relevant conversion to HMS format includes conversion to UTC.
+        /// The <see cref="DateTime"/> object passed to the <see cref="Timestamp"/>
+        /// constructor should be converted to the local machine's time zone to
+        /// account for the conversion back.
         /// </summary>
         [Fact]
         public void EncodeHMSTestFromSpec()
         {
-            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
-            Timestamp ts = new Timestamp(dt);
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
+            Timestamp ts = new Timestamp(dt.ToLocalTime());
 
             Assert.Equal("234517h", ts.Encode(Timestamp.Type.HMS));
         }
 
         /// <summary>
         /// Encodes in MDHM with the example from the APRS spec
+        /// The relevant conversion to MDHM format includes conversion to UTC.
+        /// The <see cref="DateTime"/> object passed to the <see cref="Timestamp"/>
+        /// constructor should be converted to the local machine's time zone to
+        /// account for the conversion back.
         /// </summary>
         [Fact]
         public void EncodeMDHMTestFromSpec()
         {
-            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
-            Timestamp ts = new Timestamp(dt);
+            DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
+            Timestamp ts = new Timestamp(dt.ToLocalTime());
             Assert.Equal("10092345", ts.Encode(Timestamp.Type.MDHM));
         }
     }

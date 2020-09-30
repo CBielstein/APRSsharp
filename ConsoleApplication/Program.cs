@@ -19,8 +19,8 @@
             var packetName = Console.ReadLine();
             Packet p = new Packet();
             p.DecodeInformationField(packetName);
-            Timestamp ts = (Timestamp)p.timestamp;
-            Position pos = (Position)p.position;
+            Timestamp ts = (Timestamp)p.Timestamp;
+            Position pos = (Position)p.Position;
             Console.WriteLine($"\nHello, your packet name is, {p.Comment}, at cordinates, {pos.Coordinates}, and time, {ts.DateTime.Hour}");
          }
     }

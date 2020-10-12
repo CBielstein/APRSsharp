@@ -6,6 +6,13 @@
     using System.Net.Sockets;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Delegate for handling a full string from a TCP client.
+    /// </summary>
+    /// <param name="tcpMessage">The TCP message.</param>
+    public delegate void HandleTcpString(string tcpMessage);
 
     /// <summary>
     /// Represent the library for aprs.
@@ -13,24 +20,21 @@
     public class AprsISLib
     {
         /// <summary>
-        /// The connection method to the server.
+        /// Event raised when TCP message is returned.
         /// </summary>
-        /// <param name="server">The server parameter.</param>
-        public void Connect(string server)
-        {
-            // Not implemented.
-        }
+        public event HandleTcpString? ReceivedTcpMessage;
 
         /// <summary>
         /// The methods for receiving packets.
         /// </summary>
-        public void Receive()
+        /// <returns>An async task.</returns>
+        public Task Receive()
         {
             // Variables string callsign = "N0CALL
             string callsign = "NOCALL"; // Radius of 50km of Seattle's Space Needle
             string password = "-1";
             Console.WriteLine("empty strings input");
-            Receive(callsign, password);
+            return Receive(callsign, password);
         }
 
         /// <summary>
@@ -38,7 +42,8 @@
         /// </summary>
         /// <param name="callsign">Specifying the different strings.</param>
         /// <param name="password">Specifying the password input strings.</param>
-        public void Receive(string callsign, string password)
+        /// <returns>An async task.</returns>
+        public Task Receive(string callsign, string password)
         {
             // Variables string callsign = "N0CALL
             string filter = "filter r/50.5039/4.4699/50"; // Radius of Belgium's Space Needle
@@ -70,6 +75,7 @@
                 if (!string.IsNullOrEmpty(received))
                 {
                     Console.WriteLine(received);
+                    ReceivedTcpMessage?.Invoke(received);
 
                     if (received.StartsWith('#'))
                     {

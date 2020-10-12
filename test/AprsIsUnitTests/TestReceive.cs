@@ -10,7 +10,7 @@ namespace AprsIsUnitTests
     /// <summary>
     /// Unit tests for APRS IS library.
     /// </summary>
-    public class UnitTest1
+    public class TestReceive
     {
         private readonly IList<string> tcpMessagesReceived = new List<string>();
         private bool eventHandled = false;

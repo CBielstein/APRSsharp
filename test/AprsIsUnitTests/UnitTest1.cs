@@ -13,6 +13,7 @@ namespace AprsIsUnitTests
     public class UnitTest1
     {
         private readonly IList<string> tcpMessagesReceived = new List<string>();
+        private bool eventHandled = false;
 
         /// <summary>
         /// Receive raises event on TCP message received.
@@ -33,7 +34,10 @@ namespace AprsIsUnitTests
             // Receive some packets from it.
             _ = arpsIs.Receive();
 
-            Thread.Sleep(1000);
+            while (!eventHandled)
+            {
+                Thread.Sleep(100);
+            }
 
             // Assertions
             Assert.NotEmpty(tcpMessagesReceived);
@@ -43,6 +47,7 @@ namespace AprsIsUnitTests
         private void TestTcpHandler(string tcpMessage)
         {
             tcpMessagesReceived.Add(tcpMessage);
+            eventHandled = true;
         }
     }
 }

@@ -71,8 +71,6 @@
             {
                 while (true)
                 {
-                    Thread.Sleep(500);
-
                     string? received = tcpConnection.ReceiveString();
 
                     if (!string.IsNullOrEmpty(received))
@@ -93,6 +91,8 @@
                             }
                         }
                     }
+
+                    Thread.Sleep(500);
                 }
             });
         }

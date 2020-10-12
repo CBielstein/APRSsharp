@@ -22,20 +22,22 @@ namespace AprsIsUnitTests
         {
             // Setup
             // Create an APRS IS connection object.
-            var mockTcpClient = new Mock<ITcpClient>();
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            string testMessage = "This is a test message";
+            mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
 
-            var networkStream = new NetworkStream();
-            mockTcpClient.Setup(mock => mock.GetStream()).Returns()
-
-            var arpsIs = new AprsISLib(mockTcpClient);
+            var arpsIs = new AprsISLib(mockTcpConnection.Object);
             arpsIs.ReceivedTcpMessage += TestTcpHandler;
 
             // Action
             // Receive some packets from it.
-            arpsIs.Receive();
+            _ = arpsIs.Receive();
+
+            Thread.Sleep(1000);
 
             // Assertions
             Assert.NotEmpty(tcpMessagesReceived);
+            Assert.Contains(testMessage, tcpMessagesReceived);
         }
 
         private void TestTcpHandler(string tcpMessage)

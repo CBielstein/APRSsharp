@@ -39,13 +39,13 @@
         /// The methods for receiving packets.
         /// </summary>
         /// <returns>An async task.</returns>
-        public Task Receive()
+        public async Task Receive()
         {
             // Variables string callsign = "N0CALL
             string callsign = "NOCALL"; // Radius of 50km of Seattle's Space Needle
             string password = "-1";
             Console.WriteLine("empty strings input");
-            return Receive(callsign, password);
+            await Receive(callsign, password).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@
         /// <param name="callsign">Specifying the different strings.</param>
         /// <param name="password">Specifying the password input strings.</param>
         /// <returns>An async task.</returns>
-        public Task Receive(string callsign, string password)
+        public async Task Receive(string callsign, string password)
         {
             // Variables string callsign = "N0CALL
             string filter = "filter r/50.5039/4.4699/50"; // Radius of Belgium's Space Needle
@@ -66,34 +66,35 @@
             // Open connection
             tcpConnection.Connect(server, 14580);
 
-            // Set up streams
-
             // Receive
-            while (true)
+            await Task.Run(() =>
             {
-                Thread.Sleep(500);
-
-                string? received = tcpConnection.ReceiveString();
-
-                if (!string.IsNullOrEmpty(received))
+                while (true)
                 {
-                    Console.WriteLine(received);
-                    ReceivedTcpMessage?.Invoke(received);
+                    Thread.Sleep(500);
 
-                    if (received.StartsWith('#'))
+                    string? received = tcpConnection.ReceiveString();
+
+                    if (!string.IsNullOrEmpty(received))
                     {
-                        if (received.Contains("logresp"))
-                        {
-                            authenticated = true;
-                        }
+                        Console.WriteLine(received);
+                        ReceivedTcpMessage?.Invoke(received);
 
-                        if (!authenticated)
+                        if (received.StartsWith('#'))
                         {
-                            tcpConnection.SendString(authString);
+                            if (received.Contains("logresp"))
+                            {
+                                authenticated = true;
+                            }
+
+                            if (!authenticated)
+                            {
+                                tcpConnection.SendString(authString);
+                            }
                         }
                     }
                 }
-            }
+            });
         }
     }
 }

@@ -4,6 +4,7 @@ namespace AprsIsUnitTests
     using System.Collections.Generic;
     using System.Threading;
     using AprsISLibrary;
+    using Moq;
     using Xunit;
 
     /// <summary>
@@ -21,7 +22,12 @@ namespace AprsIsUnitTests
         {
             // Setup
             // Create an APRS IS connection object.
-            var arpsIs = new AprsISLib();
+            var mockTcpClient = new Mock<ITcpClient>();
+
+            var networkStream = new NetworkStream();
+            mockTcpClient.Setup(mock => mock.GetStream()).Returns()
+
+            var arpsIs = new AprsISLib(mockTcpClient);
             arpsIs.ReceivedTcpMessage += TestTcpHandler;
 
             // Action

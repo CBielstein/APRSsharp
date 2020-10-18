@@ -8,7 +8,7 @@
     /// <summary>
     /// Tests code in the <see cref="Packet"/> class.
     /// </summary>
-    public class PacketUnitTest
+    public class PacketUnitTests
     {
         // NOTE: Many of these are testing incomplete functionality.
         // Any catch of System.NotImplementedException should be considered for removal in the future.

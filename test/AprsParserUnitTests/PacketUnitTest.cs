@@ -327,7 +327,7 @@
         ///  Compressed Lat/Long Position Report Format — with Timestamp
         ///  with APRS messaging, timestamp, radio range.
         /// </summary>
-        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
+        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
@@ -348,7 +348,7 @@
         /// <summary>
         ///  Complete Weather Report Format — with Lat/Long position and Timestamp.
         /// </summary>
-        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
+        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
@@ -370,7 +370,7 @@
         /// <summary>
         ///  Complete Weather Report Format — with Compressed Lat/Long position, with Timestamp.
         /// </summary>
-        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
+        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
@@ -431,7 +431,7 @@
         ///  Complete Lat/Long Position Report Format — without Timestamp
         /// no timestamp, no APRS messaging, altitude = 1234 ft.
         /// </summary>
-        [Fact (Skip = "Issue #24: Fix skipped tests from old repository")]
+        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void DecodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
@@ -653,7 +653,7 @@
             Packet p = new Packet();
             p.DecodeInformationField(">IO91/G");
 
-            Position pos = p.Position;
+            Position? pos = p.Position;
             Assert.NotNull(pos);
             Assert.Equal(51.5, Math.Round(pos!.Coordinates.Latitude, 2));
             Assert.Equal(-1.0, Math.Round(pos!.Coordinates.Longitude, 2));
@@ -670,14 +670,15 @@
             Packet p = new Packet();
             p.DecodeInformationField(">IO91SX/- My house");
 
-            Position pos = p.Position;
+            Position? pos = p.Position;
             Assert.NotNull(pos);
             Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('-', pos!.SymbolCode);
 
-            string comment = p.Comment;
+            string? comment = p.Comment;
+            Assert.NotNull(comment);
             Assert.Equal("My house", comment);
         }
 
@@ -698,7 +699,8 @@
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('-', pos!.SymbolCode);
 
-            string comment = p.Comment;
+            string? comment = p.Comment;
+            Assert.NotNull(comment);
             Assert.Equal("^B7", comment);
 
             Assert.True(false, "Not handling Meteor Scatter beam");

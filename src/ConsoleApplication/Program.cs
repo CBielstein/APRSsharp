@@ -1,7 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
-    using AprsISLibrary;
+    using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
 
     /// <summary>
@@ -16,27 +16,18 @@
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
         public static void Main(string[] args)
         {
-            AprsISLib n = new AprsISLib();
+            AprsIsConnection n = new AprsIsConnection();
             string callsign;
-            string filter;
             string password;
 
             // get input from the user
             Console.WriteLine("Enter your callsign: ");
             callsign = Console.ReadLine();
-            Console.WriteLine("Enter your filter name: ");
-            filter = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
             password = Console.ReadLine();
-
-            if (!string.IsNullOrEmpty(callsign) && !string.IsNullOrEmpty(password))
-            {
-               n.Receive(callsign, password);
-            }
-            else
-            {
-               n.Receive();
-            }
+            string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
+            string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
+            n.Receive(callsignArg, passwordArg);
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");

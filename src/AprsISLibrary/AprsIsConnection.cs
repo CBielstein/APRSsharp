@@ -1,4 +1,4 @@
-﻿namespace AprsISLibrary
+﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
     using System.IO;
@@ -8,48 +8,28 @@
     using System.Threading;
 
     /// <summary>
-    /// Represent the library for aprs.
+    /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
+    /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
-    public class AprsISLib
+    public class AprsIsConnection
     {
         /// <summary>
-        /// The connection method to the server.
+        /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
-        /// <param name="server">The server parameter.</param>
-        public void Connect(string server)
+        /// <param name="callsign">The users callsign string.</param>
+        /// <param name="password">The users password string.</param>
+        public void Receive(string? callsign, string? password)
         {
-            // Not implemented.
-        }
-
-        /// <summary>
-        /// The methods for receiving packets.
-        /// </summary>
-        public void Receive()
-        {
-            // Variables string callsign = "N0CALL
-            string callsign = "NOCALL"; // Radius of 50km of Seattle's Space Needle
-            string password = "-1";
-            Console.WriteLine("empty strings input");
-            Receive(callsign, password);
-        }
-
-        /// <summary>
-        /// The receiving method.
-        /// </summary>
-        /// <param name="callsign">Specifying the different strings.</param>
-        /// <param name="password">Specifying the password input strings.</param>
-        public void Receive(string callsign, string password)
-        {
-            // Variables string callsign = "N0CALL
-            string filter = "filter r/50.5039/4.4699/50"; // Radius of Belgium's Space Needle
+            callsign = callsign ?? "N0CALL";
+            password = password ?? "-1";
+            string filter = "filter r/50.5039/4.4699/50";
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             string server = "rotate.aprs2.net";
             bool authenticated = false;
-            Console.WriteLine("inputs");
 
             // Open connection
             using TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(@server, 14580);
+            tcpClient.Connect(server, 14580);
 
             // Set up streams
             using NetworkStream stream = tcpClient.GetStream();

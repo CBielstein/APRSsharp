@@ -1,23 +1,34 @@
-﻿using System;
-using Xunit;
-using AprsSharp.Parsers.Aprs;
-
-namespace AprsSharpUnitTests.Parsers.Aprs
+﻿namespace AprsSharpUnitTests.Parsers.Aprs
 {
+    using AprsSharp.Parsers.Aprs;
+    using Xunit;
+
+    /// <summary>
+    /// Tests Packet.NmeaData code.
+    /// </summary>
     public class PacketNmeaDataUnitTests
     {
+        /// <summary>
+        /// Tests GetType.
+        /// </summary>
         [Fact]
         public void GetType_FromIdentifier_1()
         {
             Assert.Equal(Packet.NmeaData.Type.GGA, Packet.NmeaData.GetType("GGA"));
         }
 
+        /// <summary>
+        /// Tests GetType.
+        /// </summary>
         [Fact]
         public void GetType_FromIdentifier_2()
         {
             Assert.Equal(Packet.NmeaData.Type.Unknown, Packet.NmeaData.GetType("POO"));
         }
 
+        /// <summary>
+        /// Tests GetType.
+        /// </summary>
         [Fact]
         public void GetType_FromIdentifier_3()
         {
@@ -25,6 +36,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(Packet.NmeaData.Type.WPT, Packet.NmeaData.GetType("wpl"));
         }
 
+        /// <summary>
+        /// Tests GetType.
+        /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
         public void GetType_FromRawString_4()
         {

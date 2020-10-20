@@ -1,23 +1,32 @@
-﻿using System;
-using Xunit;
-using AprsSharp.Parsers.Aprs;
-using GeoCoordinatePortable;
-
-namespace AprsSharpUnitTests.Parsers.Aprs
+﻿namespace AprsSharpUnitTests.Parsers.Aprs
 {
-     public class PositionUnitTests
+    using System;
+    using AprsSharp.Parsers.Aprs;
+    using GeoCoordinatePortable;
+    using Xunit;
+
+    /// <summary>
+    /// Test Position code.
+    /// </summary>
+    public class PositionUnitTests
     {
+        /// <summary>
+        /// Decode Latitute based on APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeFromSpec()
         {
             string latitude = "4903.50N";
             Position p = new Position();
-            
+
             double decodedLat = (double)p.DecodeLatitude(latitude);
             Assert.Equal(49.0583, decodedLat);
             Assert.Equal(0, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Decode Latitute based on APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeFromSpecNegative()
         {
@@ -28,12 +37,15 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(0, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Decode Latitute exception case.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeOutOfRange()
         {
             string latitude = "9103.50N";
             Position p = new Position();
-            
+
             try
             {
                 p.DecodeLatitude(latitude);
@@ -46,12 +58,15 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.True(false, "Should have thrown an ArgumentOutOfRangeException");
         }
 
+        /// <summary>
+        /// Decode Latitute exception case.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeInvalidWithChars()
         {
             string latitude = "4cam.50N";
             Position p = new Position();
-            
+
             try
             {
                 p.DecodeLatitude(latitude);
@@ -61,15 +76,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown a FormatException");
+            Assert.True(false, "Should have thrown a FormatException");
         }
 
+        /// <summary>
+        /// Decode Latitute exception case.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeTooLong()
         {
             string latitude = "4903.500N";
             Position p = new Position();
-            
+
             try
             {
                 p.DecodeLatitude(latitude);
@@ -79,15 +97,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentOutOfRangeException.");
+            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException.");
         }
 
+        /// <summary>
+        /// Decode Latitute exception case.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWrongDirection()
         {
             string latitude = "4903.50E";
             Position p = new Position();
-            
+
             try
             {
                 p.DecodeLatitude(latitude);
@@ -97,17 +118,20 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentException.");
+            Assert.True(false, "Should have thrown an ArgumentException.");
         }
 
+        /// <summary>
+        /// Decode Latitute exception case.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWrongDecimalPointLocation()
         {
             string latitude = "490.350N";
             Position p = new Position();
-            
+
             try
-            {                
+            {
                 p.DecodeLatitude(latitude);
             }
             catch (ArgumentException)
@@ -115,84 +139,104 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentException.");
+            Assert.True(false, "Should have thrown an ArgumentException.");
         }
 
+        /// <summary>
+        /// Decode Latitute based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec1()
         {
             string latitude = "4903.5 N";
             Position p = new Position();
-  
+
             double decodedLat = (double)p.DecodeLatitude(latitude);
             Assert.Equal(49.0583, decodedLat);
             Assert.Equal(1, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Decode Latitute based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec2()
         {
             string latitude = "4903.  N";
             Position p = new Position();
-            
+
             double decodedLat = (double)p.DecodeLatitude(latitude);
             Assert.Equal(49.05, decodedLat);
             Assert.Equal(2, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Decode Latitute based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec3()
         {
             string latitude = "490 .  N";
             Position p = new Position();
-            
+
             double decodedLat = (double)p.DecodeLatitude(latitude);
             Assert.Equal(49.0, decodedLat);
             Assert.Equal(3, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Decode Latitute based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLatitudeWithAmbiguityFromSpec4()
         {
             string latitude = "49  .  N";
             Position p = new Position();
-     
+
             double decodedLat = (double)p.DecodeLatitude(latitude);
             Assert.Equal(49.0, decodedLat);
             Assert.Equal(4, p.Ambiguity);
         }
 
+        /// <summary>
+        /// Test latitute ambiguity.
+        /// </summary>
         [Fact]
         public void CountAmbiguityInvalid()
         {
             string latitude = "49  .1  N";
             Position p = new Position();
-           
+
             try
             {
-               
                 p.CountAmbiguity(latitude);
 
-                Assert.True(false,"This should have thrown an exception.");
+                Assert.True(false, "This should have thrown an exception.");
             }
             catch (ArgumentException)
             {
                 return;
             }
 
-            Assert.True(false,"This should have thrown an ArgumentException.");
+            Assert.True(false, "This should have thrown an ArgumentException.");
         }
 
+        /// <summary>
+        /// Test latitute ambiguity.
+        /// </summary>
         [Fact]
         public void EnforceAmbiguityBasic()
         {
             string latitude = "4903.50N";
             Position p = new Position();
-            
+
             string ambiguous = p.EnforceAmbiguity(latitude, 2);
             Assert.Equal("4903.  N", ambiguous);
         }
 
+        /// <summary>
+        /// Test latitute ambiguity.
+        /// </summary>
         [Fact]
         public void EnforceAmbiguityBasic2()
         {
@@ -203,26 +247,32 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal("49  .  N", ambiguous);
         }
 
+        /// <summary>
+        /// Test latitute ambiguity.
+        /// </summary>
         [Fact]
         public void EnforceAmbiguityInvalidArg()
         {
             string latitude = "4903.50N";
             Position p = new Position();
-        
+
             try
-            {               
+            {
                 string ambiguous = p.EnforceAmbiguity(latitude, 7);
 
-                Assert.True(false,"Should have thrown an exception.");
+                Assert.True(false, "Should have thrown an exception.");
             }
             catch (ArgumentOutOfRangeException)
             {
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentOutOfRangeException.");
+            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException.");
         }
 
+        /// <summary>
+        /// Decode longitude based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeFromSpec()
         {
@@ -233,16 +283,22 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(-72.0292, decodedLong);
         }
 
+        /// <summary>
+        /// Decode longitude based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeFromSpecNegative()
         {
             string longitude = "07201.75E";
             Position p = new Position();
- 
+
             double decodedLong = (double)p.DecodeLongitude(longitude);
             Assert.Equal(72.0292, decodedLong);
         }
 
+        /// <summary>
+        /// Decode longitude exception case.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeOutOfRange()
         {
@@ -258,15 +314,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentOutOfRangeException");
+            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException");
         }
 
+        /// <summary>
+        /// Decode longitude exception case.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeInvalidWithChars()
         {
             string longitude = "4cam0.50E";
             Position p = new Position();
-   
+
             try
             {
                 p.DecodeLongitude(longitude);
@@ -276,15 +335,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown a FormatException");
+            Assert.True(false, "Should have thrown a FormatException");
         }
 
+        /// <summary>
+        /// Decode longitude exception case.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeTooLong()
         {
             string longitude = "072010.50W";
             Position p = new Position();
-     
+
             try
             {
                 p.DecodeLongitude(longitude);
@@ -294,9 +356,12 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentException");
+            Assert.True(false, "Should have thrown an ArgumentException");
         }
 
+        /// <summary>
+        /// Decode longitude exception case.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeWrongDirection()
         {
@@ -304,7 +369,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Position p = new Position();
 
             try
-            {    
+            {
                 p.DecodeLongitude(longitude);
             }
             catch (ArgumentException)
@@ -312,15 +377,18 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentException.");
+            Assert.True(false, "Should have thrown an ArgumentException.");
         }
 
+        /// <summary>
+        /// Decode longitude exception case.
+        /// </summary>
         [Fact]
         public void DecodeLongitudeWrongDecimalPointLocation()
         {
             string longitude = "072.0175W";
             Position p = new Position();
-      
+
             try
             {
                 p.DecodeLongitude(longitude);
@@ -330,9 +398,12 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 return;
             }
 
-            Assert.True(false,"Should have thrown an ArgumentException.");
+            Assert.True(false, "Should have thrown an ArgumentException.");
         }
 
+        /// <summary>
+        /// Decode position defaults.
+        /// </summary>
         [Fact]
         public void Decode_Defaults()
         {
@@ -344,6 +415,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(new GeoCoordinate(0, 0), p.Coordinates);
         }
 
+        /// <summary>
+        /// Decode Position based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void Decode_FromSpec()
         {
@@ -357,48 +431,63 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(-72.0292, p.Coordinates.Longitude);
         }
 
+        /// <summary>
+        /// Test Latitude defaults.
+        /// </summary>
         [Fact]
         public void EncodeLatitude_Default()
         {
             Position p = new Position();
-          
+
             string encodedLatitude = p.EncodeLatitude();
 
             Assert.Equal("0000.00N", encodedLatitude);
         }
 
+        /// <summary>
+        /// Encode Position based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void EncodeLatitude_FromSpec()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
             Position p = new Position(gc, '\\', '.', 0);
-         
+
             string encodedLatitude = p.EncodeLatitude();
 
             Assert.Equal("4903.50N", encodedLatitude);
         }
 
+        /// <summary>
+        /// Encode Position based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void EncodeLatitude_FromSpecWithAmbiguity()
         {
             GeoCoordinate gc = new GeoCoordinate(49.0583, -72.029);
             Position p = new Position(gc, '\\', '.', 3);
-            
+
             string encodedLatitude = p.EncodeLatitude();
 
             Assert.Equal("490 .  N", encodedLatitude);
         }
 
+        /// <summary>
+        /// Test encoding longitude defaults.
+        /// </summary>
         [Fact]
         public void EncodeLongitude_Default()
         {
             Position p = new Position();
- 
+
             string encodedLongitude = p.EncodeLongitude();
 
             Assert.Equal("00000.00W", encodedLongitude);
         }
 
+        /// <summary>
+        /// Encode Longitude based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void EncodeLongitude_FromSpec()
         {
@@ -410,6 +499,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal("07201.75W", encodedLongitude);
         }
 
+        /// <summary>
+        /// Encode Longitude based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void EncodeLongitude_FromSpecWithAmbiguity()
         {
@@ -421,6 +513,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal("0720 .  W", encodedLongitude);
         }
 
+        /// <summary>
+        /// Test encoding defaults.
+        /// </summary>
         [Fact]
         public void Encode_Default()
         {
@@ -431,6 +526,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal("0000.00N\\00000.00W.", encoded);
         }
 
+        /// <summary>
+        /// Test encoding based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void Encode_FromSpec()
         {
@@ -442,6 +540,9 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal("4903.50N/07201.75W-", encoded);
         }
 
+        /// <summary>
+        /// Encode based on example from APRS spec.
+        /// </summary>
         [Fact]
         public void Encode_FromSpecWithAmbiguity()
         {
@@ -452,8 +553,10 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Assert.Equal("49  .  N/072  .  W-", encoded);
         }
-        
-        // I had to add this one because I messed up the constructor. :(
+
+        /// <summary>
+        /// Test position constructor.
+        /// </summary>
         [Fact]
         public void PositionConstructor()
         {
@@ -467,7 +570,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude.
         /// </summary>
         [Fact]
         public void DecodeMaidenhead_1()
@@ -480,7 +583,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// Test basic decoding of 6 char Maidenhead gridsquare to latidude and longitude.
         /// </summary>
         [Fact]
         public void DecodeMaidenhead_2()
@@ -494,7 +597,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
         /// <summary>
         /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
-        /// including symbol
+        /// including symbol.
         /// </summary>
         [Fact]
         public void DecodeMaidenhead_3()
@@ -509,7 +612,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic decoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
+        /// Test basic decoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol.
         /// </summary>
         [Fact]
         public void DecodeMaidenhead_4()
@@ -525,7 +628,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
         /// <summary>
         /// Test basic decoding of 4 char Maidenhead gridsquare to latidude and longitude
-        /// including symbol
+        /// including symbol.
         /// </summary>
         [Fact]
         public void DecodeMaidenhead_5()
@@ -540,7 +643,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude.
         /// </summary>
         [Fact]
         public void EncodeMaidenhead_1()
@@ -550,7 +653,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude
+        /// Test basic encoding of 6 char Maidenhead gridsquare to latidude and longitude.
         /// </summary>
         [Fact]
         public void EncodeMaidenhead_2()
@@ -561,7 +664,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
         /// <summary>
         /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
-        /// including symbol
+        /// including symbol.
         /// </summary>
         [Fact]
         public void EncodeMaidenhead_3()
@@ -571,7 +674,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         }
 
         /// <summary>
-        /// Test basic encoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol
+        /// Test basic encoding of 8 char Maidenhead gridsquare to latidude and longitude, plus position symbol.
         /// </summary>
         [Fact]
         public void EncodeMaidenhead_4()
@@ -582,7 +685,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
         /// <summary>
         /// Test basic encoding of 4 char Maidenhead gridsquare to latidude and longitude
-        /// including symbol
+        /// including symbol.
         /// </summary>
         [Fact]
         public void EncodeMaidenhead_5()

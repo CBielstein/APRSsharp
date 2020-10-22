@@ -7,7 +7,7 @@ namespace AprsSharp.Protocols
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public class TNCInterface
+    public class TNCInterface : IDisposable
     {
         /// <summary>
         /// The serial port to which the TNC is connected.
@@ -33,6 +33,8 @@ namespace AprsSharp.Protocols
         /// The port on the TNC used for communication.
         /// </summary>
         private byte tncPort = 0;
+
+        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TNCInterface"/> class.
@@ -71,6 +73,18 @@ namespace AprsSharp.Protocols
         /// </summary>
         public event FrameReceivedEventHandler? FrameReceivedEvent;
 
+        /// <inheritdoc/>
+        public virtual void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            serialPort?.Dispose();
+        }
+
         /// <summary>
         /// Sets a new serial port to use for the TNC.
         /// If an existing port is open, closes it.
@@ -84,6 +98,7 @@ namespace AprsSharp.Protocols
             }
 
             serialPort?.Close();
+            serialPort?.Dispose();
 
             serialPort = new SerialPort(serialPortName);
             serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);

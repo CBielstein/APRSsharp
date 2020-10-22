@@ -38,5 +38,6 @@ The target is .NET Core 3.1 for development (netcoreapp3.1)
 
 ### Building
 
-Warnings are treated as errors in the release build (as in CI builds) but are left as warnings in local development.
-To verify your code is warning-free, you can run `dotnet build --configuration Release` to get the release build behavior.
+Warnings are treated as errors in the release build (as in CI builds) but are
+left as warnings in local development. To verify your code is warning-free, you
+can run `dotnet build --configuration Release` to get the release build behavior.

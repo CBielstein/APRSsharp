@@ -10,6 +10,7 @@ on:
       - main
     paths:
       - '**/*.md'
+      - '.github/workflows/**'
 
 jobs:
   lint:

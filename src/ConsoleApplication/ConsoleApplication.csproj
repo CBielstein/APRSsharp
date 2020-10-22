@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AprsParser\AprsParser.csproj" />
+    <ProjectReference Include="..\AprsISLibrary\AprsIsConnection.csproj" />
   </ItemGroup>
+
 
 </Project>

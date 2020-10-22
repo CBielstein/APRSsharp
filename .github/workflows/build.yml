@@ -8,12 +8,11 @@ on:
   pull_request:
     branches:
       - main
-   
 
 jobs:
   build:
     name: build
-
+    timeout-minutes: 5
     runs-on: ubuntu-latest
 
     steps:
@@ -33,5 +32,3 @@ jobs:
         
       - name: Test
         run: dotnet test --no-restore
-
-

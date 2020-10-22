@@ -14,7 +14,7 @@ on:
 jobs:
   lint:
     name: Lint
-
+    timeout-minutes: 5
     runs-on: ubuntu-latest
 
     steps:

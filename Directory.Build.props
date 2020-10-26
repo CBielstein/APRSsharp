@@ -3,9 +3,13 @@
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\analyzers.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration.ToLower())' == 'release'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <MSBuildTreatWarningsAsErrors>True</MSBuildTreatWarningsAsErrors>
   </PropertyGroup>
 
   <Import Project="Packages.props"/>

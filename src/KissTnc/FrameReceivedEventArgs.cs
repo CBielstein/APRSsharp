@@ -1,6 +1,7 @@
 namespace AprsSharp.Protocols.KISS
 {
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Caries the bytes delivered in a single frame by the TNC.
@@ -19,7 +20,7 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// Gets the data bytes of the received frame.
         /// </summary>
-        public byte[] Data
+        public IReadOnlyList<byte> Data
         {
             get;
             private set;

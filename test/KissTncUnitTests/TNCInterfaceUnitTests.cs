@@ -1,6 +1,8 @@
 namespace AprsSharpUnitTests.Protocols
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using AprsSharp.Protocols.KISS;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -201,19 +203,19 @@ namespace AprsSharpUnitTests.Protocols
         public void DelegateReceivedAtOnce()
         {
             using TNCInterface tnc = new TNCInterface();
-            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+            Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
-            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
+            tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[7] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
             tnc.DecodeReceivedData(receivedData);
 
-            byte[][] decodedFrames = qDecodedFrames.ToArray();
+            Assert.AreEqual(1, decodedFrames.Count);
 
-            Assert.AreEqual(1, decodedFrames.Length);
-            Assert.AreEqual(4, decodedFrames[0].Length);
-            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
+            IReadOnlyList<byte> frame = decodedFrames.Dequeue();
+            Assert.AreEqual(4, frame.Count);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(frame.ToArray()));
         }
 
         /// <summary>
@@ -223,23 +225,24 @@ namespace AprsSharpUnitTests.Protocols
         public void DelegateDataReceivedSplit()
         {
             using TNCInterface tnc = new TNCInterface();
-            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+            Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
-            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
+            tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
 
             byte[] dataRec1 = new byte[4] { 0xC0, 0x50, 0x48, 0x65 };
             byte[] dataRec2 = new byte[4] { 0x6C, 0x6C, 0x6F, 0xC0 };
 
             tnc.DecodeReceivedData(dataRec1);
 
-            byte[][] decodedFrames = qDecodedFrames.ToArray();
+            Assert.AreEqual(0, decodedFrames.Count);
 
-            Assert.AreEqual(0, decodedFrames.Length);
+            tnc.DecodeReceivedData(dataRec2);
 
-            decodedFrames = tnc.DecodeReceivedData(dataRec2);
-            Assert.AreEqual(1, decodedFrames.Length);
-            Assert.AreEqual(5, decodedFrames[0].Length);
-            Assert.AreEqual("Hello", Encoding.ASCII.GetString(decodedFrames[0]));
+            Assert.AreEqual(1, decodedFrames.Count);
+
+            IReadOnlyList<byte> frame = decodedFrames.Dequeue();
+            Assert.AreEqual(5, frame.Count);
+            Assert.AreEqual("Hello", Encoding.ASCII.GetString(frame.ToArray()));
         }
 
         /// <summary>
@@ -249,20 +252,20 @@ namespace AprsSharpUnitTests.Protocols
         public void DelegateDataReceivedEscapes()
         {
             using TNCInterface tnc = new TNCInterface();
-            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+            Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
-            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
+            tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
 
             byte[] recData = new byte[7] { 0xC0, 0x00, 0xDB, 0xDC, 0xDB, 0xDD, 0xC0 };
 
             tnc.DecodeReceivedData(recData);
 
-            byte[][] decodedFrames = qDecodedFrames.ToArray();
+            Assert.AreEqual(1, decodedFrames.Count);
 
-            Assert.AreEqual(1, decodedFrames.Length);
-            Assert.AreEqual(2, decodedFrames[0].Length);
-            Assert.AreEqual((byte)SpecialCharacter.FEND, decodedFrames[0][0]);
-            Assert.AreEqual((byte)SpecialCharacter.FESC, decodedFrames[0][1]);
+            IReadOnlyList<byte> frame = decodedFrames.Dequeue();
+            Assert.AreEqual(2, frame.Count);
+            Assert.AreEqual((byte)SpecialCharacter.FEND, frame[0]);
+            Assert.AreEqual((byte)SpecialCharacter.FESC, frame[1]);
         }
 
         /// <summary>
@@ -272,19 +275,19 @@ namespace AprsSharpUnitTests.Protocols
         public void DelegateDataReceivedAtOncePrefacedMultipleFEND()
         {
             using TNCInterface tnc = new TNCInterface();
-            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+            Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
-            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
+            tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[9] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
             tnc.DecodeReceivedData(receivedData);
 
-            byte[][] decodedFrames = qDecodedFrames.ToArray();
+            Assert.AreEqual(1, decodedFrames.Count);
 
-            Assert.AreEqual(1, decodedFrames.Length);
-            Assert.AreEqual(4, decodedFrames[0].Length);
-            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
+            IReadOnlyList<byte> frame = decodedFrames.Dequeue();
+            Assert.AreEqual(4, frame.Count);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(frame.ToArray()));
         }
 
         /// <summary>
@@ -294,21 +297,23 @@ namespace AprsSharpUnitTests.Protocols
         public void DelegateMultipleFramesDataReceivedAtOnce()
         {
             using TNCInterface tnc = new TNCInterface();
-            Queue<byte[]> qDecodedFrames = new Queue<byte[]>();
+            Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
-            tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
+            tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
 
             byte[] receivedData = new byte[15] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0, 0xC0, 0x50, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0xC0 };
 
             tnc.DecodeReceivedData(receivedData);
 
-            byte[][] decodedFrames = qDecodedFrames.ToArray();
+            Assert.AreEqual(2, decodedFrames.Count);
 
-            Assert.AreEqual(2, decodedFrames.Length);
-            Assert.AreEqual(4, decodedFrames[0].Length);
-            Assert.AreEqual("TEST", Encoding.ASCII.GetString(decodedFrames[0]));
-            Assert.AreEqual(5, decodedFrames[1].Length);
-            Assert.AreEqual("Hello", Encoding.ASCII.GetString(decodedFrames[1]));
+            IReadOnlyList<byte> frame = decodedFrames.Dequeue();
+            Assert.AreEqual(4, frame.Count);
+            Assert.AreEqual("TEST", Encoding.ASCII.GetString(frame.ToArray()));
+
+            frame = decodedFrames.Dequeue();
+            Assert.AreEqual(5, frame.Count);
+            Assert.AreEqual("Hello", Encoding.ASCII.GetString(frame.ToArray()));
         }
     }
 }

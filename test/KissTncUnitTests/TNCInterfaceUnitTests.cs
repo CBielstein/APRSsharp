@@ -68,7 +68,7 @@ namespace AprsSharpUnitTests.Protocols
             using TNCInterface tnc = new TNCInterface();
             tnc.SetTncPort(0);
 
-            byte[] data = new byte[2] { (byte)SpecialCharacters.FEND, (byte)SpecialCharacters.FESC };
+            byte[] data = new byte[2] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FESC };
 
             byte[] encodedBytes = tnc.SendData(data);
 
@@ -154,8 +154,8 @@ namespace AprsSharpUnitTests.Protocols
 
             Assert.AreEqual(1, decodedFrames.Length);
             Assert.AreEqual(2, decodedFrames[0].Length);
-            Assert.AreEqual((byte)SpecialCharacters.FEND, decodedFrames[0][0]);
-            Assert.AreEqual((byte)SpecialCharacters.FESC, decodedFrames[0][1]);
+            Assert.AreEqual((byte)SpecialCharacter.FEND, decodedFrames[0][0]);
+            Assert.AreEqual((byte)SpecialCharacter.FESC, decodedFrames[0][1]);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace AprsSharpUnitTests.Protocols
         {
             using TNCInterface tnc = new TNCInterface();
 
-            byte[] receivedData = new byte[9] { (byte)SpecialCharacters.FEND, (byte)SpecialCharacters.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
+            byte[] receivedData = new byte[9] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
             byte[][] decodedFrames = tnc.DecodeReceivedData(receivedData);
 
@@ -261,8 +261,8 @@ namespace AprsSharpUnitTests.Protocols
 
             Assert.AreEqual(1, decodedFrames.Length);
             Assert.AreEqual(2, decodedFrames[0].Length);
-            Assert.AreEqual((byte)SpecialCharacters.FEND, decodedFrames[0][0]);
-            Assert.AreEqual((byte)SpecialCharacters.FESC, decodedFrames[0][1]);
+            Assert.AreEqual((byte)SpecialCharacter.FEND, decodedFrames[0][0]);
+            Assert.AreEqual((byte)SpecialCharacter.FESC, decodedFrames[0][1]);
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace AprsSharpUnitTests.Protocols
 
             tnc.FrameReceivedEvent += (sender, arg) => qDecodedFrames.Enqueue(arg.Data);
 
-            byte[] receivedData = new byte[9] { (byte)SpecialCharacters.FEND, (byte)SpecialCharacters.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
+            byte[] receivedData = new byte[9] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
             tnc.DecodeReceivedData(receivedData);
 

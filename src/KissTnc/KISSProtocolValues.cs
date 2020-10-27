@@ -5,7 +5,7 @@ namespace AprsSharp.Protocols.KISS
     /// All values and descriptions taken from KA9Q's KISS paper.
     /// http://www.ka9q.net/papers/kiss.html.
     /// </summary>
-    public enum SpecialCharacters
+    public enum SpecialCharacter
     {
         /// <summary>
         /// Frame End
@@ -32,18 +32,18 @@ namespace AprsSharp.Protocols.KISS
     /// Represents codes used to command the TNC in the KISS protocol.
     /// These are embedded in the encoding of frames sent to the TNC.
     /// </summary>
-    public enum Commands
+    public enum Command
     {
         /// <summary>
         /// The rest of the frame is data to be sent on the HDLC channel.
         /// </summary>
-        DATA_FRAME = 0,
+        DataFrame = 0,
 
         /// <summary>
         /// The next byte is the transmitter keyup delay in 10 ms units.
         /// The default start-up value is 50 (i.e., 500 ms).
         /// </summary>
-        TX_DELAY = 1,
+        TxDelay = 1,
 
         /// <summary>
         /// The next byte is the persistence parameter, p, scaled to the
@@ -56,26 +56,26 @@ namespace AprsSharp.Protocols.KISS
         /// The next byte is the slot interval in 10 ms units.
         /// The default is 10 (i.e. 100ms).
         /// </summary>
-        SLOT_TIME = 3,
+        SlotTime = 3,
 
         /// <summary>
         /// The next byte is the time to hold up the TX after the FCS has been sent,
         /// in 10 MS units. This command is obsolete, and is included here only for
         /// compatibility with some existing implementations.
         /// </summary>
-        TX_TAIL = 4,
+        TxTail = 4,
 
         /// <summary>
         /// The next byte is 0 for half duplex, nonzero for full duplex.
         /// The default is 0 (i.e., half duplex).
         /// </summary>
-        FULL_DUPLEX = 5,
+        FullDuplex = 5,
 
         /// <summary>
         /// Specific for each TNC. In the TNC-1, this command sets the modem speed.
         /// Other implementations may use this function for other hardware-specific functions.
         /// </summary>
-        SET_HARDWARE = 6,
+        SetHardware = 6,
 
         /// <summary>
         /// Exit KISS and return control to a higher-level program. This is useful

@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols
+namespace AprsSharp.Protocols.KISS
 {
     /// <summary>
     /// Represents special characters in the KISS protocol.

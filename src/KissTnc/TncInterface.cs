@@ -7,7 +7,7 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public class TNCInterface : IDisposable
+    public sealed class TNCInterface : IDisposable
     {
         /// <summary>
         /// The serial port to which the TNC is connected.
@@ -22,17 +22,17 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// Marks if the next character received should be translated as an escaped character.
         /// </summary>
-        private bool inEscapeMode = false;
+        private bool inEscapeMode;
 
         /// <summary>
         /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next.
         /// </summary>
-        private bool previousWasFEND = false;
+        private bool previousWasFEND;
 
         /// <summary>
         /// The port on the TNC used for communication.
         /// </summary>
-        private byte tncPort = 0;
+        private byte tncPort;
 
         private bool disposed;
 
@@ -74,7 +74,7 @@ namespace AprsSharp.Protocols.KISS
         public event FrameReceivedEventHandler? FrameReceivedEvent;
 
         /// <inheritdoc/>
-        public virtual void Dispose()
+        public void Dispose()
         {
             if (disposed)
             {
@@ -94,7 +94,7 @@ namespace AprsSharp.Protocols.KISS
         {
             if (serialPortName == null)
             {
-                throw new ArgumentNullException("serialPortName");
+                throw new ArgumentNullException(nameof(serialPortName));
             }
 
             serialPort?.Close();
@@ -113,7 +113,7 @@ namespace AprsSharp.Protocols.KISS
             // ensure this is just the size of a nibble
             if (port < 0 || port > 0xF)
             {
-                throw new ArgumentOutOfRangeException("port", "Port value must be a nibble in range [0, 0xF], but was instead " + port);
+                throw new ArgumentOutOfRangeException(nameof(port), "Port value must be a nibble in range [0, 0xF], but was instead " + port);
             }
 
             tncPort = port;
@@ -128,11 +128,11 @@ namespace AprsSharp.Protocols.KISS
         {
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw new ArgumentNullException(nameof(bytes));
             }
             else if (bytes.Length == 0)
             {
-                throw new ArgumentException("Bytes to send has length zero.", "bytes");
+                throw new ArgumentException("Bytes to send has length zero.", nameof(bytes));
             }
 
             return EncodeAndSend(Command.DataFrame, bytes);
@@ -160,7 +160,7 @@ namespace AprsSharp.Protocols.KISS
         {
             if (p < 0 || p > 255)
             {
-                throw new ArgumentOutOfRangeException("p", "p should be in range [0, 255], but was " + p);
+                throw new ArgumentOutOfRangeException(nameof(p), "p should be in range [0, 255], but was " + p);
             }
 
             return EncodeAndSend(Command.P, new byte[1] { p });
@@ -230,6 +230,11 @@ namespace AprsSharp.Protocols.KISS
         public byte[][] DecodeReceivedData(byte[] newBytes)
         {
             Queue<byte[]> receivedFrames = new Queue<byte[]>();
+
+            if (newBytes == null)
+            {
+                throw new ArgumentNullException(nameof(newBytes));
+            }
 
             foreach (byte recByte in newBytes)
             {
@@ -307,7 +312,7 @@ namespace AprsSharp.Protocols.KISS
         /// <param name="port">The port to address on the TNC.</param>
         /// <param name="bytes">Optionally, bytes to encode.</param>
         /// <returns>Encoded bytes.</returns>
-        private byte[] EncodeFrame(Command command, byte port, byte[] bytes)
+        private static byte[] EncodeFrame(Command command, byte port, byte[] bytes)
         {
             // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
             Queue<byte> frame = new Queue<byte>(3 + ((bytes == null) ? 0 : bytes.Length));

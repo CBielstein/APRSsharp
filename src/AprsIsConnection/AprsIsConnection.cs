@@ -14,6 +14,27 @@
     public class AprsIsConnection
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
+        /// </summary>
+        /// <param name="address">URL for an APRS-IS server to which to connect.</param>
+        /// <param name="port">TCP port for an APRS-IS server to which to connect.</param>
+        public AprsIsConnection(in string address = "rotate.aprs2.net", in int port = 14580)
+        {
+            Address = address;
+            Port = port;
+        }
+
+        /// <summary>
+        /// Gets the URL for the server used by this connection.
+        /// </summary>
+        public string Address { get; private set; }
+
+        /// <summary>
+        /// Gets the TCP port for the server used by this connection.
+        /// </summary>
+        public int Port { get; private set; }
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
@@ -24,12 +45,11 @@
             password = password ?? "-1";
             string filter = "filter r/50.5039/4.4699/50";
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
-            string server = "rotate.aprs2.net";
             bool authenticated = false;
 
             // Open connection
             using TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(server, 14580);
+            tcpClient.Connect(Address, Port);
 
             // Set up streams
             using NetworkStream stream = tcpClient.GetStream();
@@ -53,7 +73,7 @@
 
                     if (received.StartsWith('#'))
                     {
-                        if (received.Contains("logresp"))
+                        if (received.Contains("logresp", StringComparison.OrdinalIgnoreCase))
                         {
                             authenticated = true;
                         }

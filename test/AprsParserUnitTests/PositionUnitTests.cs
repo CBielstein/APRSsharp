@@ -46,16 +46,7 @@
             string latitude = "9103.50N";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLatitude(latitude);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException");
+            Assert.Throws<ArgumentOutOfRangeException>(() => p.DecodeLatitude(latitude));
         }
 
         /// <summary>
@@ -67,16 +58,7 @@
             string latitude = "4cam.50N";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLatitude(latitude);
-            }
-            catch (FormatException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown a FormatException");
+            Assert.Throws<FormatException>(() => p.DecodeLatitude(latitude));
         }
 
         /// <summary>
@@ -88,16 +70,7 @@
             string latitude = "4903.500N";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLatitude(latitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException.");
+            Assert.Throws<ArgumentException>(() => p.DecodeLatitude(latitude));
         }
 
         /// <summary>
@@ -109,16 +82,7 @@
             string latitude = "4903.50E";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLatitude(latitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentException.");
+            Assert.Throws<ArgumentException>(() => p.DecodeLatitude(latitude));
         }
 
         /// <summary>
@@ -130,16 +94,7 @@
             string latitude = "490.350N";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLatitude(latitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentException.");
+            Assert.Throws<ArgumentException>(() => p.DecodeLatitude(latitude));
         }
 
         /// <summary>
@@ -207,18 +162,7 @@
             string latitude = "49  .1  N";
             Position p = new Position();
 
-            try
-            {
-                p.CountAmbiguity(latitude);
-
-                Assert.True(false, "This should have thrown an exception.");
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "This should have thrown an ArgumentException.");
+            Assert.Throws<ArgumentException>(() => p.CountAmbiguity(latitude));
         }
 
         /// <summary>
@@ -256,18 +200,7 @@
             string latitude = "4903.50N";
             Position p = new Position();
 
-            try
-            {
-                string ambiguous = p.EnforceAmbiguity(latitude, 7);
-
-                Assert.True(false, "Should have thrown an exception.");
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException.");
+            Assert.Throws<ArgumentOutOfRangeException>(() => p.EnforceAmbiguity(latitude, 7));
         }
 
         /// <summary>
@@ -305,16 +238,7 @@
             string longitude = "18130.50E";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLongitude(longitude);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentOutOfRangeException");
+            Assert.Throws<ArgumentOutOfRangeException>(() => p.DecodeLongitude(longitude));
         }
 
         /// <summary>
@@ -326,16 +250,7 @@
             string longitude = "4cam0.50E";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLongitude(longitude);
-            }
-            catch (FormatException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown a FormatException");
+            Assert.Throws<FormatException>(() => p.DecodeLongitude(longitude));
         }
 
         /// <summary>
@@ -347,16 +262,7 @@
             string longitude = "072010.50W";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLongitude(longitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentException");
+            Assert.Throws<ArgumentException>(() => p.DecodeLongitude(longitude));
         }
 
         /// <summary>
@@ -368,16 +274,7 @@
             string longitude = "07201.50N";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLongitude(longitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentException.");
+            Assert.Throws<ArgumentException>(() => p.DecodeLongitude(longitude));
         }
 
         /// <summary>
@@ -389,16 +286,7 @@
             string longitude = "072.0175W";
             Position p = new Position();
 
-            try
-            {
-                p.DecodeLongitude(longitude);
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
-
-            Assert.True(false, "Should have thrown an ArgumentException.");
+            Assert.Throws<ArgumentException>(() => p.DecodeLongitude(longitude));
         }
 
         /// <summary>

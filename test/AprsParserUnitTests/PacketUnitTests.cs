@@ -21,25 +21,18 @@
         {
             Packet p = new Packet();
 
-            try
-            {
-                p.DecodeInformationField("_10090556c220s004g005t077r000p000P000h50b09900wRSW");
+            Assert.Throws<NotImplementedException>(() => p.DecodeInformationField("_10090556c220s004g005t077r000p000P000h50b09900wRSW"));
 
-                throw new System.Exception("Update test. It's now outdated as more functionality has been added.");
-            }
-            catch (System.NotImplementedException)
-            {
-                Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
-                Assert.Equal(false, p.HasMessaging);
+            Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
+            Assert.Equal(false, p.HasMessaging);
 
-                Timestamp? ts = p.Timestamp;
-                Assert.NotNull(ts);
-                Assert.Equal(Timestamp.Type.MDHM, ts!.DecodedType);
-                Assert.Equal(10, ts!.DateTime.Month);
-                Assert.Equal(9, ts!.DateTime.Day);
-                Assert.Equal(05, ts!.DateTime.Hour);
-                Assert.Equal(56, ts!.DateTime.Minute);
-            }
+            Timestamp? ts = p.Timestamp;
+            Assert.NotNull(ts);
+            Assert.Equal(Timestamp.Type.MDHM, ts!.DecodedType);
+            Assert.Equal(10, ts!.DateTime.Month);
+            Assert.Equal(9, ts!.DateTime.Day);
+            Assert.Equal(05, ts!.DateTime.Hour);
+            Assert.Equal(56, ts!.DateTime.Minute);
         }
 
         /// <summary>
@@ -495,17 +488,7 @@
         public void GetTypeChar_DoNotUse()
         {
             Packet p = new Packet();
-
-            try
-            {
-                p.GetTypeChar(Packet.Type.DoNotUse);
-
-                Assert.True(false, "Should have thrown exception.");
-            }
-            catch (ArgumentException)
-            {
-                return;
-            }
+            Assert.Throws<ArgumentException>(() => p.GetTypeChar(Packet.Type.DoNotUse));
         }
 
         /// <summary>

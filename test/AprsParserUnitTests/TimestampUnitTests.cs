@@ -17,17 +17,7 @@
         {
             Timestamp ts = new Timestamp();
 
-            try
-            {
-                ts.FindCorrectYearAndMonth(32, DateTime.Now, out _, out _);
-
-                // Should not reach here as an ArgumentOutOfRangeException should be thrown
-                Assert.True(false);
-            }
-            catch (Exception e)
-            {
-                Assert.IsType<ArgumentOutOfRangeException>(e);
-            }
+            Assert.Throws<ArgumentOutOfRangeException>(() => ts.FindCorrectYearAndMonth(32, DateTime.Now, out _, out _));
         }
 
         /// <summary>

@@ -42,9 +42,10 @@ Warnings are treated as errors in the release build (as in CI builds) but are
 left as warnings in local development. To verify your code is warning-free, you
 can run `dotnet build --configuration Release` to get the release build behavior.
 
-### Generating/Publishing console application binary file
+### Generating / Publishing console application binary file
 
-To generate the console application binary, go to the APRSsharp folder (AprsSharp\src\APRSsharp) 
-and run the command dotnet publish to generate the console application and it will be 
-stored in the bin/netcoreapp2.2/Debug/publish folder or run dotnet publish -o outputfolder
+To generate the console application binary, go to the APRSsharp folder 
+(AprsSharp\src\APRSsharp) and run the command dotnet publish to generate 
+the console application and it will be stored in the 
+bin/netcoreapp2.2/Debug/publish folder or run dotnet publish -o outputfolder
 to store your binary in a given output folder

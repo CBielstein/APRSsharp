@@ -113,7 +113,7 @@ namespace AprsSharp.Protocols.KISS
             // ensure this is just the size of a nibble
             if (port < 0 || port > 0xF)
             {
-                throw new ArgumentOutOfRangeException(nameof(port), "Port value must be a nibble in range [0, 0xF], but was instead " + port);
+                throw new ArgumentOutOfRangeException(nameof(port), $"Port value must be a nibble in range [0, 0xF], but was instead: {port}");
             }
 
             tncPort = port;
@@ -160,7 +160,7 @@ namespace AprsSharp.Protocols.KISS
         {
             if (p < 0 || p > 255)
             {
-                throw new ArgumentOutOfRangeException(nameof(p), "p should be in range [0, 255], but was " + p);
+                throw new ArgumentOutOfRangeException(nameof(p), $"p should be in range [0, 255], but was {p}");
             }
 
             return EncodeAndSend(Command.P, new byte[1] { p });

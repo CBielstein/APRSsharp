@@ -78,7 +78,87 @@
         /// <summary>
         /// Gets or sets the position ambiguity.
         /// </summary>
-        public int Ambiguity { get; set; } = 0;
+        public int Ambiguity { get; set; }
+
+        /// <summary>
+        /// Converts a string to have the given amount of ambiguity.
+        /// </summary>
+        /// <param name="coords">String to convert.</param>
+        /// <param name="enforceAmbiguity">Amount of ambiguity to emplace.</param>
+        /// <returns>String representing ambiguity.</returns>
+        public static string EnforceAmbiguity(string coords, int enforceAmbiguity)
+        {
+            if (coords == null)
+            {
+                throw new ArgumentNullException(nameof(coords));
+            }
+            else if (enforceAmbiguity > coords.Length - 2)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(enforceAmbiguity),
+                    $"Only {coords.Length - 2} numbers can be filtered, but {enforceAmbiguity} were requested for string {coords}");
+            }
+
+            StringBuilder sb = new StringBuilder(coords);
+            int remainingAmbiguity = enforceAmbiguity;
+
+            for (int i = coords.Length - 2; i >= 0 && remainingAmbiguity > 0; --i)
+            {
+                if (i == coords.Length - 4)
+                {
+                    continue;
+                }
+
+                sb[i] = ' ';
+                --remainingAmbiguity;
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Counts the number of spaces from right to left and returns the number for ambiguity.
+        /// Also ensures there are no spaces left of a digit, which is an invalid APRS ambiguity syntax.
+        /// </summary>
+        /// <param name="coords">An APRS latitude or longitude string.</param>
+        /// <returns>Integer representing ambiguity.</returns>
+        public static int CountAmbiguity(string coords)
+        {
+            if (coords == null)
+            {
+                throw new ArgumentNullException(nameof(coords));
+            }
+
+            int ambiguity = 0;
+            bool foundDigit = false;
+            for (int i = coords.Length - 2; i >= 0; --i)
+            {
+                // skip the period
+                if (i == coords.Length - 4)
+                {
+                    continue;
+                }
+                else if (coords[i] == ' ')
+                {
+                    if (foundDigit)
+                    {
+                        throw new ArgumentException(
+                            $"Coordinates shoud only have spaces growing from right. Error on string: {coords}",
+                            nameof(coords));
+                    }
+                    else
+                    {
+                        ++ambiguity;
+                    }
+                }
+                else
+                {
+                    foundDigit = true;
+                }
+            }
+
+            return ambiguity;
+        }
 
         /// <summary>
         /// Takes an encoded APRS coordinate string and uses it to initialize to <see cref="GeoCoordinate"/>.
@@ -241,7 +321,7 @@
             string minutesStr = modifiedCoords.Substring(2, 2);
             string hundMinutesStr = modifiedCoords.Substring(5, 2);
 
-            double degrees = double.Parse(degreesStr);
+            double degrees = double.Parse(degreesStr, CultureInfo.InvariantCulture);
             if (degrees < 00 || degrees > 90)
             {
                 throw new ArgumentOutOfRangeException(
@@ -249,8 +329,8 @@
                     $"Degrees must be in range [00,90]. Found: {degrees} in coord string {modifiedCoords} from given coord string {coords}");
             }
 
-            double minutes = double.Parse(minutesStr);
-            double hundMinutes = double.Parse(hundMinutesStr);
+            double minutes = double.Parse(minutesStr, CultureInfo.InvariantCulture);
+            double hundMinutes = double.Parse(hundMinutesStr, CultureInfo.InvariantCulture);
 
             double retval = degrees + ((minutes + (hundMinutes / 100)) / 60.0);
 
@@ -261,86 +341,6 @@
 
             // limit significant figures
             return Math.Round(retval, 4);
-        }
-
-        /// <summary>
-        /// Converts a string to have the given amount of ambiguity.
-        /// </summary>
-        /// <param name="coords">String to convert.</param>
-        /// <param name="enforceAmbiguity">Amount of ambiguity to emplace.</param>
-        /// <returns>String representing ambiguity.</returns>
-        public string EnforceAmbiguity(string coords, int enforceAmbiguity)
-        {
-            if (coords == null)
-            {
-                throw new ArgumentNullException(nameof(coords));
-            }
-            else if (enforceAmbiguity > coords.Length - 2)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(enforceAmbiguity),
-                    $"Only {coords.Length - 2} numbers can be filtered, but {enforceAmbiguity} were requested for string {coords}");
-            }
-
-            StringBuilder sb = new StringBuilder(coords);
-            int remainingAmbiguity = enforceAmbiguity;
-
-            for (int i = coords.Length - 2; i >= 0 && remainingAmbiguity > 0; --i)
-            {
-                if (i == coords.Length - 4)
-                {
-                    continue;
-                }
-
-                sb[i] = ' ';
-                --remainingAmbiguity;
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Counts the number of spaces from right to left and returns the number for ambiguity.
-        /// Also ensures there are no spaces left of a digit, which is an invalid APRS ambiguity syntax.
-        /// </summary>
-        /// <param name="coords">An APRS latitude or longitude string.</param>
-        /// <returns>Integer representing ambiguity.</returns>
-        public int CountAmbiguity(string coords)
-        {
-            if (coords == null)
-            {
-                throw new ArgumentNullException(nameof(coords));
-            }
-
-            int ambiguity = 0;
-            bool foundDigit = false;
-            for (int i = coords.Length - 2; i >= 0; --i)
-            {
-                // skip the period
-                if (i == coords.Length - 4)
-                {
-                    continue;
-                }
-                else if (coords[i] == ' ')
-                {
-                    if (foundDigit)
-                    {
-                        throw new ArgumentException(
-                            $"Coordinates shoud only have spaces growing from right. Error on string: {coords}",
-                            nameof(coords));
-                    }
-                    else
-                    {
-                        ++ambiguity;
-                    }
-                }
-                else
-                {
-                    foundDigit = true;
-                }
-            }
-
-            return ambiguity;
         }
 
         /// <summary>
@@ -389,7 +389,7 @@
             string minutesStr = modifiedCoords.Substring(3, 2);
             string hundMinuteStr = modifiedCoords.Substring(6, 2);
 
-            double degrees = double.Parse(degreesStr);
+            double degrees = double.Parse(degreesStr, CultureInfo.InvariantCulture);
             if (degrees < 000 || degrees > 180)
             {
                 throw new ArgumentOutOfRangeException(
@@ -397,8 +397,8 @@
                     $"Degrees longitude must be in range [000, 180]. Found: {degrees} in coord string {modifiedCoords} from given coord string {coords}");
             }
 
-            double minutes = double.Parse(minutesStr);
-            double hundMinutes = double.Parse(hundMinuteStr);
+            double minutes = double.Parse(minutesStr, CultureInfo.InvariantCulture);
+            double hundMinutes = double.Parse(hundMinuteStr, CultureInfo.InvariantCulture);
 
             double retval = degrees + ((minutes + (hundMinutes / 100)) / 60.0);
 
@@ -452,7 +452,7 @@
         /// <param name="coordinateEncode">Either latitude or longitude encoding.</param>
         /// <param name="length">The number of chars for this encoding (should be half the total length of the gridsquare as this is only lat or long).</param>
         /// <returns>A string of the lat or long for the gridsquare encoding.</returns>
-        private string EncodeGridsquareElement(double coords, CoordinateSystem coordinateEncode, int length)
+        private static string EncodeGridsquareElement(double coords, CoordinateSystem coordinateEncode, int length)
         {
             if (coordinateEncode == CoordinateSystem.Longitude && Math.Abs(coords) > 180)
             {
@@ -486,7 +486,7 @@
             {
                 stepDivisor = 1.0 * multiplier;
                 charIndex = (int)(shiftedCoords / stepDivisor);
-                encoded += charIndex.ToString();
+                encoded += charIndex.ToString(CultureInfo.InvariantCulture);
 
                 shiftedCoords %= stepDivisor;
             }
@@ -507,7 +507,7 @@
             {
                 stepDivisor = 0.25 * multiplier;
                 charIndex = (int)(shiftedCoords / stepDivisor);
-                encoded += charIndex.ToString();
+                encoded += charIndex.ToString(CultureInfo.InvariantCulture);
 
                 // shiftedCoords %= stepDivisor;
             }
@@ -521,7 +521,7 @@
         /// <param name="gridsquare">A Maidenhead Location System gridsquare.</param>
         /// <param name="coordinateDecode">Latitude or longitude for decode.</param>
         /// <returns>A double representing latitude [-180.0, 180.0] or longitude [-90.0, 90.0].</returns>
-        private double DecodeFromGridsquare(string gridsquare, CoordinateSystem coordinateDecode)
+        private static double DecodeFromGridsquare(string gridsquare, CoordinateSystem coordinateDecode)
         {
             if (gridsquare == null)
             {

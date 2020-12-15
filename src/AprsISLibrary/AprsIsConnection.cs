@@ -36,18 +36,6 @@
         public event HandleTcpString? ReceivedTcpMessage;
 
         /// <summary>
-        /// The methods for receiving packets.
-        /// </summary>
-        /// <returns>An async task.</returns>
-        public async Task Receive()
-        {
-            // Variables string callsign = "N0CALL
-            string callsign = "NOCALL"; // Radius of 50km of Seattle's Space Needle
-            string password = "-1";
-            await Receive(callsign, password).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// The receiving method.
         /// </summary>
         /// <param name="callsign">Specifying the different strings.</param>

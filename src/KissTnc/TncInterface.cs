@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols
+namespace AprsSharp.Protocols.KISS
 {
     using System;
     using System.Collections.Generic;
@@ -7,7 +7,7 @@ namespace AprsSharp.Protocols
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public class TNCInterface : IDisposable
+    public sealed class TNCInterface : IDisposable
     {
         /// <summary>
         /// The serial port to which the TNC is connected.
@@ -22,17 +22,17 @@ namespace AprsSharp.Protocols
         /// <summary>
         /// Marks if the next character received should be translated as an escaped character.
         /// </summary>
-        private bool inEscapeMode = false;
+        private bool inEscapeMode;
 
         /// <summary>
         /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next.
         /// </summary>
-        private bool previousWasFEND = false;
+        private bool previousWasFEND;
 
         /// <summary>
         /// The port on the TNC used for communication.
         /// </summary>
-        private byte tncPort = 0;
+        private byte tncPort;
 
         private bool disposed;
 
@@ -74,7 +74,7 @@ namespace AprsSharp.Protocols
         public event FrameReceivedEventHandler? FrameReceivedEvent;
 
         /// <inheritdoc/>
-        public virtual void Dispose()
+        public void Dispose()
         {
             if (disposed)
             {
@@ -94,7 +94,7 @@ namespace AprsSharp.Protocols
         {
             if (serialPortName == null)
             {
-                throw new ArgumentNullException("serialPortName");
+                throw new ArgumentNullException(nameof(serialPortName));
             }
 
             serialPort?.Close();
@@ -113,7 +113,7 @@ namespace AprsSharp.Protocols
             // ensure this is just the size of a nibble
             if (port < 0 || port > 0xF)
             {
-                throw new ArgumentOutOfRangeException("port", "Port value must be a nibble in range [0, 0xF], but was instead " + port);
+                throw new ArgumentOutOfRangeException(nameof(port), $"Port value must be a nibble in range [0, 0xF], but was instead: {port}");
             }
 
             tncPort = port;
@@ -128,14 +128,14 @@ namespace AprsSharp.Protocols
         {
             if (bytes == null)
             {
-                throw new ArgumentNullException("bytes");
+                throw new ArgumentNullException(nameof(bytes));
             }
             else if (bytes.Length == 0)
             {
-                throw new ArgumentException("Bytes to send has length zero.", "bytes");
+                throw new ArgumentException("Bytes to send has length zero.", nameof(bytes));
             }
 
-            return EncodeAndSend(Commands.DATA_FRAME, bytes);
+            return EncodeAndSend(Command.DataFrame, bytes);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace AprsSharp.Protocols
         /// <returns>The encoded bytes.</returns>
         public byte[] SetTxDelay(byte delay)
         {
-            return EncodeAndSend(Commands.TX_DELAY, new byte[1] { delay });
+            return EncodeAndSend(Command.TxDelay, new byte[1] { delay });
         }
 
         /// <summary>
@@ -160,10 +160,10 @@ namespace AprsSharp.Protocols
         {
             if (p < 0 || p > 255)
             {
-                throw new ArgumentOutOfRangeException("p", "p should be in range [0, 255], but was " + p);
+                throw new ArgumentOutOfRangeException(nameof(p), $"p should be in range [0, 255], but was {p}");
             }
 
-            return EncodeAndSend(Commands.P, new byte[1] { p });
+            return EncodeAndSend(Command.P, new byte[1] { p });
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace AprsSharp.Protocols
         /// <returns>The encoded bytes.</returns>
         public byte[] SetSlotTime(byte slotTime)
         {
-            return EncodeAndSend(Commands.SLOT_TIME, new byte[1] { slotTime });
+            return EncodeAndSend(Command.SlotTime, new byte[1] { slotTime });
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace AprsSharp.Protocols
         /// <returns>The encoded bytes.</returns>
         public byte[] SetTxTail(byte time)
         {
-            return EncodeAndSend(Commands.TX_TAIL, new byte[1] { time });
+            return EncodeAndSend(Command.TxTail, new byte[1] { time });
         }
 
         /// <summary>
@@ -197,7 +197,7 @@ namespace AprsSharp.Protocols
         {
             byte commandByte = (state == DuplexState.FullDuplex) ? (byte)1 : (byte)0;
 
-            return EncodeAndSend(Commands.FULL_DUPLEX, new byte[1] { commandByte });
+            return EncodeAndSend(Command.FullDuplex, new byte[1] { commandByte });
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace AprsSharp.Protocols
         /// <returns>The encoded bytes.</returns>
         public byte[] SetHardwareSpecific(byte value)
         {
-            return EncodeAndSend(Commands.SET_HARDWARE, new byte[1] { value });
+            return EncodeAndSend(Command.SetHardware, new byte[1] { value });
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace AprsSharp.Protocols
         /// <returns>The encoded bytes.</returns>
         public byte[] ExitKISSMode()
         {
-            return EncodeAndSend(Commands.RETURN, Array.Empty<byte>());
+            return EncodeAndSend(Command.RETURN, Array.Empty<byte>());
         }
 
         /// <summary>
@@ -231,13 +231,18 @@ namespace AprsSharp.Protocols
         {
             Queue<byte[]> receivedFrames = new Queue<byte[]>();
 
+            if (newBytes == null)
+            {
+                throw new ArgumentNullException(nameof(newBytes));
+            }
+
             foreach (byte recByte in newBytes)
             {
                 byte? byteToEnqueue = null;
 
                 if (previousWasFEND)
                 {
-                    previousWasFEND = recByte == (byte)SpecialCharacters.FEND;
+                    previousWasFEND = recByte == (byte)SpecialCharacter.FEND;
                     continue;
                 }
 
@@ -246,17 +251,17 @@ namespace AprsSharp.Protocols
                 {
                     switch (recByte)
                     {
-                        case (byte)SpecialCharacters.TFESC:
-                            byteToEnqueue = (byte)SpecialCharacters.FESC;
+                        case (byte)SpecialCharacter.TFESC:
+                            byteToEnqueue = (byte)SpecialCharacter.FESC;
                             break;
 
-                        case (byte)SpecialCharacters.TFEND:
-                            byteToEnqueue = (byte)SpecialCharacters.FEND;
+                        case (byte)SpecialCharacter.TFEND:
+                            byteToEnqueue = (byte)SpecialCharacter.FEND;
                             break;
 
                         default:
                             // Not really an escape, push on the previously unused FESC character and move on
-                            receivedBuffer.Enqueue((byte)SpecialCharacters.FESC);
+                            receivedBuffer.Enqueue((byte)SpecialCharacter.FESC);
                             break;
                     }
 
@@ -268,7 +273,7 @@ namespace AprsSharp.Protocols
                 {
                     switch (recByte)
                     {
-                        case (byte)SpecialCharacters.FEND:
+                        case (byte)SpecialCharacter.FEND:
                             byte[] deliverBytes = receivedBuffer.ToArray();
                             receivedBuffer.Clear();
                             previousWasFEND = true;
@@ -281,7 +286,7 @@ namespace AprsSharp.Protocols
 
                             break;
 
-                        case (byte)SpecialCharacters.FESC:
+                        case (byte)SpecialCharacter.FESC:
                             inEscapeMode = true;
                             break;
 
@@ -307,26 +312,26 @@ namespace AprsSharp.Protocols
         /// <param name="port">The port to address on the TNC.</param>
         /// <param name="bytes">Optionally, bytes to encode.</param>
         /// <returns>Encoded bytes.</returns>
-        private byte[] EncodeFrame(Commands command, byte port, byte[] bytes)
+        private static byte[] EncodeFrame(Command command, byte port, byte[] bytes)
         {
             // We will need at least FEND, command byte, bytes, FEND. Potentially more as bytes could have characters needing escape.
             Queue<byte> frame = new Queue<byte>(3 + ((bytes == null) ? 0 : bytes.Length));
 
-            frame.Enqueue((byte)SpecialCharacters.FEND);
+            frame.Enqueue((byte)SpecialCharacter.FEND);
             frame.Enqueue((byte)((port << 4) | (byte)command));
 
             foreach (byte b in bytes ?? Array.Empty<byte>())
             {
                 switch (b)
                 {
-                    case (byte)SpecialCharacters.FEND:
-                        frame.Enqueue((byte)SpecialCharacters.FESC);
-                        frame.Enqueue((byte)SpecialCharacters.TFEND);
+                    case (byte)SpecialCharacter.FEND:
+                        frame.Enqueue((byte)SpecialCharacter.FESC);
+                        frame.Enqueue((byte)SpecialCharacter.TFEND);
                         break;
 
-                    case (byte)SpecialCharacters.FESC:
-                        frame.Enqueue((byte)SpecialCharacters.FESC);
-                        frame.Enqueue((byte)SpecialCharacters.TFESC);
+                    case (byte)SpecialCharacter.FESC:
+                        frame.Enqueue((byte)SpecialCharacter.FESC);
+                        frame.Enqueue((byte)SpecialCharacter.TFESC);
                         break;
 
                     default:
@@ -335,7 +340,7 @@ namespace AprsSharp.Protocols
                 }
             }
 
-            frame.Enqueue((byte)SpecialCharacters.FEND);
+            frame.Enqueue((byte)SpecialCharacter.FEND);
 
             return frame.ToArray();
         }
@@ -367,7 +372,7 @@ namespace AprsSharp.Protocols
         /// <param name="command">Command / frame time to encode.</param>
         /// <param name="data">Data to send.</param>
         /// <returns>The encoded bytes.</returns>
-        private byte[] EncodeAndSend(Commands command, byte[] data)
+        private byte[] EncodeAndSend(Command command, byte[] data)
         {
             byte[] encodedBytes = EncodeFrame(command, tncPort, data);
 

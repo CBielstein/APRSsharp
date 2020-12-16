@@ -1,4 +1,4 @@
-﻿namespace AprsSharp.Connections.AprsIs
+﻿ namespace AprsSharp.Connections.AprsIs
 {
     using System;
     using System.IO;
@@ -7,7 +7,7 @@
     /// <summary>
     /// Represents a TcpConnection.
     /// </summary>
-    public class TcpConnection : ITcpConnection, IDisposable
+    public sealed class TcpConnection : ITcpConnection, IDisposable
     {
         private readonly TcpClient tcpClient = new TcpClient();
         private NetworkStream? stream;
@@ -18,12 +18,15 @@
         public void Connect(string server, int port)
         {
             tcpClient.Connect(@server, 14580);
+            stream?.Dispose();
             stream = tcpClient.GetStream();
+            writer?.Dispose();
             writer = new StreamWriter(stream)
             {
                 NewLine = "\r\n",
                 AutoFlush = true,
             };
+            reader?.Dispose();
             reader = new StreamReader(stream);
         }
 

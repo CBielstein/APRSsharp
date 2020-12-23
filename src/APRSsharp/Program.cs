@@ -11,6 +11,15 @@
     public class Program
     {
         /// <summary>
+        /// A function matching the delegate event to print the received message.
+        /// </summary>
+        /// <param name="tcpMessage">The received tcp message that needs to be printed.</param>
+        public static void PrintTcpMessage(string tcpMessage)
+        {
+            Console.WriteLine(tcpMessage);
+        }
+
+        /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
@@ -27,6 +36,7 @@
             password = Console.ReadLine();
             string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
             string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
+            n.ReceivedTcpMessage += PrintTcpMessage;
             n.Receive(callsignArg, passwordArg);
 
             // skeleton method that will be used to handle the decoded packets

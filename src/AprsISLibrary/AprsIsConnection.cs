@@ -6,6 +6,13 @@
     using System.Net.Sockets;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Delegate for handling a full string from a TCP client.
+    /// </summary>
+    /// <param name="tcpMessage">The TCP message.</param>
+    public delegate void HandleTcpString(string tcpMessage);
 
     /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
@@ -14,11 +21,17 @@
     public class AprsIsConnection
     {
         /// <summary>
+        /// Event raised when TCP message is returned.
+        /// </summary>
+        public event HandleTcpString? ReceivedTcpMessage;
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
-        public void Receive(string? callsign, string? password)
+        /// <returns>An async task.</returns>
+        public async Task Receive(string? callsign, string? password)
         {
             callsign = callsign ?? "N0CALL";
             password = password ?? "-1";
@@ -28,11 +41,11 @@
             bool authenticated = false;
 
             // Open connection
-            using TcpClient tcpClient = new TcpClient();
-            tcpClient.Connect(server, 14580);
+            using TcpClient tcpConnection = new TcpClient();
+            tcpConnection.Connect(server, 14580);
 
             // Set up streams
-            using NetworkStream stream = tcpClient.GetStream();
+            using NetworkStream stream = tcpConnection.GetStream();
             using StreamWriter writer = new StreamWriter(stream, Encoding.UTF8)
             {
                 NewLine = "\r\n",
@@ -40,31 +53,34 @@
             };
             using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
 
-            // Receive
-            while (true)
+           // Receive
+            await Task.Run(() =>
             {
-                Thread.Sleep(500);
-
-                string? received = reader.ReadLine();
-
-                if (!string.IsNullOrEmpty(received))
+                while (true)
                 {
-                    Console.WriteLine(received);
+                    string? received = reader.ReadLine();
 
-                    if (received.StartsWith('#'))
+                    if (!string.IsNullOrEmpty(received))
                     {
-                        if (received.Contains("logresp"))
-                        {
-                            authenticated = true;
-                        }
+                        ReceivedTcpMessage?.Invoke(received);
 
-                        if (!authenticated)
+                        if (received.StartsWith('#'))
                         {
-                            writer.WriteLine(authString);
+                            if (received.Contains("logresp"))
+                            {
+                                authenticated = true;
+                            }
+
+                            if (!authenticated)
+                            {
+                                writer.WriteLine(authString);
+                            }
                         }
                     }
+
+                    Thread.Sleep(500);
                 }
-            }
+            });
         }
     }
 }

@@ -20,6 +20,17 @@
     /// </summary>
     public class AprsIsConnection
     {
+        private readonly ITcpConnection tcpConnection;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
+        /// </summary>
+        /// <param name="tcpConnection">Optionally, a TcpConnection to use for communication.</param>
+        public AprsIsConnection(ITcpConnection tcpConnection)
+        {
+            this.tcpConnection = tcpConnection;
+        }
+
         /// <summary>
         /// Event raised when TCP message is returned.
         /// </summary>
@@ -41,24 +52,14 @@
             bool authenticated = false;
 
             // Open connection
-            using TcpClient tcpConnection = new TcpClient();
             tcpConnection.Connect(server, 14580);
-
-            // Set up streams
-            using NetworkStream stream = tcpConnection.GetStream();
-            using StreamWriter writer = new StreamWriter(stream, Encoding.UTF8)
-            {
-                NewLine = "\r\n",
-                AutoFlush = true,
-            };
-            using StreamReader reader = new StreamReader(stream, Encoding.UTF8);
 
            // Receive
             await Task.Run(() =>
             {
                 while (true)
                 {
-                    string? received = reader.ReadLine();
+                    string? received = tcpConnection.ReceiveString();
 
                     if (!string.IsNullOrEmpty(received))
                     {
@@ -73,7 +74,7 @@
 
                             if (!authenticated)
                             {
-                                writer.WriteLine(authString);
+                                tcpConnection.SendString(authString);
                             }
                         }
                     }

@@ -25,7 +25,8 @@
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
         public static void Main(string[] args)
         {
-            AprsIsConnection n = new AprsIsConnection();
+            using TcpConnection tcpConnection = new TcpConnection();
+            AprsIsConnection n = new AprsIsConnection(tcpConnection);
             string callsign;
             string password;
 

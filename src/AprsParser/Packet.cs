@@ -8,7 +8,7 @@
     /// A representation of an APRS Packet.
     /// Does decoding of an APRS packet as a string.
     /// </summary>
-    public partial class Packet
+    public class Packet
     {
         /// <summary>
         /// Maps a type-identifying character to a packet Type.

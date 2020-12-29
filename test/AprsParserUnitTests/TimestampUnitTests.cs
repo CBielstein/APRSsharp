@@ -15,9 +15,7 @@
         [Fact]
         public void FindCorrectYearAndMonth_DayOutOfRange()
         {
-            Timestamp ts = new Timestamp();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => ts.FindCorrectYearAndMonth(32, DateTime.Now, out _, out _));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Timestamp.FindCorrectYearAndMonth(32, DateTime.Now, out _, out _));
         }
 
         /// <summary>
@@ -26,13 +24,11 @@
         [Fact]
         public void FindCorrectYearAndMonth_SameMonth()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2016;
             int expectedMonth = 10;
             DateTime midMonth = new DateTime(expectedYear, expectedMonth, 24);
 
-            ts.FindCorrectYearAndMonth(7, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(7, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);
@@ -44,13 +40,11 @@
         [Fact]
         public void FindCorrectYearAndMonth_PreviousMonth()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2016;
             int expectedMonth = 9;
             DateTime midMonth = new DateTime(expectedYear, 10, 24);
 
-            ts.FindCorrectYearAndMonth(25, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(25, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);
@@ -62,13 +56,11 @@
         [Fact]
         public void FindCorrectYearAndMonth_PreviousYear()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2015;
             int expectedMonth = 12;
             DateTime midMonth = new DateTime(2016, 1, 1);
 
-            ts.FindCorrectYearAndMonth(31, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(31, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);
@@ -81,13 +73,11 @@
         [Fact]
         public void FindCorrectYearAndMonth_TwoMonthsAgo()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2016;
             int expectedMonth = 1;
             DateTime midMonth = new DateTime(expectedYear, 3, 1);
 
-            ts.FindCorrectYearAndMonth(30, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(30, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear,  year);
             Assert.Equal(expectedMonth, month);
@@ -100,14 +90,12 @@
         [Fact]
         public void FindCorrectYearAndMonth_NotLeapYear()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2015;
             int expectedMonth = 1;
 
             DateTime midMonth = new DateTime(expectedYear, 3, 1);
 
-            ts.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);
@@ -120,13 +108,11 @@
         [Fact]
         public void FindCorrectYearAndMonth_LeapYear()
         {
-            Timestamp ts = new Timestamp();
-
             int expectedYear = 2016;
             int expectedMonth = 2;
             DateTime midMonth = new DateTime(expectedYear, 3, 1);
 
-            ts.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);
@@ -169,12 +155,10 @@
         [Fact]
         public void FindCorrectDayMonthAndYear_SameDayLocal()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Local);
             DateTime hint = packet.AddHours(1);
 
-            ts.FindCorrectDayMonthAndYear(
+            Timestamp.FindCorrectDayMonthAndYear(
                 packet.Hour,
                 packet.Minute,
                 packet.Second,
@@ -195,12 +179,10 @@
         [Fact]
         public void FindCorrectDayMonthAndYear_YesterdayZulu()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Utc);
             DateTime hint = packet.AddHours(-2);
 
-            ts.FindCorrectDayMonthAndYear(
+            Timestamp.FindCorrectDayMonthAndYear(
                 packet.Hour,
                 packet.Minute,
                 packet.Second,
@@ -221,12 +203,10 @@
         [Fact]
         public void FindCorrectDayMonthAndYear_3MinutesAhead()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMinutes(-3);
 
-            ts.FindCorrectDayMonthAndYear(
+            Timestamp.FindCorrectDayMonthAndYear(
                 packet.Hour,
                 packet.Minute,
                 packet.Second,
@@ -260,12 +240,10 @@
         [Fact]
         public void FindCorrectYear_3MinutesAhead()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMinutes(-3);
 
-            ts.FindCorrectYear(
+            Timestamp.FindCorrectYear(
                 packet.Month,
                 packet.Day,
                 packet.Hour,
@@ -282,12 +260,10 @@
         [Fact]
         public void FindCorrectYear_ThisYear()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMonths(1);
 
-            ts.FindCorrectYear(
+            Timestamp.FindCorrectYear(
                 packet.Month,
                 packet.Day,
                 packet.Hour,
@@ -304,12 +280,10 @@
         [Fact]
         public void FindCorrectYear_LastYear()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMonths(3);
 
-            ts.FindCorrectYear(
+            Timestamp.FindCorrectYear(
                 packet.Month,
                 packet.Day,
                 packet.Hour,
@@ -326,12 +300,10 @@
         [Fact]
         public void FindCorrectYear_LeapYear()
         {
-            Timestamp ts = new Timestamp();
-
             DateTime packet = new DateTime(2015, 2, 28, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMonths(1);
 
-            ts.FindCorrectYear(
+            Timestamp.FindCorrectYear(
                 packet.Month,
                 packet.Day + 1,
                 packet.Hour,

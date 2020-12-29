@@ -487,8 +487,7 @@
         [Fact]
         public void GetTypeChar_DoNotUse()
         {
-            Packet p = new Packet();
-            Assert.Throws<ArgumentException>(() => p.GetTypeChar(Packet.Type.DoNotUse));
+            Assert.Throws<ArgumentException>(() => Packet.GetTypeChar(Packet.Type.DoNotUse));
         }
 
         /// <summary>
@@ -497,11 +496,7 @@
         [Fact]
         public void GetTypeChar_1()
         {
-            Packet p = new Packet();
-
-            char value = (char)p.GetTypeChar(Packet.Type.PositionWithoutTimestampWithMessaging);
-
-            Assert.Equal('=', value);
+            Assert.Equal('=', Packet.GetTypeChar(Packet.Type.PositionWithoutTimestampWithMessaging));
         }
 
         /// <summary>
@@ -510,11 +505,9 @@
         [Fact]
         public void GetDataType_1()
         {
-            Packet p = new Packet();
-
-            Packet.Type value = (Packet.Type)p.GetDataType("/092345z4903.50N/07201.75W>Test1234");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, value);
+            Assert.Equal(
+                Packet.Type.PositionWithTimestampNoMessaging,
+                Packet.GetDataType("/092345z4903.50N/07201.75W>Test1234"));
         }
 
         /// <summary>

@@ -22,12 +22,12 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// Marks if the next character received should be translated as an escaped character.
         /// </summary>
-        private bool inEscapeMode;
+        private bool inEscapeMode = false;
 
         /// <summary>
         /// Tracks if the previously received byte was FEND, so we can skip the control byte which comes next.
         /// </summary>
-        private bool previousWasFEND;
+        private bool previousWasFEND = false;
 
         /// <summary>
         /// The port on the TNC used for communication.

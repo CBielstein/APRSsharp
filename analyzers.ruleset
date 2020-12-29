@@ -18,5 +18,8 @@
 
     <!-- SA1633:FileMustHaveHeader -->
     <Rule Id="SA1633" Action="None" />
+
+    <!-- CA1805:DoNotInitializeUnnecessarily -->
+    <Rule Id="CA1805" Action="None" />
   </Rules>
 </RuleSet>

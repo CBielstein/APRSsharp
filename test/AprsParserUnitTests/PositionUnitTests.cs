@@ -160,9 +160,7 @@
         public void CountAmbiguityInvalid()
         {
             string latitude = "49  .1  N";
-            Position p = new Position();
-
-            Assert.Throws<ArgumentException>(() => p.CountAmbiguity(latitude));
+            Assert.Throws<ArgumentException>(() => Position.CountAmbiguity(latitude));
         }
 
         /// <summary>
@@ -172,9 +170,7 @@
         public void EnforceAmbiguityBasic()
         {
             string latitude = "4903.50N";
-            Position p = new Position();
-
-            string ambiguous = p.EnforceAmbiguity(latitude, 2);
+            string ambiguous = Position.EnforceAmbiguity(latitude, 2);
             Assert.Equal("4903.  N", ambiguous);
         }
 
@@ -185,9 +181,7 @@
         public void EnforceAmbiguityBasic2()
         {
             string latitude = "4903.50N";
-            Position p = new Position();
-
-            string ambiguous = p.EnforceAmbiguity(latitude, 4);
+            string ambiguous = Position.EnforceAmbiguity(latitude, 4);
             Assert.Equal("49  .  N", ambiguous);
         }
 
@@ -198,9 +192,7 @@
         public void EnforceAmbiguityInvalidArg()
         {
             string latitude = "4903.50N";
-            Position p = new Position();
-
-            Assert.Throws<ArgumentOutOfRangeException>(() => p.EnforceAmbiguity(latitude, 7));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Position.EnforceAmbiguity(latitude, 7));
         }
 
         /// <summary>

@@ -69,7 +69,7 @@
         /// <summary>
         /// Gets or sets a <see cref="DateTime"/> representing the APRS timestamp.
         /// </summary>
-        public DateTime DateTime { get; set; } = DateTime.Now.ToUniversalTime();
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Gets or sets a <see cref="Type"/> representing the APRS timestamp type.
@@ -378,7 +378,7 @@
             int day = int.Parse(dayStr, CultureInfo.InvariantCulture);
             int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
             int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
-            DateTime hint = wasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
+            DateTime hint = wasZuluTime ? DateTime.UtcNow : DateTime.Now;
 
             FindCorrectYearAndMonth(day, hint, out int year, out int month);
             DateTimeKind dtKind = wasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
@@ -410,7 +410,7 @@
             int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
             int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
             int second = int.Parse(secondStr, CultureInfo.InvariantCulture);
-            DateTime hint = DateTime.Now.ToUniversalTime();
+            DateTime hint = DateTime.UtcNow;
 
             FindCorrectDayMonthAndYear(
                 hour,
@@ -451,7 +451,7 @@
             int day = int.Parse(dayStr, CultureInfo.InvariantCulture);
             int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
             int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
-            DateTime hint = DateTime.Now.ToUniversalTime();
+            DateTime hint = DateTime.UtcNow;
 
             FindCorrectYear(
                 month,

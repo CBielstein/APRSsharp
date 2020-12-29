@@ -163,6 +163,7 @@
             /// <summary>
             /// Object
             /// </summary>
+            [field:System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1720", Justification = "APRS spec uses the word 'object', so it is appropriate here")]
             Object,
 
             /// <summary>
@@ -272,6 +273,70 @@
         public NmeaData? RawNmeaData { get; set; } = null;
 
         /// <summary>
+        /// Given an information field, this returns the Type of the APRS packet.
+        /// </summary>
+        /// <param name="informationField">A string encoded APRS Information Field.</param>
+        /// <returns>Packet.Type of the data type.</returns>
+        public static Type GetDataType(string informationField)
+        {
+            if (informationField == null)
+            {
+                throw new ArgumentNullException(nameof(informationField));
+            }
+
+            // TODO: This isn't always true.
+            // '!' can come up to the 40th position.
+            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
+
+            return DataTypeMap[dataTypeIdentifier];
+        }
+
+        /// <summary>
+        /// Returns the char for a given Packet.Type.
+        /// </summary>
+        /// <param name="type">Type to represent.</param>
+        /// <returns>A char representing type.</returns>
+        public static char GetTypeChar(Type type)
+        {
+            if (type == Type.DoNotUse || type == Type.Unused || type == Type.Unknown)
+            {
+                throw new ArgumentException("Used invalid Type " + type);
+            }
+
+            IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
+            return keys.Single();
+        }
+
+        /// <summary>
+        /// Decodes a position from raw GPS location (NMEA formats)
+        /// This expects a three letter type to start the string
+        /// Supported formats:
+        ///     None yet.
+        /// </summary>
+        /// <param name="rawGpsPacket">The full packet. Decoded.</param>
+        public static void HandleRawGps(string rawGpsPacket)
+        {
+            if (rawGpsPacket == null)
+            {
+                throw new ArgumentNullException(nameof(rawGpsPacket));
+            }
+            else if (rawGpsPacket.Length < 6)
+            {
+                // 6 is the length of the identifier $GPxxx, so the string is invalid if it isn't at least that long
+                throw new ArgumentException("rawGpsPacket should be 6 or more characters in length. Given length: " + rawGpsPacket.Length);
+            }
+
+            // Ensure start of identifier is valid
+            if (!rawGpsPacket.Substring(0, 3).Equals("$GP", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentNullException("rawGpsPacket should have started with $GP. Given packet started with:" + rawGpsPacket.Substring(0, 3));
+            }
+
+            // Get type of packet
+            NmeaData.Type nmeaDataType = NmeaData.GetType(rawGpsPacket.Substring(3, 3));
+        }
+
+        /// <summary>
         /// Takes a string encoding of an APRS packet, decodes it, and saves it in to this object.
         /// </summary>
         /// <param name="encodedPacket">A string encoding of an AX.25 APRS packet.</param>
@@ -365,7 +430,7 @@
         {
             if (informationField == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(informationField));
             }
             else if (informationField.Length == 0)
             {
@@ -429,7 +494,7 @@
                 case Type.Status:
                     {
                         Position = new Position();
-                        int endGridsquare = informationField.IndexOf(' ');
+                        int endGridsquare = informationField.IndexOf(' ', StringComparison.Ordinal);
                         if (endGridsquare == -1)
                         {
                             Position.DecodeMaidenhead(informationField.Substring(1));
@@ -460,7 +525,7 @@
                     Position = new Position();
                     {
                         Position = new Position();
-                        int endGridsquare = informationField.IndexOf(']');
+                        int endGridsquare = informationField.IndexOf(']', StringComparison.Ordinal);
                         Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
 
                         if (endGridsquare + 1 < informationField.Length)
@@ -488,69 +553,8 @@
                 case Type.Unknown:
                     throw new NotImplementedException("Unknown");
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(informationField));
             }
-        }
-
-        /// <summary>
-        /// Given an information field, this returns the Type of the APRS packet.
-        /// </summary>
-        /// <param name="informationField">A string encoded APRS Information Field.</param>
-        /// <returns>Packet.Type of the data type.</returns>
-        public Type GetDataType(string informationField)
-        {
-            // TODO: This isn't always true.
-            // '!' can come up to the 40th position.
-            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
-
-            return DataTypeMap[dataTypeIdentifier];
-        }
-
-        /// <summary>
-        /// Returns the char for a given Packet.Type.
-        /// </summary>
-        /// <param name="type">Type to represent.</param>
-        /// <returns>A char representing type.</returns>
-        public char GetTypeChar(Type type)
-        {
-            if (type == Type.DoNotUse || type == Type.Unused || type == Type.Unknown)
-            {
-                throw new ArgumentException("Used invalid Type " + type);
-            }
-
-            IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
-            return keys.Single();
-        }
-
-        /// <summary>
-        /// Decodes a position from raw GPS location (NMEA formats)
-        /// This expects a three letter type to start the string
-        /// Supported formats:
-        ///     None yet.
-        /// </summary>
-        /// <param name="rawGpsPacket">The full packet. Decoded.</param>
-        public void HandleRawGps(string rawGpsPacket)
-        {
-            if (rawGpsPacket == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else if (rawGpsPacket.Length < 6)
-            {
-                // 6 is the length of the identifier $GPxxx, so the string is invalid if it isn't at least that long
-                throw new ArgumentException("rawGpsPacket should be 6 or more characters in length. Given length: " + rawGpsPacket.Length);
-            }
-
-            string upperRawPacket = rawGpsPacket.ToUpperInvariant();
-
-            // Ensure start of identifier is valid
-            if (!upperRawPacket.Substring(0, 3).Equals("$GP"))
-            {
-                throw new ArgumentNullException("rawGpsPacket should have started with $GP. Given packet started with:" + upperRawPacket.Substring(0, 3));
-            }
-
-            // Get type of packet
-            NmeaData.Type nmeaDataType = NmeaData.GetType(upperRawPacket.Substring(3, 3));
         }
 
         /// <summary>

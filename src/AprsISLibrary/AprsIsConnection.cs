@@ -25,12 +25,12 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
-        /// <param name="tcpConnection">A TcpConnection to use for communication.</param>
+        /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
         public AprsIsConnection(ITcpConnection tcpConnection)
         {
             if (tcpConnection == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(tcpConnection));
             }
 
             this.tcpConnection = tcpConnection;

@@ -17,7 +17,7 @@
         /// <inheritdoc/>
         public void Connect(string server, int port)
         {
-            tcpClient.Connect(@server, port);
+            tcpClient.Connect(server, port);
             stream?.Dispose();
             stream = tcpClient.GetStream();
             writer?.Dispose();

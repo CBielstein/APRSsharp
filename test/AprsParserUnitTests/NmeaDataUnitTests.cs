@@ -9,38 +9,25 @@
     public class NmeaDataUnitTests
     {
         /// <summary>
-        /// Tests GetType.
+        /// Tests GetType from a type identifier.
         /// </summary>
-        [Fact]
-        public void GetType_FromIdentifier_1()
+        /// <param name="expected">Expected NmeaData.Type returned by test.</param>
+        /// <param name="input">Input string to test.</param>
+        [Theory]
+        [InlineData(NmeaData.Type.GGA, "GGA")]
+        [InlineData(NmeaData.Type.Unknown, "POO")]
+        [InlineData(NmeaData.Type.WPT, "wpt")]
+        [InlineData(NmeaData.Type.WPT, "wpl")]
+        public void GetTypeFromIdentifier(in NmeaData.Type expected, in string input)
         {
-            Assert.Equal(NmeaData.Type.GGA, NmeaData.GetType("GGA"));
+            Assert.Equal(expected, NmeaData.GetType(input));
         }
 
         /// <summary>
-        /// Tests GetType.
-        /// </summary>
-        [Fact]
-        public void GetType_FromIdentifier_2()
-        {
-            Assert.Equal(NmeaData.Type.Unknown, NmeaData.GetType("POO"));
-        }
-
-        /// <summary>
-        /// Tests GetType.
-        /// </summary>
-        [Fact]
-        public void GetType_FromIdentifier_3()
-        {
-            Assert.Equal(NmeaData.Type.WPT, NmeaData.GetType("wpt"));
-            Assert.Equal(NmeaData.Type.WPT, NmeaData.GetType("wpl"));
-        }
-
-        /// <summary>
-        /// Tests GetType.
+        /// Tests GetType from a full NMEA string.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void GetType_FromRawString_4()
+        public void GetTypeFromRawString()
         {
             Assert.Equal(NmeaData.Type.RMC, NmeaData.GetType("$GPRMC,063909,A,3349.4302,N,11700.3721,W,43.022,89.3,291099,13.6,E*52"));
         }

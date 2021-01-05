@@ -81,14 +81,22 @@
         }
 
         /// <summary>
-        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
-        /// assuming the packet is from the same day using local.
+        /// Test FindCorrectDayMonthAndYear from an HMS packet.
+        /// This tests all in UTC as all DateTime differences are relative so in theory local vs UTC should not change behavior here.
+        /// Hint is 2016/11/1 01:30:00, set offsets appropriately for tests.
         /// </summary>
-        [Fact]
-        public void FindCorrectDayMonthAndYear_SameDayLocal()
+        /// <param name="minutesBetweenPacketAndHint">Offset the packet time from the hint. Positive values move packet before hint, negative after.</param>
+        /// <param name="expectedDaysBeforeHint">Expected number of days before the hint (0 for today, 1 for yesterday).</param>
+        [Theory]
+        [InlineData(60, 0)] // Same day
+        [InlineData(120, 1)] // Yesterday (pushes hint to "tomorrow" relative to packet)
+        [InlineData(3, 0)] // Three minutes ahead (test 5 minute packet time buffer)
+        public void FindCorrectDayMonthAndYear(
+            int minutesBetweenPacketAndHint,
+            int expectedDaysBeforeHint)
         {
-            DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Local);
-            DateTime hint = packet.AddHours(1);
+            DateTime hint = new DateTime(2016, 11, 18, 1, 30, 0, DateTimeKind.Utc);
+            DateTime packet = hint.Subtract(new TimeSpan(0, minutesBetweenPacketAndHint, 0));
 
             Timestamp.FindCorrectDayMonthAndYear(
                 packet.Hour,
@@ -99,55 +107,7 @@
                 out int month,
                 out int year);
 
-            Assert.Equal(packet.Day, day);
-            Assert.Equal(packet.Month, month);
-            Assert.Equal(packet.Year, year);
-        }
-
-        /// <summary>
-        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
-        /// assuming the packet is from yesterday using zulu.
-        /// </summary>
-        [Fact]
-        public void FindCorrectDayMonthAndYear_YesterdayZulu()
-        {
-            DateTime packet = new DateTime(2016, 11, 18, 22, 48, 16, DateTimeKind.Utc);
-            DateTime hint = packet.AddHours(-2);
-
-            Timestamp.FindCorrectDayMonthAndYear(
-                packet.Hour,
-                packet.Minute,
-                packet.Second,
-                hint,
-                out int day,
-                out int month,
-                out int year);
-
-            Assert.Equal(packet.Day - 1, day);
-            Assert.Equal(packet.Month, month);
-            Assert.Equal(packet.Year, year);
-        }
-
-        /// <summary>
-        /// Test FindCorrectDayMonthAndYear from an HMS packet perspective
-        /// with the packet coming from 3 minutes before hint.
-        /// </summary>
-        [Fact]
-        public void FindCorrectDayMonthAndYear_3MinutesAhead()
-        {
-            DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
-            DateTime hint = packet.AddMinutes(-3);
-
-            Timestamp.FindCorrectDayMonthAndYear(
-                packet.Hour,
-                packet.Minute,
-                packet.Second,
-                hint,
-                out int day,
-                out int month,
-                out int year);
-
-            Assert.Equal(hint.Day, day);
+            Assert.Equal(hint.Day - expectedDaysBeforeHint, day);
             Assert.Equal(hint.Month, month);
             Assert.Equal(hint.Year, year);
         }

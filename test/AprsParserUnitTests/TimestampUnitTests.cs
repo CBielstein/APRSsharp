@@ -19,100 +19,32 @@
         }
 
         /// <summary>
-        /// Ensures we find the correct month and year when we're in the same month.
+        /// Tests FindCorrectYearAndMonth.
         /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_SameMonth()
+        /// <param name="day">A day to find in the most recent applicable month and year.</param>
+        /// <param name="hintYear">The year for the "hint" (usually the current date).</param>
+        /// <param name="hintMonth">The month for the "hint" (usually the current date).</param>
+        /// <param name="hintDay">The day for the "hint" (usually the current date).</param>
+        /// <param name="expectedYear">The expected resultant year.</param>
+        /// <param name="expectedMonth">The expected resultant month.</param>
+        [Theory]
+        [InlineData(7, 2016, 10, 24, 2016, 10)] // Same Month
+        [InlineData(25, 2016, 10, 24, 2016, 9)] // Previous Month
+        [InlineData(31, 2016, 1, 1, 2015, 12)] // Previous Year
+        [InlineData(30, 2016, 3, 1, 2016, 1)] // Two Months Previous
+        [InlineData(29, 2015, 3, 1, 2015, 1)] // Not leap year (Feb 29, 2015 does NOT exist)
+        [InlineData(29, 2016, 3, 1, 2016, 2)] // Leap year (Feb 29, 2016 DOES exist)
+        public void FindCorrectYearAndMonth(
+            in int day,
+            in int hintYear,
+            in int hintMonth,
+            in int hintDay,
+            in int expectedYear,
+            in int expectedMonth)
         {
-            int expectedYear = 2016;
-            int expectedMonth = 10;
-            DateTime midMonth = new DateTime(expectedYear, expectedMonth, 24);
+            DateTime hint = new DateTime(hintYear, hintMonth, hintDay);
 
-            Timestamp.FindCorrectYearAndMonth(7, midMonth, out int year, out int month);
-
-            Assert.Equal(expectedYear, year);
-            Assert.Equal(expectedMonth, month);
-        }
-
-        /// <summary>
-        /// Ensures we find the correct month and year when the day is from last month.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_PreviousMonth()
-        {
-            int expectedYear = 2016;
-            int expectedMonth = 9;
-            DateTime midMonth = new DateTime(expectedYear, 10, 24);
-
-            Timestamp.FindCorrectYearAndMonth(25, midMonth, out int year, out int month);
-
-            Assert.Equal(expectedYear, year);
-            Assert.Equal(expectedMonth, month);
-        }
-
-        /// <summary>
-        /// Ensures we find the correct month and year when the day is from last year.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_PreviousYear()
-        {
-            int expectedYear = 2015;
-            int expectedMonth = 12;
-            DateTime midMonth = new DateTime(2016, 1, 1);
-
-            Timestamp.FindCorrectYearAndMonth(31, midMonth, out int year, out int month);
-
-            Assert.Equal(expectedYear, year);
-            Assert.Equal(expectedMonth, month);
-        }
-
-        /// <summary>
-        /// Ensures we find the correct month and year when the day is from two months ago.
-        /// Skips 2/30, since that day doesn't exist.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_TwoMonthsAgo()
-        {
-            int expectedYear = 2016;
-            int expectedMonth = 1;
-            DateTime midMonth = new DateTime(expectedYear, 3, 1);
-
-            Timestamp.FindCorrectYearAndMonth(30, midMonth, out int year, out int month);
-
-            Assert.Equal(expectedYear,  year);
-            Assert.Equal(expectedMonth, month);
-        }
-
-        /// <summary>
-        /// Ensures we find the correct month and year when the day is from two months ago.
-        /// Skips 2/29, since that day doesn't exist in 2015.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_NotLeapYear()
-        {
-            int expectedYear = 2015;
-            int expectedMonth = 1;
-
-            DateTime midMonth = new DateTime(expectedYear, 3, 1);
-
-            Timestamp.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
-
-            Assert.Equal(expectedYear, year);
-            Assert.Equal(expectedMonth, month);
-        }
-
-        /// <summary>
-        /// Ensures we find the correct month and year when the day is from two months ago.
-        /// Does NOT skip 2/29, since that day DOES exist in 2016.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYearAndMonth_LeapYear()
-        {
-            int expectedYear = 2016;
-            int expectedMonth = 2;
-            DateTime midMonth = new DateTime(expectedYear, 3, 1);
-
-            Timestamp.FindCorrectYearAndMonth(29, midMonth, out int year, out int month);
+            Timestamp.FindCorrectYearAndMonth(day, hint, out int year, out int month);
 
             Assert.Equal(expectedYear, year);
             Assert.Equal(expectedMonth, month);

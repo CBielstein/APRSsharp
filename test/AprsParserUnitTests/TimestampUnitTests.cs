@@ -13,7 +13,7 @@
         /// Pass a day that is out of the bounds of [1,31] and expect an exception.
         /// </summary>
         [Fact]
-        public void FindCorrectYearAndMonth_DayOutOfRange()
+        public void FindCorrectYearAndMonthDayOutOfRange()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => Timestamp.FindCorrectYearAndMonth(32, DateTime.Now, out _, out _));
         }
@@ -96,7 +96,7 @@
             int expectedDaysBeforeHint)
         {
             DateTime hint = new DateTime(2016, 11, 18, 1, 30, 0, DateTimeKind.Utc);
-            DateTime packet = hint.Subtract(new TimeSpan(0, minutesBetweenPacketAndHint, 0));
+            DateTime packet = hint.AddMinutes(-1 * minutesBetweenPacketAndHint);
 
             Timestamp.FindCorrectDayMonthAndYear(
                 packet.Hour,
@@ -127,13 +127,24 @@
         }
 
         /// <summary>
-        /// Test FindCorrectYear's 5 minute drift logic.
+        /// Test FindCorrectYear.
         /// </summary>
-        [Fact]
-        public void FindCorrectYear_3MinutesAhead()
+        /// <param name="minutesBetweenPacketAndHint">Offset the packet time from the hint. Positive values move packet before hint, negative after.</param>
+        /// <param name="monthsBetweenPacketAndHint">Offset the packet month from the hint. Positive values move packet before hint, negative after.</param>
+        /// <param name="expectedYearsBeforeHint">Expected number of days before the hint (0 for this year, 1 for last year, etc.).</param>
+        [Theory]
+        [InlineData(-3, 0, 0)] // 3 minutes ahead (< 5 minutes) is considered same date
+        [InlineData(0, 1, 0)] // Same Year, 1 month ago
+        [InlineData(0, 3, 1)] // Last Year, 3 months ago
+        public void FindCorrectYear(
+            int minutesBetweenPacketAndHint,
+            int monthsBetweenPacketAndHint,
+            int expectedYearsBeforeHint)
         {
-            DateTime packet = new DateTime(2017, 1, 1, 0, 1, 1, DateTimeKind.Utc);
-            DateTime hint = packet.AddMinutes(-3);
+            DateTime hint = new DateTime(2017, 2, 1, 0, 1, 1, DateTimeKind.Utc);
+            DateTime packet = hint
+                .AddMonths(-1 * monthsBetweenPacketAndHint)
+                .AddMinutes(-1 * minutesBetweenPacketAndHint);
 
             Timestamp.FindCorrectYear(
                 packet.Month,
@@ -143,54 +154,14 @@
                 hint,
                 out int year);
 
-            Assert.Equal(hint.Year, year);
-        }
-
-        /// <summary>
-        /// Test FindCorrectYear with a packet from earlier this year.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYear_ThisYear()
-        {
-            DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
-            DateTime hint = packet.AddMonths(1);
-
-            Timestamp.FindCorrectYear(
-                packet.Month,
-                packet.Day,
-                packet.Hour,
-                packet.Minute,
-                hint,
-                out int year);
-
-            Assert.Equal(packet.Year, year);
-        }
-
-        /// <summary>
-        /// Test FindCorrectYear with a packet from last year.
-        /// </summary>
-        [Fact]
-        public void FindCorrectYear_LastYear()
-        {
-            DateTime packet = new DateTime(2016, 11, 18, 0, 1, 1, DateTimeKind.Utc);
-            DateTime hint = packet.AddMonths(3);
-
-            Timestamp.FindCorrectYear(
-                packet.Month,
-                packet.Day,
-                packet.Hour,
-                packet.Minute,
-                hint,
-                out int year);
-
-            Assert.Equal(packet.Year, year);
+            Assert.Equal(hint.Year - expectedYearsBeforeHint, year);
         }
 
         /// <summary>
         /// Test FindCorrectYear leap year edition.
         /// </summary>
         [Fact]
-        public void FindCorrectYear_LeapYear()
+        public void FindCorrectYearInLeapYear()
         {
             DateTime packet = new DateTime(2015, 2, 28, 0, 1, 1, DateTimeKind.Utc);
             DateTime hint = packet.AddMonths(1);

@@ -18,7 +18,7 @@
         [InlineData(NmeaData.Type.Unknown, "POO")]
         [InlineData(NmeaData.Type.WPT, "wpt")]
         [InlineData(NmeaData.Type.WPT, "wpl")]
-        public void GetTypeFromIdentifier(in NmeaData.Type expected, in string input)
+        public void GetTypeFromIdentifier(NmeaData.Type expected, string input)
         {
             Assert.Equal(expected, NmeaData.GetType(input));
         }

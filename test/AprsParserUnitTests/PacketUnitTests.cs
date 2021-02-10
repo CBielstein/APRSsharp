@@ -66,30 +66,6 @@
         }
 
         /// <summary>
-        /// Decodes a lat/long position report format with timestamp, no APRS messaging, zulu time, with comment
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_1()
-        {
-            Packet p = new Packet();
-
-            DateTime dt = new DateTime(2016, 12, 9, 23, 45, 0, 0, DateTimeKind.Utc);
-            p.Timestamp = new Timestamp(dt);
-
-            p.HasMessaging = false;
-
-            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
-            p.Position = new Position(gc, '/', '>', 0);
-
-            p.Comment = "Test1234";
-
-            string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampNoMessaging);
-
-            Assert.Equal("/092345z4903.50N/07201.75W>Test1234", encoded);
-        }
-
-        /// <summary>
         /// Dcodes a lat/long position report format with timestamp, with APRS messaging, local time, with comment
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -120,26 +96,38 @@
         }
 
         /// <summary>
-        /// Dcodes a lat/long position report format with timestamp, with APRS messaging, local time, with comment
-        /// based on the example given in the APRS spec.
+        /// Encodes a lat/long position report format with timestamp.
         /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_LatLongPositionReportFormatWithTimestamp_2()
+        /// <param name="dateTimeKind">The kind of date/time to use.</param>
+        /// <param name="timestampType">The timestamp type.</param>
+        /// <param name="hasMessaging">If the packet should include messaging.</param>
+        /// <param name="packetType">Type of packet to encode.</param>
+        /// <param name="expectedEncoding">The expected encoded string.</param>
+        [Theory]
+        [InlineData(DateTimeKind.Local, Timestamp.Type.DHMl, true, Packet.Type.PositionWithTimestampWithMessaging, @"@092345/4903.50N/07201.75W>Test1234")] // Local, has messaging
+        [InlineData(DateTimeKind.Utc, Timestamp.Type.DHMz, false, Packet.Type.PositionWithTimestampNoMessaging, @"/092345z4903.50N/07201.75W>Test1234")] // UTC, no messaging
+        public void EncodeInformationFieldFromSpecExampleLatLongPositionReportFormatWithTimestamp(
+            DateTimeKind dateTimeKind,
+            Timestamp.Type timestampType,
+            bool hasMessaging,
+            Packet.Type packetType,
+            string expectedEncoding)
         {
             Packet p = new Packet();
 
-            DateTime dt = new DateTime(2016, 12, 9, 23, 45, 00, DateTimeKind.Local);
+            DateTime dt = new DateTime(2016, 12, 9, 23, 45, 0, 0, dateTimeKind);
             p.Timestamp = new Timestamp(dt);
 
-            p.HasMessaging = true;
+            p.HasMessaging = hasMessaging;
 
-            p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '>', 0);
+            GeoCoordinate gc = new GeoCoordinate(49.0583, -72.0292);
+            p.Position = new Position(gc, '/', '>', 0);
 
             p.Comment = "Test1234";
 
-            string encoded = p.EncodeInformationField(Packet.Type.PositionWithTimestampWithMessaging, Timestamp.Type.DHMl);
+            string encoded = p.EncodeInformationField(packetType, timestampType);
 
-            Assert.Equal("@092345/4903.50N/07201.75W>Test1234", encoded);
+            Assert.Equal(expectedEncoding, encoded);
         }
 
         /// <summary>
@@ -404,20 +392,27 @@
         }
 
         /// <summary>
-        ///  Complete Lat/Long Position Report Format — without Timestamp
-        /// no timestamp, no APRS messaging, with comment.
+        /// Test encoding complete Lat/Long Position Report Format.
         /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_1()
+        /// <param name="comment">Packet comment.</param>
+        /// <param name="ambiguity">Positional ambiguity.</param>
+        /// <param name="expectedEncoding">Expected encoding result.</param>
+        [Theory]
+        [InlineData("Test 001234", 0, @"!4903.50N/07201.75W-Test 001234")] // With comment, no ambiguity.
+        [InlineData("", 4, "!49  .  N/072  .  W-")] // Without comment, with ambiguity to the nearest degree.
+        public void EncodeInformationFieldFromSpecExampleCompleteLatLongPositionReportFormatWithoutTimestamp(
+            string comment,
+            int ambiguity,
+            string expectedEncoding)
         {
             Packet p = new Packet();
             p.HasMessaging = false;
 
-            p.Comment = "Test 001234";
-            p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', 0);
+            p.Comment = comment;
+            p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', ambiguity);
 
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
-            Assert.Equal("!4903.50N/07201.75W-Test 001234", encoded);
+            Assert.Equal(expectedEncoding, encoded);
         }
 
         /// <summary>
@@ -463,22 +458,6 @@
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('-', pos!.SymbolCode);
             Assert.Equal(4, pos!.Ambiguity);
-        }
-
-        /// <summary>
-        ///  Complete Lat/Long Position Report Format — without Timestamp
-        /// no timestamp, no APRS messaging, location to nearest degree.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_CompleteLatLongPositionReportFormatWithoutTimestamp_3()
-        {
-            Packet p = new Packet();
-
-            p.HasMessaging = false;
-            p.Position = new Position(new GeoCoordinate(49, -72), '/', '-', 4);
-
-            string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
-            Assert.Equal("!49  .  N/072  .  W-", encoded);
         }
 
         /// <summary>
@@ -544,63 +523,46 @@
         }
 
         /// <summary>
-        /// Tests encoding a Maidenhead Locator Beacon based on the APRS spec.
+        /// Tests encoding a Maidenhead Locator Beacon based on examples from the APRS spec.
         /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_1()
+        /// <param name="comment">Packet comment.</param>
+        /// <param name="expectedEncoding">Expected encoding.</param>
+        [Theory]
+        [InlineData("35 miles NNW of London", "[IO91SX] 35 miles NNW of London")] // With comment
+        [InlineData("", "[IO91SX]")] // Without comment
+        public void EncodeInformationFieldFromSpecExampleMaidenheadLocatorBeaconFromGps(
+            string comment,
+            string expectedEncoding)
         {
             Packet p = new Packet();
-            p.Comment = "35 miles NNW of London";
+            p.Comment = comment;
             p.Position = new Position(new GeoCoordinate(51.98, -0.46));
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
+            Assert.Equal(expectedEncoding, encoded);
         }
 
         /// <summary>
-        /// Tests encoding a Maidenhead Locator Beacon based on the APRS spec.
+        /// Tests encoding a Maidenhead Locator Beacon based on the APRS spec from a Maidenhead position.
         /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_2()
+        /// <param name="comment">Packet comment.</param>
+        /// <param name="expectedEncoding">Expected encoding.</param>
+        [Theory]
+        [InlineData("35 miles NNW of London", "[IO91SX] 35 miles NNW of London")] // With comment
+        [InlineData("", "[IO91SX]")] // Without comment
+        public void EncodeInformationFieldFromSpecExampleMaidenheadLocatorBeaconFromMaidenhead(
+            string comment,
+            string expectedEncoding)
         {
             Packet p = new Packet();
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46));
-
-            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.Equal("[IO91SX]", encoded);
-        }
-
-        /// <summary>
-        /// Tests encoding a Maidenhead Locator Beacon based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_3()
-        {
-            Packet p = new Packet();
-            p.Comment = "35 miles NNW of London";
+            p.Comment = comment;
             p.Position = new Position();
             p.Position.DecodeMaidenhead("IO91SX");
 
             string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
 
-            Assert.Equal("[IO91SX] 35 miles NNW of London", encoded);
-        }
-
-        /// <summary>
-        /// Tests encoding a Maidenhead Locator Beacon based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_MaidenheadLocatorBeacon_4()
-        {
-            Packet p = new Packet();
-            p.Position = new Position();
-            p.Position.DecodeMaidenhead("IO91SX");
-
-            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
-
-            Assert.Equal("[IO91SX]", encoded);
+            Assert.Equal(expectedEncoding, encoded);
         }
 
         /// <summary>
@@ -685,58 +647,24 @@
         /// <summary>
         /// Tests encoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_1()
+        /// <param name="comment">Packet comment.</param>
+        /// <param name="ambiguity">Position ambiguity.</param>
+        /// <param name="expectedEncoding">Expected encoding.</param>
+        [Theory]
+        [InlineData("", 0, ">IO91SX/G")] // Without comment, no ambiguity
+        [InlineData("", 2, ">IO91/G")] // Without comment, with ambiguity
+        [InlineData("My house", 0, ">IO91SX/G My house")] // With comment, without ambiguity
+        public void EncodeInformationFieldFromSpecExampleStatusReportFormatWithMaidenhead(
+            string comment,
+            int ambiguity,
+            string expectedEncoding)
         {
             Packet p = new Packet();
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G');
+            p.Comment = comment;
+            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', ambiguity);
             string encoded = p.EncodeInformationField(Packet.Type.Status);
 
-            Assert.Equal(">IO91SX/G", encoded);
-        }
-
-        /// <summary>
-        /// Tests encoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_2()
-        {
-            Packet p = new Packet();
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', 2);
-
-            string encoded = p.EncodeInformationField(Packet.Type.Status);
-
-            Assert.Equal(">IO91/G", encoded);
-        }
-
-        /// <summary>
-        /// Tests encoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_3()
-        {
-            Packet p = new Packet();
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
-            p.Comment = "My house";
-
-            string encoded = p.EncodeInformationField(Packet.Type.Status);
-
-            Assert.Equal(">IO91SX/- My house", encoded);
-        }
-
-        /// <summary>
-        /// Tests encoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void EncodeInformationFieldFromSpecExample_StatusReportFormatWithMaidenhead_4()
-        {
-            Packet p = new Packet();
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', '-');
-            p.Comment = "My house";
-
-            string encoded = p.EncodeInformationField(Packet.Type.Status);
-
-            Assert.Equal(">IO91SX/- My house", encoded);
+            Assert.Equal(expectedEncoding, encoded);
         }
     }
 }

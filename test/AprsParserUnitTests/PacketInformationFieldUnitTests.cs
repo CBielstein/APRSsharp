@@ -17,7 +17,7 @@
         /// Dcodes a positionless weather report based on the example given in the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_PositionlessWeatherReportFormat()
+        public void DecodePositionlessWeatherReportFormat()
         {
             Packet p = new Packet();
 
@@ -36,52 +36,32 @@
         }
 
         /// <summary>
-        /// Decodes a lat/long position report format with timestamp, no APRS messaging, zulu time, with comment
+        /// Decodes a lat/long position report format with timestamp and comment
         /// based on the example given in the APRS spec.
         /// </summary>
-        [Fact]
-        public void Decode_LatLongPositionReportFormatWithTimestamp_1()
+        /// <param name="informationField">The information field to decode.</param>
+        /// <param name="expectedPacketType">Expected type of the packet.</param>
+        /// <param name="expectedHasMessaging">Expected hasMessaging value.</param>
+        /// <param name="expectedTimestampType">Expected Timestamp type.</param>
+        [Theory]
+        [InlineData("/092345z4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampNoMessaging, false, Timestamp.Type.DHMz)] // No messaging, UTC
+        [InlineData("@092345/4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampWithMessaging, true, Timestamp.Type.DHMl)] // With messaging, local time
+        public void DecodeLatLongPositionReportFormatWithTimestamp(
+            string informationField,
+            Packet.Type expectedPacketType,
+            bool expectedHasMessaging,
+            Timestamp.Type expectedTimestampType)
         {
             Packet p = new Packet();
 
-            p.DecodeInformationField("/092345z4903.50N/07201.75W>Test1234");
+            p.DecodeInformationField(informationField);
 
-            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
-            Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
-            Assert.Equal(9, ts!.DateTime.Day);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos!.Coordinates);
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('>', pos!.SymbolCode);
-
-            Assert.Equal("Test1234", p.Comment);
-        }
-
-        /// <summary>
-        /// Dcodes a lat/long position report format with timestamp, with APRS messaging, local time, with comment
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact]
-        public void Decode_LatLongPositionReportFormatWithTimestamp_2()
-        {
-            Packet p = new Packet();
-
-            p.DecodeInformationField("@092345/4903.50N/07201.75W>Test1234");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
-            Assert.Equal(true, p.HasMessaging);
+            Assert.Equal(expectedPacketType, p.DecodedType);
+            Assert.Equal(expectedHasMessaging, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMl, ts!.DecodedType);
+            Assert.Equal(expectedTimestampType, ts!.DecodedType);
             Assert.Equal(9, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
             Assert.Equal(45, ts!.DateTime.Minute);
@@ -137,7 +117,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_LatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
         {
             Packet p = new Packet();
 
@@ -162,7 +142,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_LatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
         {
             Packet p = new Packet();
             p.DecodeInformationField("@234517h4903.50N/07201.75W>PHG5132");
@@ -186,7 +166,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_LatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
         {
             Packet p = new Packet();
 
@@ -211,7 +191,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_LatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
         {
             Packet p = new Packet();
             p.DecodeInformationField("/234517h4903.50N/07201.75W>DFS2360");
@@ -240,7 +220,7 @@
         /// weather report based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_LatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
         {
             Packet p = new Packet();
             p.DecodeInformationField("@092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII");
@@ -264,7 +244,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_DFReportFormat_1()
+        public void DecodeDFReportFormat_1()
         {
             Packet p = new Packet();
             p.DecodeInformationField("@092345z4903.50N/07201.75W\088/036/270/729");
@@ -288,7 +268,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_DFReportFormat_2()
+        public void DecodeDFReportFormat_2()
         {
             Packet p = new Packet();
             p.DecodeInformationField(@"/092345z4903.50N/07201.75W\000/000/270/729");
@@ -317,7 +297,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_CompressedLatLongPositionReportFormat()
+        public void DecodeCompressedLatLongPositionReportFormat()
         {
             Packet p = new Packet();
             p.DecodeInformationField("@092345z/5L!!<*e7>{?!");
@@ -339,7 +319,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_CompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
+        public void DecodeCompleteWeatherReportFormatwithLatLongPositionAndTimestamp()
         {
             Packet p = new Packet();
             p.DecodeInformationField("@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW");
@@ -362,7 +342,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_CompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
+        public void DecodeCompleteWeatherReportFormatWithCompressedLatLongPositionWithTimestamp()
         {
             Packet p = new Packet();
 
@@ -387,7 +367,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_CompleteLatLongPositionReportFormatWithoutTimestamp_1()
+        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_1()
         {
             Packet p = new Packet();
             p.DecodeInformationField("!4903.50N/07201.75W-Test 001234");
@@ -433,7 +413,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_CompleteLatLongPositionReportFormatWithoutTimestamp_2()
+        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_2()
         {
             Packet p = new Packet();
             p.DecodeInformationField("!4903.50N/07201.75W-Test /A=001234");
@@ -457,7 +437,7 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_CompleteLatLongPositionReportFormatWithoutTimestamp_3()
+        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_3()
         {
             Packet p = new Packet();
             p.DecodeInformationField("!49  .  N/072  .  W-");
@@ -484,30 +464,40 @@
         }
 
         /// <summary>
-        /// Tests GetTypeChar for <see cref="Packet.Type.PositionWithoutTimestampWithMessaging"/>.
+        /// Tests GetTypeChar.
         /// </summary>
-        [Fact]
-        public void GetTypeChar_1()
+        /// <param name="packetType">Packet type to test.</param>
+        /// <param name="expectedChar">Expected character result.</param>
+        [Theory]
+        [InlineData(Packet.Type.PositionWithoutTimestampWithMessaging, '=')]
+        public void GetTypeChar(
+            Packet.Type packetType,
+            char expectedChar)
         {
-            Assert.Equal('=', Packet.GetTypeChar(Packet.Type.PositionWithoutTimestampWithMessaging));
+            Assert.Equal(expectedChar, Packet.GetTypeChar(packetType));
         }
 
         /// <summary>
         /// Tests GetDataType.
         /// </summary>
-        [Fact]
-        public void GetDataType_1()
+        /// <param name="informationField">Input information field to test.</param>
+        /// <param name="expectedPacketType">Expected data type result.</param>
+        [Theory]
+        [InlineData("/092345z4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampNoMessaging)]
+        public void GetDataType(
+            string informationField,
+            Packet.Type expectedDataType)
         {
             Assert.Equal(
-                Packet.Type.PositionWithTimestampNoMessaging,
-                Packet.GetDataType("/092345z4903.50N/07201.75W>Test1234"));
+                expectedDataType,
+                Packet.GetDataType(informationField));
         }
 
         /// <summary>
         /// Tests decoding a Maidenhead Locator Beacon based on the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_MaidenheadLocatorBeacon_1()
+        public void DecodeMaidenheadLocatorBeacon_1()
         {
             Packet p = new Packet();
 
@@ -524,7 +514,7 @@
         /// Tests decoding a Maidenhead Locator Beacon based on the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_MaidenheadLocatorBeacon_2()
+        public void DecodeMaidenheadLocatorBeacon_2()
         {
             Packet p = new Packet();
             p.DecodeInformationField("[IO91SX]");
@@ -583,7 +573,7 @@
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_StatusReportFormatWithMaidenhead_1()
+        public void DecodeStatusReportFormatWithMaidenhead_1()
         {
             Packet p = new Packet();
             p.DecodeInformationField(">IO91SX/G");
@@ -600,7 +590,7 @@
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_StatusReportFormatWithMaidenhead_2()
+        public void DecodeStatusReportFormatWithMaidenhead_2()
         {
             Packet p = new Packet();
             p.DecodeInformationField(">IO91/G");
@@ -617,7 +607,7 @@
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
         [Fact]
-        public void Decode_StatusReportFormatWithMaidenhead_3()
+        public void DecodeStatusReportFormatWithMaidenhead_3()
         {
             Packet p = new Packet();
             p.DecodeInformationField(">IO91SX/- My house");
@@ -638,7 +628,7 @@
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void Decode_StatusReportFormatWithMaidenhead_4()
+        public void DecodeStatusReportFormatWithMaidenhead_4()
         {
             Packet p = new Packet();
 

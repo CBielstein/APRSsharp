@@ -332,8 +332,9 @@
         /// <param name="expectedLongitute">Expected decoded longitude.</param>
         /// <param name="expectedAmbiguity">Expected decoded ambiguity.</param>
         [Theory]
-        [InlineData("!4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292,  0)] // no timestamp, no APRS messaging, with comment
+        [InlineData("!4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292, 0)] // no timestamp, no APRS messaging, with comment
         [InlineData("!49  .  N/072  .  W-", null, 49, -72, 4)] // no timestamp, no APRS messaging, location to nearest degree
+        [InlineData("!4903.50N/07201.75W-Test /A=001234", "Test /A=001234", 49.0583, -72.0292, 0, Skip = "Issue #68: Packet decode does not handle altitude data")]
         public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp(
             string informationField,
             string? expectedComment,
@@ -378,30 +379,6 @@
 
             string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
             Assert.Equal(expectedEncoding, encoded);
-        }
-
-        /// <summary>
-        ///  Complete Lat/Long Position Report Format - without Timestamp
-        /// no timestamp, no APRS messaging, altitude = 1234 ft
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_2()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("!4903.50N/07201.75W-Test /A=001234");
-
-            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-            Assert.Equal("Test /A=001234", p.Comment);
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos!.Coordinates);
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('-', pos!.SymbolCode);
-
-            Assert.True(false, "Unhandled altitude.");
         }
 
         /// <summary>
@@ -519,6 +496,7 @@
         [InlineData(">IO91SX/G", 51.98, -0.46, 'G', null)]
         [InlineData(">IO91/G", 51.5, -1.0, 'G', null)]
         [InlineData(">IO91SX/- My house", 51.98, -0.46, '-', "My house")]
+        [InlineData(">IO91SX/- ^B7", 51.98, -0.46, '-', "^B7", Skip = "Issue #69: Packet decode does not handle Meteor Scatter beam information")]
         public void DecodeStatusReportFormatWithMaidenhead(
             string informationField,
             double expectedLatitute,
@@ -536,30 +514,6 @@
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal(expectedSymbolCode, pos!.SymbolCode);
             Assert.Equal(expectedComment, p.Comment);
-        }
-
-        /// <summary>
-        /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeStatusReportFormatWithMaidenhead_4()
-        {
-            Packet p = new Packet();
-
-            p.DecodeInformationField(">IO91SX/- ^B7");
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('-', pos!.SymbolCode);
-
-            string? comment = p.Comment;
-            Assert.NotNull(comment);
-            Assert.Equal("^B7", comment);
-
-            Assert.True(false, "Not handling Meteor Scatter beam");
         }
 
         /// <summary>

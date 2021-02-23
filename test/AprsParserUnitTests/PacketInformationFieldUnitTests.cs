@@ -112,7 +112,7 @@
         }
 
         /// <summary>
-        /// Lat/Long Position Report Format — with Data Extension and Timestamp
+        /// Lat/Long Position Report Format - with Data Extension and Timestamp
         /// with timestamp, with APRS messaging, local time, course/speed
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -137,7 +137,7 @@
         }
 
         /// <summary>
-        /// Lat/Long Position Report Format — with Data Extension and Timestamp
+        /// Lat/Long Position Report Format - with Data Extension and Timestamp
         /// with timestamp, APRS messaging, hours/mins/secs time, PHG
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -161,7 +161,7 @@
         }
 
         /// <summary>
-        /// Lat/Long Position Report Format — with Data Extension and Timestamp
+        /// Lat/Long Position Report Format - with Data Extension and Timestamp
         /// with timestamp, APRS messaging, zulu time, radio range
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -186,7 +186,7 @@
         }
 
         /// <summary>
-        /// Lat/Long Position Report Format — with Data Extension and Timestamp
+        /// Lat/Long Position Report Format - with Data Extension and Timestamp
         /// with timestamp, hours/mins/secs time, DF, no APRS messaging
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -216,7 +216,7 @@
         }
 
         /// <summary>
-        /// Lat/Long Position Report Format — with Data Extension and Timestamp
+        /// Lat/Long Position Report Format - with Data Extension and Timestamp
         /// weather report based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
@@ -239,7 +239,7 @@
         }
 
         /// <summary>
-        /// DF Report Format — with Timestamp
+        /// DF Report Format - with Timestamp
         /// with timestamp, course/speed/bearing/NRQ, with APRS messaging
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -263,7 +263,7 @@
         }
 
         /// <summary>
-        /// DF Report Format — with Timestamp
+        /// DF Report Format - with Timestamp
         /// with timestamp, bearing/NRQ, no course/speed, no APRS messaging
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -292,7 +292,7 @@
         }
 
         /// <summary>
-        /// Compressed Lat/Long Position Report Format — with Timestamp
+        /// Compressed Lat/Long Position Report Format - with Timestamp
         /// with APRS messaging, timestamp, radio range
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -315,7 +315,7 @@
         }
 
         /// <summary>
-        /// Complete Weather Report Format — with Lat/Long position and Timestamp
+        /// Complete Weather Report Format - with Lat/Long position and Timestamp
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
@@ -338,7 +338,7 @@
         }
 
         /// <summary>
-        /// Complete Weather Report Format — with Compressed Lat/Long position, with Timestamp
+        /// Complete Weather Report Format - with Compressed Lat/Long position, with Timestamp
         /// based on the example given in the APRS spec.
         /// </summary>
         [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
@@ -362,24 +362,36 @@
         }
 
         /// <summary>
-        /// Complete Lat/Long Position Report Format — without Timestamp
-        /// no timestamp, no APRS messaging, with comment
+        /// Complete Lat/Long Position Report Format - without Timestamp
         /// based on the example given in the APRS spec.
         /// </summary>
-        [Fact]
-        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_1()
+        /// <param name="informationField">Information field for decode.</param>
+        /// <param name="expectedComment">Expected decoded comment.</param>
+        /// <param name="expectedLatitute">Expected decoded latitute.</param>
+        /// <param name="expectedLongitute">Expected decoded longitude.</param>
+        /// <param name="expectedAmbiguity">Expected decoded ambiguity.</param>
+        [Theory]
+        [InlineData("!4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292,  0)] // no timestamp, no APRS messaging, with comment
+        [InlineData("!49  .  N/072  .  W-", null, 49, -72, 4)] // no timestamp, no APRS messaging, location to nearest degree
+        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp(
+            string informationField,
+            string? expectedComment,
+            double expectedLatitute,
+            double expectedLongitute,
+            int expectedAmbiguity)
         {
             Packet p = new Packet();
-            p.DecodeInformationField("!4903.50N/07201.75W-Test 001234");
+            p.DecodeInformationField(informationField);
 
             Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
-            Assert.Equal("Test 001234", p.Comment);
+            Assert.Equal(expectedComment, p.Comment);
 
             Position? pos = p.Position;
-            Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pos!.Coordinates);
+            Assert.Equal(new GeoCoordinate(expectedLatitute, expectedLongitute), pos!.Coordinates);
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('-', pos!.SymbolCode);
+            Assert.Equal(expectedAmbiguity, pos!.Ambiguity);
         }
 
         /// <summary>
@@ -408,7 +420,7 @@
         }
 
         /// <summary>
-        ///  Complete Lat/Long Position Report Format — without Timestamp
+        ///  Complete Lat/Long Position Report Format - without Timestamp
         /// no timestamp, no APRS messaging, altitude = 1234 ft
         /// based on the example given in the APRS spec.
         /// </summary>
@@ -432,33 +444,10 @@
         }
 
         /// <summary>
-        /// Complete Lat/Long Position Report Format — without Timestamp
-        /// no timestamp, no APRS messaging, location to nearest degree
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact]
-        public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp_3()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("!49  .  N/072  .  W-");
-
-            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-            Assert.Null(p.Comment);
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(new GeoCoordinate(49, -72), pos!.Coordinates);
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('-', pos!.SymbolCode);
-            Assert.Equal(4, pos!.Ambiguity);
-        }
-
-        /// <summary>
         /// Tests GetTypeChar for <see cref="Packet.Type.DoNotUse"/>.
         /// </summary>
         [Fact]
-        public void GetTypeChar_DoNotUse()
+        public void GetTypeCharDoNotUseThrows()
         {
             Assert.Throws<ArgumentException>(() => Packet.GetTypeChar(Packet.Type.DoNotUse));
         }
@@ -481,7 +470,7 @@
         /// Tests GetDataType.
         /// </summary>
         /// <param name="informationField">Input information field to test.</param>
-        /// <param name="expectedPacketType">Expected data type result.</param>
+        /// <param name="expectedDataType">Expected data type result.</param>
         [Theory]
         [InlineData("/092345z4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampNoMessaging)]
         public void GetDataType(
@@ -496,34 +485,22 @@
         /// <summary>
         /// Tests decoding a Maidenhead Locator Beacon based on the APRS spec.
         /// </summary>
-        [Fact]
-        public void DecodeMaidenheadLocatorBeacon_1()
+        /// <param name="informationField">Information field for decode.</param>
+        /// <param name="expectedComment">Expected comment.</param>
+        [Theory]
+        [InlineData("[IO91SX] 35 miles NNW of London", " 35 miles NNW of London")]
+        [InlineData("[IO91SX]", null)]
+        public void DecodeMaidenheadLocatorBeacon(string informationField, string? expectedComment)
         {
             Packet p = new Packet();
 
-            p.DecodeInformationField("[IO91SX] 35 miles NNW of London");
+            p.DecodeInformationField(informationField);
 
             Position? pos = p.Position;
             Assert.NotNull(pos);
             Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
             Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Equal(" 35 miles NNW of London", p!.Comment);
-        }
-
-        /// <summary>
-        /// Tests decoding a Maidenhead Locator Beacon based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void DecodeMaidenheadLocatorBeacon_2()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("[IO91SX]");
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Null(p.Comment);
+            Assert.Equal(expectedComment, p!.Comment);
         }
 
         /// <summary>
@@ -572,56 +549,32 @@
         /// <summary>
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>
-        [Fact]
-        public void DecodeStatusReportFormatWithMaidenhead_1()
+        /// <param name="informationField">Information field for decode.</param>
+        /// <param name="expectedLatitute">Expected decoded latitute value.</param>
+        /// <param name="expectedLongitute">Expected decoded longitude value.</param>
+        /// <param name="expectedSymbolCode">Expected decoded symbol code value.</param>
+        /// <param name="expectedComment">Expected decoded comment.</param>
+        [Theory]
+        [InlineData(">IO91SX/G", 51.98, -0.46, 'G', null)]
+        [InlineData(">IO91/G", 51.5, -1.0, 'G', null)]
+        [InlineData(">IO91SX/- My house", 51.98, -0.46, '-', "My house")]
+        public void DecodeStatusReportFormatWithMaidenhead(
+            string informationField,
+            double expectedLatitute,
+            double expectedLongitute,
+            char expectedSymbolCode,
+            string? expectedComment)
         {
             Packet p = new Packet();
-            p.DecodeInformationField(">IO91SX/G");
+            p.DecodeInformationField(informationField);
 
             Position? pos = p.Position;
             Assert.NotNull(pos);
-            Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
+            Assert.Equal(expectedLatitute, Math.Round(pos!.Coordinates.Latitude, 2));
+            Assert.Equal(expectedLongitute, Math.Round(pos!.Coordinates.Longitude, 2));
             Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('G', pos!.SymbolCode);
-        }
-
-        /// <summary>
-        /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void DecodeStatusReportFormatWithMaidenhead_2()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField(">IO91/G");
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(51.5, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(-1.0, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('G', pos!.SymbolCode);
-        }
-
-        /// <summary>
-        /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        [Fact]
-        public void DecodeStatusReportFormatWithMaidenhead_3()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField(">IO91SX/- My house");
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(51.98, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(-0.46, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal('-', pos!.SymbolCode);
-
-            string? comment = p.Comment;
-            Assert.NotNull(comment);
-            Assert.Equal("My house", comment);
+            Assert.Equal(expectedSymbolCode, pos!.SymbolCode);
+            Assert.Equal(expectedComment, p.Comment);
         }
 
         /// <summary>

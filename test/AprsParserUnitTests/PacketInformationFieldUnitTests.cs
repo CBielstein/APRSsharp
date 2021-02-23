@@ -211,43 +211,33 @@
 
         /// <summary>
         /// DF Report Format - with Timestamp
-        /// with timestamp, course/speed/bearing/NRQ, with APRS messaging
-        /// based on the example given in the APRS spec.
+        /// based on the examples given in the APRS spec.
         /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeDFReportFormat_1()
+        /// <param name="informationField">Information field to decode.</param>
+        /// <param name="expectedPacketType">Expected decoded Packet.Type value.</param>
+        /// <param name="expectedHasMessaging">Expected decoded HasMessaging value.</param>
+        [Theory(Skip = "Issue #24: Fix skipped tests from old repository")]
+        [InlineData( // with timestamp, course/speed/bearing/NRQ, with APRS messaging
+            @"@092345z4903.50N/07201.75W\088/036/270/729",
+            Packet.Type.PositionWithTimestampWithMessaging,
+            true)]
+        [InlineData( // with timestamp, bearing/NRQ, no course/speed, no APRS messaging
+            @"/092345z4903.50N/07201.75W\000/000/270/729",
+            Packet.Type.PositionWithTimestampNoMessaging,
+            false)]
+        public void DecodeDFReportFormat(
+            string informationField,
+            Packet.Type expectedPacketType,
+            bool expectedHasMessaging)
         {
             Packet p = new Packet();
-            p.DecodeInformationField("@092345z4903.50N/07201.75W\088/036/270/729");
+            p.DecodeInformationField(informationField);
 
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
-            Assert.Equal(true, p.HasMessaging);
+            Assert.Equal(expectedPacketType, p.DecodedType);
+            Assert.Equal(expectedHasMessaging, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
-            Assert.Equal(09, ts!.DateTime.Day);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-
-            Assert.True(false, "Not yet handling DF Report.");
-        }
-
-        /// <summary>
-        /// DF Report Format - with Timestamp
-        /// with timestamp, bearing/NRQ, no course/speed, no APRS messaging
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeDFReportFormat_2()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField(@"/092345z4903.50N/07201.75W\000/000/270/729");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
             Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
             Assert.Equal(09, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
@@ -259,7 +249,7 @@
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('\\', pos!.SymbolCode);
 
-            Assert.True(false, "Not yet handling bearing, course/speed.");
+            Assert.True(false, "Not yet handling DF Report, bearing, course, and/or speed.");
         }
 
         /// <summary>

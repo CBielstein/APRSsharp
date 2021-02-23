@@ -284,7 +284,7 @@
                 throw new ArgumentNullException(nameof(informationField));
             }
 
-            // TODO: This isn't always true.
+            // TODO Issue #67: This isn't always true.
             // '!' can come up to the 40th position.
             char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
 

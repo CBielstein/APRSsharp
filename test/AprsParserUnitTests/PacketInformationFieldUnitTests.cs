@@ -113,98 +113,92 @@
 
         /// <summary>
         /// Lat/Long Position Report Format - with Data Extension and Timestamp
-        /// with timestamp, with APRS messaging, local time, course/speed
-        /// based on the example given in the APRS spec.
+        /// based on the examples given in the APRS spec.
         /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_1()
+        /// <param name="informationField">Information field for decoding.</param>
+        /// <param name="expectedPacketType">Expected decoded Packet.Type value.</param>
+        /// <param name="expectedHasMessaging">Expected decoded HasMessaging value.</param>
+        /// <param name="expectedTimestampType">Expected decoded Timestamp.Type value.</param>
+        /// <param name="expectedTimeDay">Expected decoded Timestamp day value.</param>
+        /// <param name="expectedTimeHour">Expected decoded Timestamp hour value.</param>
+        /// <param name="expectedTimeMinute">Expected decoded Timestamp minute value.</param>
+        /// <param name="expecteTimeSecond">Expected decoded Timestamp second value.</param>
+        [Theory(Skip = "Issue #24: Fix skipped tests from old repository")]
+        [InlineData( // with timestamp, with APRS messaging, local time, course/speed
+            "@092345/4903.50N/07201.75W>088/036",
+            Packet.Type.PositionWithTimestampWithMessaging,
+            true,
+            Timestamp.Type.DHMl,
+            9,
+            23,
+            45,
+            0)]
+        [InlineData( // with timestamp, APRS messaging, hours/mins/secs time, PHG
+            "@234517h4903.50N/07201.75W>PHG5132",
+            Packet.Type.PositionWithTimestampWithMessaging,
+            true,
+            Timestamp.Type.HMS,
+            null,
+            23,
+            45,
+            17)]
+        [InlineData( // with timestamp, APRS messaging, zulu time, radio range
+            "@092345z4903.50N/07201.75W>RNG0050",
+            Packet.Type.PositionWithTimestampWithMessaging,
+            true,
+            Timestamp.Type.DHMz,
+            9,
+            23,
+            45,
+            0)]
+        [InlineData( // with timestamp, hours/mins/secs time, DF, no APRS messaging
+            "/234517h4903.50N/07201.75W>DFS2360",
+            Packet.Type.PositionWithTimestampNoMessaging,
+            false,
+            Timestamp.Type.HMS,
+            null,
+            23,
+            45,
+            17)]
+        [InlineData(// weather report
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUII",
+            Packet.Type.WeatherReport,
+            false,
+            Timestamp.Type.DHMz,
+            9,
+            23,
+            45,
+            0,
+            Skip = "Issue #67: Packet.GetDataType does not support complex data types")]
+        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp(
+            string informationField,
+            Packet.Type expectedPacketType,
+            bool expectedHasMessaging,
+            Timestamp.Type expectedTimestampType,
+            int? expectedTimeDay,
+            int expectedTimeHour,
+            int expectedTimeMinute,
+            int expecteTimeSecond)
         {
             Packet p = new Packet();
 
-            p.DecodeInformationField("@092345/4903.50N/07201.75W>088/036");
+            p.DecodeInformationField(informationField);
 
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
-            Assert.Equal(true, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
-            Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMl, ts!.DecodedType);
-            Assert.Equal(9, ts!.DateTime.Day);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-
-            Assert.True(false, "Not yet handling data extension.");
-        }
-
-        /// <summary>
-        /// Lat/Long Position Report Format - with Data Extension and Timestamp
-        /// with timestamp, APRS messaging, hours/mins/secs time, PHG
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_2()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("@234517h4903.50N/07201.75W>PHG5132");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
-            Assert.Equal(true, p.HasMessaging);
+            Assert.Equal(expectedPacketType, p.DecodedType);
+            Assert.Equal(expectedHasMessaging, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.HMS, ts!.DecodedType);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-            Assert.Equal(17, ts!.DateTime.Second);
+            Assert.Equal(expectedTimestampType, ts!.DecodedType);
 
-            Assert.True(false, "Not yet handling data extension.");
-        }
+            if (expectedTimeDay != null)
+            {
+                Assert.Equal(expectedTimeDay, ts!.DateTime.Day);
+            }
 
-        /// <summary>
-        /// Lat/Long Position Report Format - with Data Extension and Timestamp
-        /// with timestamp, APRS messaging, zulu time, radio range
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_3()
-        {
-            Packet p = new Packet();
-
-            p.DecodeInformationField("@092345z4903.50N/07201.75W>RNG0050");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
-            Assert.Equal(true, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
-            Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
-            Assert.Equal(09, ts!.DateTime.Day);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-
-            Assert.True(false, "Not yet handling data extensions.");
-        }
-
-        /// <summary>
-        /// Lat/Long Position Report Format - with Data Extension and Timestamp
-        /// with timestamp, hours/mins/secs time, DF, no APRS messaging
-        /// based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_4()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("/234517h4903.50N/07201.75W>DFS2360");
-
-            Assert.Equal(Packet.Type.PositionWithTimestampNoMessaging, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
-            Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.HMS, ts!.DecodedType);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-            Assert.Equal(17, ts!.DateTime.Second);
+            Assert.Equal(expectedTimeHour, ts!.DateTime.Hour);
+            Assert.Equal(expectedTimeMinute, ts!.DateTime.Minute);
+            Assert.Equal(expecteTimeSecond, ts!.DateTime.Second);
 
             Position? pos = p.Position;
             Assert.NotNull(pos);
@@ -212,30 +206,7 @@
             Assert.Equal('/', pos!.SymbolTableIdentifier);
             Assert.Equal('>', pos!.SymbolCode);
 
-            Assert.True(false, "Not yet handling DF data.");
-        }
-
-        /// <summary>
-        /// Lat/Long Position Report Format - with Data Extension and Timestamp
-        /// weather report based on the example given in the APRS spec.
-        /// </summary>
-        [Fact(Skip = "Issue #24: Fix skipped tests from old repository")]
-        public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp_5()
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField("@092345z4903.50N/07201.75W_090/000g000t066r000p000…dUII");
-
-            Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
-            Assert.Equal(false, p.HasMessaging);
-
-            Timestamp? ts = p.Timestamp;
-            Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
-            Assert.Equal(09, ts!.DateTime.Day);
-            Assert.Equal(23, ts!.DateTime.Hour);
-            Assert.Equal(45, ts!.DateTime.Minute);
-
-            Assert.True(false, "Not yet handling weather reports");
+            Assert.True(false, "Not yet handling data extension.");
         }
 
         /// <summary>

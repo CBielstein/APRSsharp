@@ -504,7 +504,7 @@
                             Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
                         }
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        if (endGridsquare != -1 && endGridsquare + 1 < informationField.Length)
                         {
                             Comment = informationField.Substring(endGridsquare + 1);
                         }

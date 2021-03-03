@@ -24,6 +24,13 @@ visualizing APRS digital packets in a straight-forward manner.
 This project is provided as [open source](LICENSE) and developed by the
 community for the community.
 
+### Further Documentation
+
+See supplemental documentation for APRS# constituent projects:
+
+* [AprsParser](src/AprsParser/AprsParser.md)
+* [KissTnc](src/KissTnc/KissTnc.md)
+
 ## Contributions
 
 Please see the [code of conduct](CODE_OF_CONDUCT.md) and

@@ -58,21 +58,15 @@
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Packet"/> class.
-        /// Constructs a new Packet object by decoding the encodedPacket string.
-        /// Really just a shortcut for calling the Decode function.
+        /// If an encoded packet is provided, Decode is used to deocde in to this object.
         /// </summary>
-        /// <param name="encodedPacket">A string encoding of an APRS packet.</param>
-        public Packet(string encodedPacket)
+        /// <param name="encodedPacket">A string encoding of an APRS packet to decode (optional).</param>
+        public Packet(string? encodedPacket = null)
         {
-            Decode(encodedPacket);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Packet"/> class.
-        /// Empty constructor.
-        /// </summary>
-        public Packet()
-        {
+            if (encodedPacket != null)
+            {
+                Decode(encodedPacket);
+            }
         }
 
         /// <summary>
@@ -359,19 +353,9 @@
         /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
         /// </summary>
         /// <param name="encodeType">The type of encoding to use.</param>
+        /// <param name="timeType">The type of encoding for the timestamp to use. Optional, defaults to DHMz.</param>
         /// <returns>APRS Information Field as a string.</returns>
-        public string EncodeInformationField(Type encodeType)
-        {
-            return EncodeInformationField(encodeType, Timestamp.Type.DHMz);
-        }
-
-        /// <summary>
-        /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
-        /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
-        /// <param name="timeType">The type of encoding for the timestamp to use.</param>
-        /// <returns>APRS Information Field as a string.</returns>
-        public string EncodeInformationField(Type encodeType, Timestamp.Type timeType)
+        public string EncodeInformationField(Type encodeType, Timestamp.Type timeType = Timestamp.Type.DHMz)
         {
             string encodedInfoField = string.Empty;
 

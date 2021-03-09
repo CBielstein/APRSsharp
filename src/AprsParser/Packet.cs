@@ -284,7 +284,7 @@
                 throw new ArgumentNullException(nameof(informationField));
             }
 
-            // TODO: This isn't always true.
+            // TODO Issue #67: This isn't always true.
             // '!' can come up to the 40th position.
             char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
 
@@ -504,7 +504,7 @@
                             Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
                         }
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        if (endGridsquare != -1 && endGridsquare + 1 < informationField.Length)
                         {
                             Comment = informationField.Substring(endGridsquare + 1);
                         }

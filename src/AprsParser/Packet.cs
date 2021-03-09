@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// A representation of an APRS Packet.
@@ -522,15 +523,20 @@
                     throw new NotImplementedException("handle Telemetry data");
 
                 case Type.MaidenheadGridLocatorBeacon:
-                    Position = new Position();
                     {
-                        Position = new Position();
-                        int endGridsquare = informationField.IndexOf(']', StringComparison.Ordinal);
-                        Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                        var match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        if (!match.Success || match.Groups.Count < 2)
                         {
-                            Comment = informationField.Substring(endGridsquare + 1);
+                            throw new ArgumentException($"{Type.MaidenheadGridLocatorBeacon} detected but did not match regex.", nameof(informationField));
+                        }
+
+                        Position = new Position();
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+
+                        if (match.Groups.Count > 2 && !string.IsNullOrEmpty(match.Groups[2].Value))
+                        {
+                            Comment = match.Groups[2].Value;
                         }
                     }
 

@@ -207,7 +207,7 @@
                     nameof(gridsquare));
             }
 
-            var match = Regex.Match(gridsquare, RegexStrings.MaidenheadGridWithOptionalSymbols);
+            var match = Regex.Match(gridsquare, RegexStrings.MaidenheadGridFullLine);
             if (!match.Success)
             {
                 throw new ArgumentException("Maidenhead did not match regex.", nameof(gridsquare));

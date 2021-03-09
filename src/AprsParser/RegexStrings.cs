@@ -6,13 +6,21 @@ namespace AprsSharp.Parsers.Aprs
     internal static class RegexStrings
     {
         /// <summary>
-        /// Matches a Miadenhead Grid Locator Beacon with comment.
+        /// Matches Maidenhead grid with optional symbols.
+        /// Three groups: Full, alphanumber grid, symbols.
         /// </summary>
-        public const string MaidenheadGridLocatorBeacon = @"^\[(.{4,6})\](.+)?$";
+        public const string MaidenheadGridWithOptionalSymbols = @"([a-zA-Z0-9]{4,8})(.{2})?";
 
         /// <summary>
-        /// Matches Maidenhead grid with optional symbols, full line match.
+        /// Same as <see cref="MaidenheadGridWithOptionalSymbols"/> but forces full line match.
         /// </summary>
-        public const string MaidenheadGridWithOptionalSymbols = @"^([a-zA-Z0-9]{4,8})(.{2})?$";
+        /// <value></value>
+        public static readonly string MaidenheadGridFullLine = $@"^{MaidenheadGridWithOptionalSymbols}$";
+
+        /// <summary>
+        /// Matches a Miadenhead Grid Locator Beacon with comment.
+        /// Four groups: Full, alphanumeric grid, symbols, comment.
+        /// </summary>
+        public static readonly string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
     }
 }

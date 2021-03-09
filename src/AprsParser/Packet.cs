@@ -534,9 +534,9 @@
                         Position = new Position();
                         Position.DecodeMaidenhead(match.Groups[1].Value);
 
-                        if (!string.IsNullOrEmpty(match.Groups[2].Value))
+                        if (!string.IsNullOrEmpty(match.Groups[3].Value))
                         {
-                            Comment = match.Groups[2].Value;
+                            Comment = match.Groups[3].Value;
                         }
                     }
 

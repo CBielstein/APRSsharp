@@ -3,6 +3,7 @@
     using System;
     using System.Globalization;
     using System.Text;
+    using System.Text.RegularExpressions;
     using GeoCoordinatePortable;
 
     /// <summary>
@@ -206,17 +207,20 @@
                     nameof(gridsquare));
             }
 
-            string trimmedGridsquare = gridsquare;
-
-            // If the symbol table identifier is not a letter or digit, assume it's the table.
-            // Because if it is a letter or digit, we'll assume there is no symbol information.
-            // Then trim it off for passing through to the decode functions
-            if (!char.IsLetterOrDigit(gridsquare[^2]))
+            var match = Regex.Match(gridsquare, RegexStrings.MaidenheadGridWithOptionalSymbols);
+            if (!match.Success)
             {
-                SymbolTableIdentifier = gridsquare[^2];
-                SymbolCode = gridsquare[^1];
+                throw new ArgumentException("Maidenhead did not match regex.", nameof(gridsquare));
+            }
 
-                trimmedGridsquare = gridsquare[0..^2];
+            string trimmedGridsquare = match.Groups[1].Value;
+
+            // If a third group is matched, this group is the two symbol fields.
+            if (match.Groups[2].Success)
+            {
+                string symbols = match.Groups[2].Value;
+                SymbolTableIdentifier = symbols[0];
+                SymbolCode = symbols[1];
             }
 
             double latitude = DecodeFromGridsquare(trimmedGridsquare, CoordinateSystem.Latitude);

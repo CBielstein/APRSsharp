@@ -526,7 +526,7 @@
                     {
                         var match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
 
-                        if (!match.Success || match.Groups.Count < 2)
+                        if (!match.Success)
                         {
                             throw new ArgumentException($"{Type.MaidenheadGridLocatorBeacon} detected but did not match regex.", nameof(informationField));
                         }
@@ -534,7 +534,7 @@
                         Position = new Position();
                         Position.DecodeMaidenhead(match.Groups[1].Value);
 
-                        if (match.Groups.Count > 2 && !string.IsNullOrEmpty(match.Groups[2].Value))
+                        if (!string.IsNullOrEmpty(match.Groups[2].Value))
                         {
                             Comment = match.Groups[2].Value;
                         }

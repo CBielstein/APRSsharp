@@ -41,6 +41,14 @@
         /// </summary>
         public event HandleTcpString? ReceivedTcpMessage;
 
+         /// <summary>
+        /// Method to cancel the receipt of packets.
+        /// </summary>
+        public void Disconnect()
+        {
+            bool stopReceive = true;
+        }
+
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
@@ -55,6 +63,7 @@
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             string server = "rotate.aprs2.net";
             bool authenticated = false;
+            bool stopReceive = false;
 
             // Open connection
             tcpConnection.Connect(server, 14580);
@@ -87,6 +96,7 @@
                     Thread.Sleep(500);
                 }
             });
+            tcpConnection.Disconnect();
         }
     }
 }

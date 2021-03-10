@@ -60,5 +60,11 @@
 
             writer.WriteLine(message);
         }
+
+        /// <inheritdoc/>
+        public void Disconnect()
+        {
+            bool stopReceive = true;
+        }
     }
 }

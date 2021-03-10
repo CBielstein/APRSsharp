@@ -35,10 +35,20 @@
             callsign = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
             password = Console.ReadLine();
+            Console.WriteLine("Press key Q to cancel receipt of packets:\n ");
             string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
             string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
             n.ReceivedTcpMessage += PrintTcpMessage;
             n.Receive(callsignArg, passwordArg);
+
+            ConsoleKeyInfo input;
+            input = Console.ReadKey();
+            if (input.Key == ConsoleKey.Q)
+            {
+                Console.WriteLine("Cancelling the receipt of packets");
+                n.Disconnect();
+                Console.WriteLine("Packets cancelled");
+            }
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");

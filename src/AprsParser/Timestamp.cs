@@ -29,13 +29,6 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Timestamp"/> class.
-        /// </summary>
-        public Timestamp()
-        {
-        }
-
-        /// <summary>
         /// Represents the type of APRS timestamp.
         /// </summary>
         public enum Type

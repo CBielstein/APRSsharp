@@ -18,9 +18,15 @@ namespace AprsSharp.Parsers.Aprs
         public static readonly string MaidenheadGridFullLine = $@"^{MaidenheadGridWithOptionalSymbols}$";
 
         /// <summary>
-        /// Matches a Miadenhead Grid Locator Beacon with comment.
+        /// Matches a Miadenhead Grid in square brackets [] with comment.
         /// Four groups: Full, alphanumeric grid, symbols, comment.
         /// </summary>
         public static readonly string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
+
+        /// <summary>
+        /// Matches a Maidenhead grid and optional comment, separated by a space.
+        /// Four matches: Full, full maidenhead, alphanumeric grid, symbols, comment.
+        /// </summary>
+        public static readonly string MaidenheadGridSpaceComment = $@"^({MaidenheadGridWithOptionalSymbols})( .+)+?";
     }
 }

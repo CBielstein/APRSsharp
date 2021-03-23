@@ -12,8 +12,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     public class AprsIsConnectionUnitTests
     {
         /// <summary>
-        /// Tests that the `Disconnect()` method on AprsIsConnection
-        /// succesfully stops receiving.
+        /// Tests that the Disconnect() method on AprsIsConnection
+        /// succesfully stops receiving and the Receive() Task returns.
         /// </summary>
         [Fact]
         public void TestDisconnect()
@@ -22,11 +22,18 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object);
 
             Task receiveTask = connection.Receive(null, null);
+
+            // Sleep 0.01 seconds to ensure the connection starts "receiving"
+            Thread.Sleep(10);
+
             connection.Disconnect();
 
-            Thread.Sleep(100); // Sleep 0.1 seconds to allow connection to cancel
+            // Wait for the task, but no more than 2 seconds.
+            Assert.True(Task.WaitAll(new Task[] { receiveTask }, 2000), "Task timed out while waiting for disconnection.");
 
-            Assert.True(receiveTask.IsCompletedSuccessfully);
+            Assert.True(receiveTask.IsCompletedSuccessfully, "Task did not complete successfully.");
+            mockTcpConnection.Verify(mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()), Times.Once());
+            mockTcpConnection.Verify(mock => mock.ReceiveString(), Times.AtLeastOnce());
             mockTcpConnection.Verify(mock => mock.Disconnect(), Times.Once());
         }
     }

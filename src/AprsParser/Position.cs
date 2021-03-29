@@ -171,19 +171,19 @@
             {
                 throw new ArgumentNullException(nameof(coords));
             }
-            else if (coords.Length != 19)
+
+            Match match = Regex.Match(coords, RegexStrings.PositionLatLongWithSymbols);
+            if (!match.Success)
             {
-                throw new ArgumentException(
-                    $"The given APRS coordinates has length {coords.Length} instead of the expected 19: {coords}",
-                    nameof(coords));
+                throw new ArgumentException("Coordinates did not match regex", nameof(coords));
             }
 
             Ambiguity = 0;
-            double latitude = DecodeLatitude(coords.Substring(0, 8));
-            double longitude = DecodeLongitude(coords.Substring(9, 9));
+            double latitude = DecodeLatitude(match.Groups[1].Value);
+            double longitude = DecodeLongitude(match.Groups[3].Value);
 
-            SymbolTableIdentifier = coords[8];
-            SymbolCode = coords[18];
+            SymbolTableIdentifier = match.Groups[2].Value[0];
+            SymbolCode = match.Groups[4].Value[0];
             Coordinates = new GeoCoordinate(latitude, longitude);
         }
 

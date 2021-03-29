@@ -13,8 +13,14 @@ namespace AprsSharp.Parsers.Aprs
 
         /// <summary>
         /// Matchdes a lat/long position, including with ambiguity, including symbols.
+        /// Five matches:
+        ///     Full
+        ///     Latitute
+        ///     Symbol table ID
+        ///     Longitude
+        ///     Symbol Code.
         /// </summary>
-        public const string PositionLatLongWithSymbols = @"[0-9 \.NW]{8}(.)[0-9 \.EW]{9}(.)";
+        public const string PositionLatLongWithSymbols = @"([0-9 \.NW]{8})(.)([0-9 \.EW]{9})(.)";
 
         /// <summary>
         /// Same as <see cref="MaidenheadGridWithOptionalSymbols"/> but forces full line match.
@@ -36,10 +42,12 @@ namespace AprsSharp.Parsers.Aprs
 
         /// <summary>
         /// Matches a PositionWithoutTimestamp info field.
-        /// Five mathces:
+        /// Seven mathces:
         ///     Full
         ///     Full lat/long coords and symbols
+        ///     Latitude
         ///     Symbol table
+        ///     Longitude
         ///     Symbol code
         ///     Optional comment.
         /// </summary>

@@ -459,9 +459,9 @@
 
                         Position = new Position(match.Groups[1].Value);
 
-                        if (match.Groups[4].Success)
+                        if (match.Groups[6].Success)
                         {
-                            Comment = match.Groups[4].Value;
+                            Comment = match.Groups[6].Value;
                         }
 
                         break;

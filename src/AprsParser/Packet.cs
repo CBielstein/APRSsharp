@@ -495,14 +495,14 @@
                 case Type.Status:
                     {
                         Position = new Position();
-                        var match = Regex.Match(informationField, RegexStrings.MaidenheadGridSpaceComment);
+                        Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
                         if (!match.Success)
                         {
                             throw new ArgumentException("Type.Status did not match regex", nameof(informationField));
                         }
 
-                        Position.DecodeMaidenhead(match.Groups[2].Value);
-                        Comment = match.Groups[4].Value;
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+                        Comment = match.Groups[4].Success ? match.Groups[4].Value : null;
                     }
 
                     break;
@@ -518,7 +518,7 @@
 
                 case Type.MaidenheadGridLocatorBeacon:
                     {
-                        var match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
+                        Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
                         if (!match.Success)
                         {
                             throw new ArgumentException($"{Type.MaidenheadGridLocatorBeacon} detected but did not match regex.", nameof(informationField));

@@ -24,9 +24,9 @@ namespace AprsSharp.Parsers.Aprs
         public static readonly string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
 
         /// <summary>
-        /// Matches a Maidenhead grid and optional comment, separated by a space.
+        /// Matches a Status info field with Maidenhead grid and optional comment (comment separated by a space)
         /// Four matches: Full, full maidenhead, alphanumeric grid, symbols, comment.
         /// </summary>
-        public static readonly string MaidenheadGridSpaceComment = $@"^({MaidenheadGridWithOptionalSymbols})( .+)+?";
+        public static readonly string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithOptionalSymbols}) ?(.+)?";
     }
 }

@@ -446,17 +446,26 @@
                     throw new NotImplementedException("handle currnet Mic-E Data (Rev 0 beta)");
                 case Type.OldMicEData:
                     throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
+
+                // Handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
                 case Type.PositionWithoutTimestampNoMessaging:
-                    // handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
-                    HasMessaging = false;
-                    Position = new Position(informationField.Substring(1, 19));
-
-                    if (informationField.Length > 20)
                     {
-                        Comment = informationField.Substring(20);
-                    }
+                        HasMessaging = false;
+                        Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
+                        if (!match.Success)
+                        {
+                            throw new ArgumentException("Type.PositionWithoutTimestampNoMessaging did not match regex", nameof(informationField));
+                        }
 
-                    break;
+                        Position = new Position(match.Groups[1].Value);
+
+                        if (match.Groups[4].Success)
+                        {
+                            Comment = match.Groups[4].Value;
+                        }
+
+                        break;
+                    }
 
                 case Type.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
@@ -502,7 +511,11 @@
                         }
 
                         Position.DecodeMaidenhead(match.Groups[1].Value);
-                        Comment = match.Groups[4].Success ? match.Groups[4].Value : null;
+
+                        if (match.Groups[4].Success)
+                        {
+                            Comment = match.Groups[4].Value;
+                        }
                     }
 
                     break;

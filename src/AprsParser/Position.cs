@@ -173,10 +173,7 @@
             }
 
             Match match = Regex.Match(coords, RegexStrings.PositionLatLongWithSymbols);
-            if (!match.Success)
-            {
-                throw new ArgumentException("Coordinates did not match regex", nameof(coords));
-            }
+            match.AssertSuccess("Coordinates", nameof(coords));
 
             Ambiguity = 0;
             double latitude = DecodeLatitude(match.Groups[1].Value);
@@ -197,21 +194,9 @@
             {
                 throw new ArgumentNullException(nameof(gridsquare));
             }
-            else if (gridsquare.Length != 4 &&
-                     gridsquare.Length != 6 &&
-                     gridsquare.Length != 8 &&
-                     gridsquare.Length != 10)
-            {
-                throw new ArgumentException(
-                    $"The given Maidenhead Location System gridsquare was {gridsquare.Length} characters length when a length of 4, 6, 8, or 10 characters was expected (including an optional two char symbol table and code).",
-                    nameof(gridsquare));
-            }
 
             var match = Regex.Match(gridsquare, RegexStrings.MaidenheadGridFullLine);
-            if (!match.Success)
-            {
-                throw new ArgumentException("Maidenhead did not match regex.", nameof(gridsquare));
-            }
+            match.AssertSuccess("Maidenhead", nameof(gridsquare));
 
             string trimmedGridsquare = match.Groups[1].Value;
 

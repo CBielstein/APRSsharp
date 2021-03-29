@@ -452,10 +452,7 @@
                     {
                         HasMessaging = false;
                         Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
-                        if (!match.Success)
-                        {
-                            throw new ArgumentException("Type.PositionWithoutTimestampNoMessaging did not match regex", nameof(informationField));
-                        }
+                        match.AssertSuccess(Type.PositionWithoutTimestampNoMessaging.ToString(), nameof(informationField));
 
                         Position = new Position(match.Groups[1].Value);
 
@@ -505,10 +502,7 @@
                     {
                         Position = new Position();
                         Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
-                        if (!match.Success)
-                        {
-                            throw new ArgumentException("Type.Status did not match regex", nameof(informationField));
-                        }
+                        match.AssertSuccess(Type.Status.ToString(), nameof(informationField));
 
                         Position.DecodeMaidenhead(match.Groups[1].Value);
 
@@ -532,10 +526,7 @@
                 case Type.MaidenheadGridLocatorBeacon:
                     {
                         Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
-                        if (!match.Success)
-                        {
-                            throw new ArgumentException($"{Type.MaidenheadGridLocatorBeacon} detected but did not match regex.", nameof(informationField));
-                        }
+                        match.AssertSuccess(Type.MaidenheadGridLocatorBeacon.ToString(), nameof(informationField));
 
                         Position = new Position();
                         Position.DecodeMaidenhead(match.Groups[1].Value);

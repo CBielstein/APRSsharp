@@ -568,15 +568,22 @@
         /// <param name="hasMessaging">true if this packet represents messaging capabilities.</param>
         private void HandlePositionWithTimestamp(string informationField, bool hasMessaging)
         {
+            Match match = Regex.Match(informationField, RegexStrings.PositionWithTimestamp);
+            match.AssertSuccess(
+                hasMessaging ?
+                    Type.PositionWithTimestampWithMessaging.ToString() :
+                    Type.PositionWithTimestampNoMessaging.ToString(),
+                nameof(informationField));
+
             HasMessaging = hasMessaging;
 
-            Timestamp = new Timestamp(informationField.Substring(1, 7));
+            Timestamp = new Timestamp(match.Groups[2].Value);
 
-            Position = new Position(informationField.Substring(8, 19));
+            Position = new Position(match.Groups[3].Value);
 
-            if (informationField.Length > 27)
+            if (match.Groups[8].Success)
             {
-                Comment = informationField.Substring(27);
+                Comment = match.Groups[8].Value;
             }
         }
     }

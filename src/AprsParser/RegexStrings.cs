@@ -52,5 +52,20 @@ namespace AprsSharp.Parsers.Aprs
         ///     Optional comment.
         /// </summary>
         public static readonly string PositionWithoutTimestamp = $@"^!({PositionLatLongWithSymbols})(.+)?$";
+
+        /// <summary>
+        /// Matches a PositionWithTimestamp info field.
+        /// 9 mathces:
+        ///     Full
+        ///     Packet type symbol (/ or @)
+        ///     Timestamp
+        ///     Full position
+        ///         Latitude
+        ///         Symbol table
+        ///         Longitude
+        ///         Symbol code
+        ///     Optional comment.
+        /// </summary>
+        public static readonly string PositionWithTimestamp = $@"^([/@])([0-9]{{6}}[/zh0-9])({PositionLatLongWithSymbols})(.+)?$";
     }
 }

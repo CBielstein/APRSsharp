@@ -1,6 +1,8 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
 
@@ -23,7 +25,8 @@
         /// Main method that takes in raw packet strings.
         /// </summary>
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
-        public static void Main(string[] args)
+        /// <returns>Returns an async task that can be stored.</returns>
+        public static async Task Main(string[] args)
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
@@ -35,29 +38,19 @@
             callsign = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
             password = Console.ReadLine();
-            Console.WriteLine("Press key Q to cancel receipt of packets:\n ");
+            Console.WriteLine("Press key Q òr q to cancel the connection:\n ");
             string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
             string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
             n.ReceivedTcpMessage += PrintTcpMessage;
-            n.Receive(callsignArg, passwordArg);
+            Task receive = n.Receive(callsignArg, passwordArg);
 
             ConsoleKeyInfo input;
             input = Console.ReadKey();
-            if (input.Key == ConsoleKey.Q)
+            while (input.Key != ConsoleKey.Q)
             {
-                Console.WriteLine("Cancelling the receipt of packets");
                 n.Disconnect();
-                Console.WriteLine("Packets cancelled");
+                await receive;
             }
-
-            // skeleton method that will be used to handle the decoded packets
-            Console.WriteLine("Enter the packet name ");
-            var packetName = Console.ReadLine();
-            Packet p = new Packet();
-            p.DecodeInformationField(packetName);
-            Timestamp? ts = p.Timestamp;
-            Position? pos = p.Position;
-            Console.WriteLine($"\nHello, your packet name is, {p.Comment}, at cordinates, {pos?.Coordinates}, and time, {ts?.DateTime.Hour}");
          }
     }
 }

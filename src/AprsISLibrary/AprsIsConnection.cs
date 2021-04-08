@@ -21,6 +21,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+        private bool stopReceive;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -46,7 +47,7 @@
         /// </summary>
         public void Disconnect()
         {
-            bool stopReceive = true;
+            stopReceive = true;
         }
 
         /// <summary>
@@ -63,7 +64,6 @@
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             string server = "rotate.aprs2.net";
             bool authenticated = false;
-            bool stopReceive = false;
 
             // Open connection
             tcpConnection.Connect(server, 14580);
@@ -71,7 +71,7 @@
            // Receive
             await Task.Run(() =>
             {
-                while (true)
+                while (stopReceive == false)
                 {
                     string? received = tcpConnection.ReceiveString();
 

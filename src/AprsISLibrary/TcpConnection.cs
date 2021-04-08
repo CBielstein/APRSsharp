@@ -64,7 +64,6 @@
         /// <inheritdoc/>
         public void Disconnect()
         {
-            bool stopReceive = true;
-        }
+      }
     }
 }

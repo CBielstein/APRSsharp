@@ -64,6 +64,8 @@
         /// <inheritdoc/>
         public void Disconnect()
         {
+            stream?.Close();
+            tcpClient.Close();
       }
     }
 }

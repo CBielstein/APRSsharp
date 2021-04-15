@@ -21,6 +21,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+        private bool stopReceive;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -40,6 +41,14 @@
         /// Event raised when TCP message is returned.
         /// </summary>
         public event HandleTcpString? ReceivedTcpMessage;
+
+         /// <summary>
+        /// Method to cancel the receipt of packets.
+        /// </summary>
+        public void Disconnect()
+        {
+            stopReceive = true;
+        }
 
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
@@ -62,7 +71,7 @@
            // Receive
             await Task.Run(() =>
             {
-                while (true)
+                while (stopReceive == false)
                 {
                     string? received = tcpConnection.ReceiveString();
 
@@ -87,6 +96,7 @@
                     Thread.Sleep(500);
                 }
             });
+            tcpConnection.Disconnect();
         }
     }
 }

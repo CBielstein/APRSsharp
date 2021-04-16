@@ -1,6 +1,9 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
+    using System.IO;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
 
@@ -25,20 +28,47 @@
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
         public static void Main(string[] args)
         {
+
+            // Create a root command with some options
+            var rootCommand = new RootCommand
+                {
+                new Option<string>(
+                    aliases: new string[] { "--password","--p", "--pass" },
+                    getDefaultValue: () => "-1",
+                    description: "A user password whose argument is parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--callsign","--c", "--cgn" },
+                    getDefaultValue: () => "N0CALL",
+                    description: "A user callsign parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--server","--s", "--svr" },
+                    getDefaultValue: () => "rotate.aprs2.net",
+                    description: "A user server parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--filter","--f" },
+                    getDefaultValue: () => "filter r/50.5039/4.4699/50",
+                    description: "A user server parsed as a string")
+                };
+            rootCommand.Description = "APRS console app";
+            Console.WriteLine("Start");
+
+            // Note that the parameters of the handler method are matched according to the names of the options
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string>(HandleConnection);
+
+            rootCommand.Invoke(args);
+        }
+        public static void HandleConnection(string? callsign, string? password, string? server, string? filter)
+        {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
-            string callsign;
-            string password;
-
-            // get input from the user
-            Console.WriteLine("Enter your callsign: ");
-            callsign = Console.ReadLine();
-            Console.WriteLine("Enter your password: ");
-            password = Console.ReadLine();
-            string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
-            string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
+            Console.WriteLine($"The value again --password is: {password}");
+            Console.WriteLine($"The value again --callsign is: {callsign}");
+            //string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
+            //string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
             n.ReceivedTcpMessage += PrintTcpMessage;
-            n.Receive(callsignArg, passwordArg);
+            Console.WriteLine($"The value again --password is: {password}");
+            Console.WriteLine($"The value again --callsign is: {callsign}");
+            n.Receive(callsign, password, server, filter);
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");

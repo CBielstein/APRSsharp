@@ -32,19 +32,19 @@
             var rootCommand = new RootCommand
                 {
                 new Option<string>(
-                    aliases: new string[] { "--password","--p", "--pass" },
+                    aliases: new string[] { "--password", "--p", "--pass" },
                     getDefaultValue: () => "-1",
                     description: "A user password whose argument is parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--callsign","--c", "--cgn" },
+                    aliases: new string[] { "--callsign", "--c", "--cgn" },
                     getDefaultValue: () => "N0CALL",
                     description: "A user callsign parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--server","--s", "--svr" },
+                    aliases: new string[] { "--server", "--s", "--svr" },
                     getDefaultValue: () => "rotate.aprs2.net",
                     description: "A specified server parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--filter","--f" },
+                    aliases: new string[] { "--filter", "--f" },
                     getDefaultValue: () => "filter r/50.5039/4.4699/50",
                     description: "A user filter parsed as a string"),
                 };

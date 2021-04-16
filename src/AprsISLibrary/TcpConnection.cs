@@ -46,7 +46,6 @@
             {
                 throw new Exception();
             }
-            Console.WriteLine("Receive string");
 
             return reader.ReadLine();
         }
@@ -58,7 +57,7 @@
             {
                 throw new Exception();
             }
-            Console.WriteLine("got sendstring");
+
             writer.WriteLine(message);
         }
     }

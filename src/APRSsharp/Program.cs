@@ -51,7 +51,7 @@
             rootCommand.Description = "AprsSharp console app";
 
             // The paremeters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string>(HandleAprsConnection);
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string, IConsole>(HandleAprsConnection);
 
             rootCommand.Invoke(args);
         }
@@ -63,7 +63,8 @@
         /// <param name="password"> The user password.</param>
         /// <param name="server"> The specified server to connect.</param>
         /// <param name="filter"> The filter that will be used for receiving the packets.</param>
-        public static void HandleAprsConnection(string callsign, string password, string server, string filter)
+        /// <param name="console"> Flexibility in running in different consoles.</param>
+        public static void HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);

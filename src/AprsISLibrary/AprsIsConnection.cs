@@ -46,14 +46,12 @@
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
+        /// <param name="server">The specified server to be connected.</param>
+        /// <param name="filter">The filter that is put for the connection.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive(string? callsign, string? password)
+        public async Task Receive(string callsign, string password, string server, string filter)
         {
-            callsign = callsign ?? "N0CALL";
-            password = password ?? "-1";
-            string filter = "filter r/50.5039/4.4699/50";
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
-            string server = "rotate.aprs2.net";
             bool authenticated = false;
 
             // Open connection
@@ -65,7 +63,6 @@
                 while (true)
                 {
                     string? received = tcpConnection.ReceiveString();
-
                     if (!string.IsNullOrEmpty(received))
                     {
                         ReceivedTcpMessage?.Invoke(received);

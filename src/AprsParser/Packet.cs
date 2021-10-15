@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
     /// A representation of an APRS Packet.
@@ -454,7 +455,7 @@
                     {
                         HasMessaging = false;
                         Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
-                        match.AssertSuccess(Type.PositionWithoutTimestampNoMessaging.ToString(), nameof(informationField));
+                        match.AssertSuccess(Type.PositionWithoutTimestampNoMessaging, nameof(informationField));
 
                         Position = new Position(match.Groups[1].Value);
 
@@ -504,7 +505,7 @@
                     {
                         Position = new Position();
                         Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
-                        match.AssertSuccess(Type.Status.ToString(), nameof(informationField));
+                        match.AssertSuccess(Type.Status, nameof(informationField));
 
                         Position.DecodeMaidenhead(match.Groups[1].Value);
 
@@ -528,7 +529,7 @@
                 case Type.MaidenheadGridLocatorBeacon:
                     {
                         Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
-                        match.AssertSuccess(Type.MaidenheadGridLocatorBeacon.ToString(), nameof(informationField));
+                        match.AssertSuccess(Type.MaidenheadGridLocatorBeacon, nameof(informationField));
 
                         Position = new Position();
                         Position.DecodeMaidenhead(match.Groups[1].Value);
@@ -573,8 +574,8 @@
             Match match = Regex.Match(informationField, RegexStrings.PositionWithTimestamp);
             match.AssertSuccess(
                 hasMessaging ?
-                    Type.PositionWithTimestampWithMessaging.ToString() :
-                    Type.PositionWithTimestampNoMessaging.ToString(),
+                    Type.PositionWithTimestampWithMessaging :
+                    Type.PositionWithTimestampNoMessaging,
                 nameof(informationField));
 
             HasMessaging = hasMessaging;

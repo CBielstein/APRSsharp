@@ -4,6 +4,7 @@
     using System.Globalization;
     using System.Text;
     using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
     using GeoCoordinatePortable;
 
     /// <summary>

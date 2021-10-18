@@ -2,22 +2,16 @@ namespace AprsSharp.Protocols.KISS
 {
     using System;
     using System.Collections.Generic;
-    using System.IO.Ports;
 
     /// <summary>
-    /// Represents an interface through a serial connection to a TNC using the KISS protocol.
+    /// Abstracts an interface to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class TNCInterface : IDisposable
+    public abstract class TNCInterface
     {
-        /// <summary>
-        /// The serial port to which the TNC is connected.
-        /// </summary>
-        private SerialPort? serialPort;
-
         /// <summary>
         /// A queue of received bytes waiting to be delivered (at the end of a frame).
         /// </summary>
-        private Queue<byte> receivedBuffer;
+        private readonly Queue<byte> receivedBuffer = new Queue<byte>();
 
         /// <summary>
         /// Marks if the next character received should be translated as an escaped character.
@@ -34,22 +28,12 @@ namespace AprsSharp.Protocols.KISS
         /// </summary>
         private byte tncPort;
 
-        private bool disposed;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TNCInterface"/> class.
         /// </summary>
-        /// <param name="serialPortName">The name of the SerialPort to use.</param>
         /// <param name="port">The port on the TNC used for communication.</param>
-        public TNCInterface(string? serialPortName = null, byte port = 0)
+        public TNCInterface(byte port = 0)
         {
-            if (serialPortName != null)
-            {
-                SetSerialPort(serialPortName);
-            }
-
-            receivedBuffer = new Queue<byte>();
-
             SetTncPort(port);
         }
 
@@ -64,37 +48,6 @@ namespace AprsSharp.Protocols.KISS
         /// The event which will be raised when a full frame is received.
         /// </summary>
         public event FrameReceivedEventHandler? FrameReceivedEvent;
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            serialPort?.Dispose();
-        }
-
-        /// <summary>
-        /// Sets a new serial port to use for the TNC.
-        /// If an existing port is open, closes it.
-        /// </summary>
-        /// <param name="serialPortName">New port name.</param>
-        public void SetSerialPort(string serialPortName)
-        {
-            if (serialPortName == null)
-            {
-                throw new ArgumentNullException(nameof(serialPortName));
-            }
-
-            serialPort?.Close();
-            serialPort?.Dispose();
-
-            serialPort = new SerialPort(serialPortName);
-            serialPort.DataReceived += new SerialDataReceivedEventHandler(TNCDataReceivedEventHandler);
-        }
 
         /// <summary>
         /// Sets the port on the TNC to usefor transmission.
@@ -298,6 +251,12 @@ namespace AprsSharp.Protocols.KISS
         }
 
         /// <summary>
+        /// Send data to the TNC.
+        /// </summary>
+        /// <param name="bytes">Bytes to send to the TNC.</param>
+        protected abstract void SendToTnc(byte[] bytes);
+
+        /// <summary>
         /// Encodes a frame for KISS protocol.
         /// </summary>
         /// <param name="command">The command to use for the frame.</param>
@@ -338,27 +297,6 @@ namespace AprsSharp.Protocols.KISS
         }
 
         /// <summary>
-        /// Handle the DataReceived event from the serialPort.
-        /// </summary>
-        /// <param name="sender">SerialPort which has received data.</param>
-        /// <param name="args">Additional args.</param>
-        private void TNCDataReceivedEventHandler(object sender, SerialDataReceivedEventArgs args)
-        {
-            SerialPort sp = (SerialPort)sender;
-
-            int numBytesToRead = sp.BytesToRead;
-            byte[] bytesReceived = new byte[numBytesToRead];
-            int numBytesWereRead = sp.Read(bytesReceived, 0, numBytesToRead);
-
-            if (numBytesWereRead < numBytesToRead)
-            {
-                Array.Resize(ref bytesReceived, numBytesWereRead);
-            }
-
-            DecodeReceivedData(bytesReceived);
-        }
-
-        /// <summary>
         /// Encodes and sends a frame of the given type with the given data.
         /// </summary>
         /// <param name="command">Command / frame time to encode.</param>
@@ -367,12 +305,7 @@ namespace AprsSharp.Protocols.KISS
         private byte[] EncodeAndSend(Command command, byte[] data)
         {
             byte[] encodedBytes = EncodeFrame(command, tncPort, data);
-
-            if (serialPort?.IsOpen == true)
-            {
-                serialPort.Write(encodedBytes, 0, encodedBytes.Length);
-            }
-
+            SendToTnc(encodedBytes);
             return encodedBytes;
         }
 

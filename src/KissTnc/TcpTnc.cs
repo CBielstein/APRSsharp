@@ -8,14 +8,9 @@ namespace AprsSharp.Protocols.KISS
     /// Represents an interface through a TCP/IP connection to a TNC using the KISS protocol.
     /// TODO: Standarize casing of names.
     /// </summary>
-    public sealed class TcpTnc : TNCInterface, IDisposable
+    public sealed class TcpTnc : TNCInterface
     {
         private readonly ITcpConnection tcpConnection;
-
-        /// <summary>
-        /// Track if the object has been disposed or not.
-        /// </summary>
-        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TcpTnc"/> class.
@@ -32,15 +27,14 @@ namespace AprsSharp.Protocols.KISS
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (disposed)
-            {
-                return;
-            }
+            base.Dispose(disposing);
 
-            disposed = true;
-            tcpConnection.Dispose();
+            if (disposing)
+            {
+                tcpConnection.Dispose();
+            }
         }
 
         /// <inheritdoc/>

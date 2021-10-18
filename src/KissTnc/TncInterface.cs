@@ -6,7 +6,7 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Abstracts an interface to a TNC using the KISS protocol.
     /// </summary>
-    public abstract class TNCInterface
+    public abstract class TNCInterface : IDisposable
     {
         /// <summary>
         /// A queue of received bytes waiting to be delivered (at the end of a frame).
@@ -29,6 +29,11 @@ namespace AprsSharp.Protocols.KISS
         private byte tncPort;
 
         /// <summary>
+        /// Track if the object has been disposed or not.
+        /// </summary>
+        private bool disposed;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TNCInterface"/> class.
         /// </summary>
         /// <param name="port">The port on the TNC used for communication.</param>
@@ -48,6 +53,19 @@ namespace AprsSharp.Protocols.KISS
         /// The event which will be raised when a full frame is received.
         /// </summary>
         public event FrameReceivedEventHandler? FrameReceivedEvent;
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Sets the port on the TNC to usefor transmission.
@@ -248,6 +266,14 @@ namespace AprsSharp.Protocols.KISS
             }
 
             return receivedFrames.ToArray();
+        }
+
+        /// <summary>
+        /// Dipose the class.
+        /// </summary>
+        /// <param name="disposing">True to dispose unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
         }
 
         /// <summary>

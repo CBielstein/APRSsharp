@@ -6,17 +6,12 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class SerialTNC : TNCInterface, IDisposable
+    public sealed class SerialTNC : TNCInterface
     {
         /// <summary>
         /// The serial port to which the TNC is connected.
         /// </summary>
         private readonly SerialPort serialPort;
-
-        /// <summary>
-        /// Track if the object has been disposed or not.
-        /// </summary>
-        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SerialTNC"/> class.
@@ -38,15 +33,14 @@ namespace AprsSharp.Protocols.KISS
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (disposed)
-            {
-                return;
-            }
+            base.Dispose(disposing);
 
-            disposed = true;
-            serialPort.Dispose();
+            if (disposing)
+            {
+                serialPort.Dispose();
+            }
         }
 
         /// <inheritdoc/>

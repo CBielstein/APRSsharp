@@ -11,7 +11,7 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// The serial port to which the TNC is connected.
         /// </summary>
-        private SerialPort? serialPort;
+        private readonly SerialPort serialPort;
 
         /// <summary>
         /// Track if the object has been disposed or not.
@@ -46,7 +46,7 @@ namespace AprsSharp.Protocols.KISS
             }
 
             disposed = true;
-            serialPort?.Dispose();
+            serialPort.Dispose();
         }
 
         /// <inheritdoc/>
@@ -55,11 +55,6 @@ namespace AprsSharp.Protocols.KISS
             if (bytes == null)
             {
                 throw new ArgumentNullException(nameof(bytes));
-            }
-
-            if (serialPort?.IsOpen != true)
-            {
-                throw new InvalidOperationException("Tried to send data when the serial port was not open.");
             }
 
             serialPort.Write(bytes, 0, bytes.Length);

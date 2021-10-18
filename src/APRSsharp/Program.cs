@@ -7,6 +7,9 @@
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
     using Microsoft.Extensions.Logging;
+    using System.Linq;
+    using System.Text;
+    using AprsSharp.Protocols.KISS;
 
     /// <summary>
     /// The public class that will be called when building the console application.
@@ -14,6 +17,22 @@
     /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The modes in which this program can operate.
+        /// </summary>
+        public enum Mode
+        {
+            /// <summary>
+            /// Receives packets from APRS-IS
+            /// </summary>
+            APRSIS,
+
+            /// <summary>
+            /// Interfaces with a TNC via TCP
+            /// </summary>
+            TCPTNC,
+        }
+
         /// <summary>
         /// A function matching the delegate event to print the received packet.
         /// </summary>
@@ -86,6 +105,10 @@
             // Create a root command with some options
             var rootCommand = new RootCommand
                 {
+                new Option<Mode>(
+                    aliases: new string[] { "--mode", "-m" },
+                    getDefaultValue: () => Mode.APRSIS,
+                    description: "The mode of operation for this program"),
                 new Option<string>(
                     aliases: new string[] { "--callsign", "-c", "--cgn" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultCallsign,
@@ -97,7 +120,11 @@
                 new Option<string>(
                     aliases: new string[] { "--server", "-s", "--svr" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultServerName,
-                    description: "A specified server parsed as a string"),
+                    description: "A specified server parsed as a string, used for APRS-IS or TCP TNCs"),
+                new Option<int>(
+                    aliases: new string[] { "--port", "-p" },
+                    getDefaultValue: () => 8001,
+                    description: "A TCP port for use with TCP TNCs"),
                 new Option<string>(
                     aliases: new string[] { "--filter", "-f" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
@@ -110,21 +137,30 @@
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string, LogLevel>(HandleAprsConnection);
+            rootCommand.Handler = CommandHandler.Create<Mode, string, string, string, int, string, LogLevel>(Execute);
 
             rootCommand.Invoke(args);
         }
 
         /// <summary>
-        /// Method that calls command line arguments.
+        /// Executes functionality using the provided command line arguments
         /// </summary>
-        /// <param name="callsign"> The user callsign that they should input.</param>
-        /// <param name="password"> The user password.</param>
-        /// <param name="server"> The specified server to connect.</param>
-        /// <param name="filter"> The filter that will be used for receiving the packets.</param>
+        /// <param name="mode">The mode of operation for this invocation of the program.</param>
+        /// <param name="callsign">The user callsign that they should input.</param>
+        /// <param name="password">The user password.</param>
+        /// <param name="server">The specified server to connect (either APRS-IS or TCP TNC).</param>
+        /// <param name="port">A port to use for connection in TCP TNC.</param>
+        /// <param name="filter">The filter that will be used for receiving the packets.</param>
         /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, LogLevel verbosity)
+        public static async Task Execute(
+            Mode mode,
+            string callsign,
+            string password,
+            string server,
+            int port,
+            string filter,
+            LogLevel verbosity)
         {
             using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
             {
@@ -133,21 +169,57 @@
                     .SetMinimumLevel(verbosity);
             });
 
-            using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
-            n.ReceivedPacket += PrintPacket;
-
-            Task receive = n.Receive(callsign, password, server, filter);
-
-            while (true)
+            switch (mode)
             {
-                ConsoleKeyInfo input = Console.ReadKey();
-
-                if (input.Key == ConsoleKey.Q)
+                case Mode.APRSIS:
                 {
-                    n.Disconnect();
-                    await receive;
+                    Console.WriteLine($"Connecting to APRS-IS server: {server}");
+                    using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
+                    n.ReceivedPacket += PrintPacket;
+
+                    Task receive = n.Receive(callsign, password, server, filter);
+
+                    while (true)
+                    {
+                        ConsoleKeyInfo input = Console.ReadKey();
+
+                        if (input.Key == ConsoleKey.Q)
+                        {
+                            n.Disconnect();
+                            await receive;
+                            break;
+                        }
+                    }
+
                     break;
                 }
+
+                case Mode.TCPTNC:
+                {
+
+                    Console.WriteLine($"Connecting to TNC via TCP: {server}:{port}");
+
+                    using TNCInterface tnc = new TcpTnc(server, port, 0);
+                    tnc.FrameReceivedEvent += (sender, args) =>
+                    {
+                        var byteArray = args.Data.ToArray();
+                        Console.WriteLine(Encoding.UTF8.GetString(byteArray));
+                    };
+
+                    Console.WriteLine("Press Q to quit");
+                    ConsoleKey key;
+
+                    do
+                    {
+                        key = Console.ReadKey().Key;
+                    }
+                    while (key != ConsoleKey.Q);
+
+                    break;
+                }
+
+                default:
+                    throw new ArgumentException($"Unsupported execution mode: {mode}");
             }
         }
     }

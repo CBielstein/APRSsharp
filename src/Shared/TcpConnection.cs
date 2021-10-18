@@ -1,4 +1,4 @@
-﻿ namespace AprsSharp.Shared
+﻿namespace AprsSharp.Shared
 {
     using System;
     using System.IO;
@@ -69,6 +69,65 @@
         {
             stream?.Close();
             tcpClient.Close();
+        }
+
+        /// <inheritdoc/>
+        public void AsyncReceive(HandleReceivedBytes callback)
+        {
+            var buffer = new byte[10];
+
+            if (stream?.CanRead != true)
+            {
+                throw new InvalidOperationException("Cannot read from NetworkStream.");
+            }
+
+            var receiveState = new ReceiveState(stream, buffer, callback);
+
+            stream.BeginRead(buffer, 0, buffer.Length, HandleReceive, receiveState);
+        }
+
+        /// <summary>
+        /// Handles receive of new bytes by invoking the callback and continuing receive.
+        /// </summary>
+        /// <param name="asyncResult">AsyncResult carrying the ReceiveState of this async IO.</param>
+        private static void HandleReceive(IAsyncResult asyncResult)
+        {
+            var rs = (ReceiveState)asyncResult.AsyncState;
+
+            var bytesRead = rs.Stream.EndRead(asyncResult);
+            var receivedBytes = rs.Buffer.AsSpan(0, bytesRead).ToArray();
+
+            rs.Callback(receivedBytes);
+
+            rs.Stream.BeginRead(rs.Buffer, 0, rs.Buffer.Length, HandleReceive, rs);
+        }
+
+        /// <summary>
+        /// Private class to track the state of async IO.
+        /// </summary>
+        private class ReceiveState
+        {
+            public ReceiveState(NetworkStream stream, byte[] buffer, HandleReceivedBytes callback)
+            {
+                Stream = stream;
+                Buffer = buffer;
+                Callback = callback;
+            }
+
+            /// <summary>
+            /// Gets or sets the NetworkStream being used for receive.
+            /// </summary>
+            public NetworkStream Stream { get; set; }
+
+            /// <summary>
+            /// Gets or sets the buffer being used to store recieved bytes.
+            /// </summary>
+            public byte[] Buffer { get; set; }
+
+            /// <summary>
+            /// Gets or sets the callback to invoke when bytes are received.
+            /// </summary>
+            public HandleReceivedBytes Callback { get; set; }
         }
     }
 }

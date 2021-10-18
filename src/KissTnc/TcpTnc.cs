@@ -1,9 +1,9 @@
-using System;
-using System.Text;
-using AprsSharp.Shared;
-
 namespace AprsSharp.Protocols.KISS
 {
+    using System;
+    using System.Text;
+    using AprsSharp.Shared;
+
     /// <summary>
     /// Represents an interface through a TCP/IP connection to a TNC using the KISS protocol.
     /// TODO: Standarize casing of names.
@@ -28,6 +28,7 @@ namespace AprsSharp.Protocols.KISS
         {
             tcpConnection = new TcpConnection();
             tcpConnection.Connect(server, port);
+            tcpConnection.AsyncReceive(bytes => DecodeReceivedData(bytes));
         }
 
         /// <inheritdoc/>

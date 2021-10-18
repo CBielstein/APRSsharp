@@ -3,6 +3,12 @@
     using System;
 
     /// <summary>
+    /// Delegate for handling bytes received by this TCP connection.
+    /// </summary>
+    /// <param name="bytes">Bytes received.</param>
+    public delegate void HandleReceivedBytes(byte[] bytes);
+
+    /// <summary>
     /// Abstracts a TCP connection.
     /// </summary>
     public interface ITcpConnection : IDisposable
@@ -36,5 +42,11 @@
         /// The function to stop the receipt/cancel tcp packets.
         /// </summary>
         void Disconnect();
+
+        /// <summary>
+        /// Begins async IO receive and accepts callback to handle new bytes.
+        /// </summary>
+        /// <param name="callback">Delegate to handle received bytes.</param>
+        void AsyncReceive(HandleReceivedBytes callback);
     }
 }

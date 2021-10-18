@@ -22,32 +22,18 @@ namespace AprsSharp.Protocols.KISS
         /// Initializes a new instance of the <see cref="SerialTNC"/> class.
         /// </summary>
         /// <param name="serialPortName">The name of the SerialPort to use.</param>
-        /// <param name="port">The port on the TNC used for communication.</param>
-        public SerialTNC(string? serialPortName = null, byte port = 0)
-            : base(port)
-        {
-            if (serialPortName != null)
-            {
-                SetSerialPort(serialPortName);
-            }
-        }
-
-        /// <summary>
-        /// Sets a new serial port to use for the TNC.
-        /// If an existing port is open, closes it.
-        /// </summary>
-        /// <param name="serialPortName">New port name.</param>
-        public void SetSerialPort(string serialPortName)
+        /// <param name="tncPort">The port on the TNC used for communication.</param>
+        public SerialTNC(string serialPortName, byte tncPort)
+            : base(tncPort)
         {
             if (serialPortName == null)
             {
                 throw new ArgumentNullException(nameof(serialPortName));
             }
 
-            serialPort?.Close();
-            serialPort?.Dispose();
-
             serialPort = new SerialPort(serialPortName);
+            serialPort.Open();
+
             serialPort.DataReceived += new SerialDataReceivedEventHandler(HandleDataFromSerialPort);
         }
 

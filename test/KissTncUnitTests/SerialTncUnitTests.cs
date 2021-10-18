@@ -19,8 +19,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void EncodeFrameData1()
         {
-            using SerialTNC tnc = new SerialTNC();
-            tnc.SetTncPort(0);
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             string message = "TEST";
 
@@ -44,7 +43,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void EncodeFrameData2()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             tnc.SetTncPort(5);
 
             string message = "Hello";
@@ -67,7 +66,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void EncodeFrameDataWithEscapes()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             tnc.SetTncPort(0);
 
             byte[] data = new byte[2] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FESC };
@@ -90,7 +89,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void EncodeFrameExitKissMode()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             tnc.SetTncPort(0);
 
             byte[] encodedBytes = tnc.ExitKISSMode();
@@ -111,7 +110,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DataReceivedAtOnce()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             byte[] receivedData = new byte[7] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
@@ -128,7 +127,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DataReceivedSplit()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             byte[] dataRec1 = new byte[4] { 0xC0, 0x50, 0x48, 0x65 };
             byte[] dataRec2 = new byte[4] { 0x6C, 0x6C, 0x6F, 0xC0 };
@@ -148,7 +147,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DataReceivedEscapes()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             byte[] recData = new byte[7] { 0xC0, 0x00, 0xDB, 0xDC, 0xDB, 0xDD, 0xC0 };
 
@@ -166,7 +165,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DataReceivedAtOncePrefacedMultipleFEND()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             byte[] receivedData = new byte[9] { (byte)SpecialCharacter.FEND, (byte)SpecialCharacter.FEND, 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0 };
 
@@ -183,7 +182,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void MultipleFramesDataReceivedAtOnce()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
 
             byte[] receivedData = new byte[15] { 0xC0, 0x00, 0x54, 0x45, 0x53, 0x54, 0xC0, 0xC0, 0x50, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0xC0 };
 
@@ -202,7 +201,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DelegateReceivedAtOnce()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
             tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
@@ -224,7 +223,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DelegateDataReceivedSplit()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
             tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
@@ -251,7 +250,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DelegateDataReceivedEscapes()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
             tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
@@ -274,7 +273,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DelegateDataReceivedAtOncePrefacedMultipleFEND()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
             tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);
@@ -296,7 +295,7 @@ namespace AprsSharpUnitTests.Protocols
         [TestMethod]
         public void DelegateMultipleFramesDataReceivedAtOnce()
         {
-            using SerialTNC tnc = new SerialTNC();
+            using SerialTNC tnc = new SerialTNC("COM1", 0);
             Queue<IReadOnlyList<byte>> decodedFrames = new Queue<IReadOnlyList<byte>>();
 
             tnc.FrameReceivedEvent += (sender, arg) => decodedFrames.Enqueue(arg.Data);

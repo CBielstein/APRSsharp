@@ -1,4 +1,4 @@
-﻿ namespace AprsSharp.Connections.AprsIs
+﻿ namespace AprsSharp.Shared
 {
     using System;
     using System.IO;

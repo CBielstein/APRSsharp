@@ -10,7 +10,7 @@ namespace AprsSharp.Parsers.Aprs
     {
         /// <summary>
         /// Matches Maidenhead grid with optional symbols.
-        /// Three groups: Full, alphanumber grid, symbols.
+        /// Three groups: Full, alphanumeric grid, symbols.
         /// </summary>
         public const string MaidenheadGridWithOptionalSymbols = @"([a-zA-Z0-9]{4,8})(.{2})?";
 

@@ -27,27 +27,23 @@
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
-            string callsign;
-            string password;
 
             // get input from the user
             Console.WriteLine("Enter your callsign: ");
-            callsign = Console.ReadLine();
+            string? callsign = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
-            password = Console.ReadLine();
-            string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
-            string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
+            string? password = Console.ReadLine();
             n.ReceivedTcpMessage += PrintTcpMessage;
-            n.Receive(callsignArg, passwordArg);
+            n.Receive(callsign, password);
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");
-            var packetName = Console.ReadLine();
+            string packetName = Console.ReadLine() ?? throw new ArgumentNullException(nameof(packetName), "Did not provide packet name");
             Packet p = new Packet();
             p.DecodeInformationField(packetName);
             Timestamp? ts = p.Timestamp;
             Position? pos = p.Position;
             Console.WriteLine($"\nHello, your packet name is, {p.Comment}, at cordinates, {pos?.Coordinates}, and time, {ts?.DateTime.Hour}");
-         }
+        }
     }
 }

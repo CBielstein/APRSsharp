@@ -53,6 +53,8 @@ can run `dotnet build -c Release` to get the release build behavior.
 
 To generate the console application binary, go to the APRSsharp folder
 (`AprsSharp\src\APRSsharp`) and run the command `dotnet publish -c Release` to generate
-the console application and it will be stored in the
-`bin\Release\net6.0\win-x86\publish` folder or run `dotnet publish -c Release -o <outputfolder>`
-to store your binary in a given output folder
+the console application.
+The resulting binary will be placed in
+`bin\Release\net6.0\win-x86\publish`.
+Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
+output directory.

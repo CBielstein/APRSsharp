@@ -1,7 +1,5 @@
 namespace AprsSharp.Parsers.Aprs
 {
-    using System.Diagnostics.CodeAnalysis;
-
     /// <summary>
     /// Holds strings for regex comparisons for reuse.
     /// </summary>
@@ -28,19 +26,19 @@ namespace AprsSharp.Parsers.Aprs
         /// Same as <see cref="MaidenheadGridWithOptionalSymbols"/> but forces full line match.
         /// </summary>
         /// <value></value>
-        public static readonly string MaidenheadGridFullLine = $@"^{MaidenheadGridWithOptionalSymbols}$";
+        public const string MaidenheadGridFullLine = $@"^{MaidenheadGridWithOptionalSymbols}$";
 
         /// <summary>
         /// Matches a Miadenhead Grid in square brackets [] with comment.
         /// Four groups: Full, alphanumeric grid, symbols, comment.
         /// </summary>
-        public static readonly string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
+        public const string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
 
         /// <summary>
         /// Matches a Status info field with Maidenhead grid and optional comment (comment separated by a space)
         /// Four matches: Full, full maidenhead, alphanumeric grid, symbols, comment.
         /// </summary>
-        public static readonly string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithOptionalSymbols}) ?(.+)?$";
+        public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithOptionalSymbols}) ?(.+)?$";
 
         /// <summary>
         /// Matches a PositionWithoutTimestamp info field.
@@ -53,7 +51,7 @@ namespace AprsSharp.Parsers.Aprs
         ///     Symbol code
         ///     Optional comment.
         /// </summary>
-        public static readonly string PositionWithoutTimestamp = $@"^!({PositionLatLongWithSymbols})(.+)?$";
+        public const string PositionWithoutTimestamp = $@"^!({PositionLatLongWithSymbols})(.+)?$";
 
         /// <summary>
         /// Matches a PositionWithTimestamp info field.
@@ -68,6 +66,6 @@ namespace AprsSharp.Parsers.Aprs
         ///         Symbol code
         ///     Optional comment.
         /// </summary>
-        public static readonly string PositionWithTimestamp = $@"^([/@])([0-9]{{6}}[/zh0-9])({PositionLatLongWithSymbols})(.+)?$";
+        public const string PositionWithTimestamp = $@"^([/@])([0-9]{{6}}[/zh0-9])({PositionLatLongWithSymbols})(.+)?$";
     }
 }

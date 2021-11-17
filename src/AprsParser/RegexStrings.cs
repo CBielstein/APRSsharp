@@ -5,7 +5,6 @@ namespace AprsSharp.Parsers.Aprs
     /// <summary>
     /// Holds strings for regex comparisons for reuse.
     /// </summary>
-    [type: SuppressMessage("Microsoft.Performance", "CA1802:UseLiteralsWhereAppropriate", Justification = ".NET Core does not support interpolated const strings. TODO Issue #81.")]
     internal static class RegexStrings
     {
         /// <summary>

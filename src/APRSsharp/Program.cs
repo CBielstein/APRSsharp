@@ -38,7 +38,7 @@
             callsign = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
             password = Console.ReadLine();
-            Console.WriteLine("Press key Q or q to cancel the connection:\n ");
+            Console.WriteLine("Press key Q or key q to cancel the connection:\n ");
             string? callsignArg = string.IsNullOrEmpty(callsign) ? null : callsign;
             string? passwordArg = string.IsNullOrEmpty(password) ? null : password;
             n.ReceivedTcpMessage += PrintTcpMessage;

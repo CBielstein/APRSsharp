@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
     /// A representation of an APRS Packet.
@@ -328,6 +330,8 @@
 
             // Get type of packet
             NmeaData.Type nmeaDataType = NmeaData.GetType(rawGpsPacket.Substring(3, 3));
+
+            throw new NotImplementedException("handle RawGPSData");
         }
 
         /// <summary>
@@ -429,17 +433,23 @@
                     throw new NotImplementedException("handle currnet Mic-E Data (Rev 0 beta)");
                 case Type.OldMicEData:
                     throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
+
+                // Handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
                 case Type.PositionWithoutTimestampNoMessaging:
-                    // handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
-                    HasMessaging = false;
-                    Position = new Position(informationField.Substring(1, 19));
-
-                    if (informationField.Length > 20)
                     {
-                        Comment = informationField.Substring(20);
-                    }
+                        HasMessaging = false;
+                        Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
+                        match.AssertSuccess(Type.PositionWithoutTimestampNoMessaging, nameof(informationField));
 
-                    break;
+                        Position = new Position(match.Groups[1].Value);
+
+                        if (match.Groups[6].Success)
+                        {
+                            Comment = match.Groups[6].Value;
+                        }
+
+                        break;
+                    }
 
                 case Type.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
@@ -478,19 +488,14 @@
                 case Type.Status:
                     {
                         Position = new Position();
-                        int endGridsquare = informationField.IndexOf(' ', StringComparison.Ordinal);
-                        if (endGridsquare == -1)
-                        {
-                            Position.DecodeMaidenhead(informationField.Substring(1));
-                        }
-                        else
-                        {
-                            Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
-                        }
+                        Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
+                        match.AssertSuccess(Type.Status, nameof(informationField));
 
-                        if (endGridsquare != -1 && endGridsquare + 1 < informationField.Length)
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+
+                        if (match.Groups[4].Success)
                         {
-                            Comment = informationField.Substring(endGridsquare + 1);
+                            Comment = match.Groups[4].Value;
                         }
                     }
 
@@ -506,15 +511,16 @@
                     throw new NotImplementedException("handle Telemetry data");
 
                 case Type.MaidenheadGridLocatorBeacon:
-                    Position = new Position();
                     {
-                        Position = new Position();
-                        int endGridsquare = informationField.IndexOf(']', StringComparison.Ordinal);
-                        Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                        Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
+                        match.AssertSuccess(Type.MaidenheadGridLocatorBeacon, nameof(informationField));
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        Position = new Position();
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+
+                        if (!string.IsNullOrEmpty(match.Groups[3].Value))
                         {
-                            Comment = informationField.Substring(endGridsquare + 1);
+                            Comment = match.Groups[3].Value;
                         }
                     }
 
@@ -549,15 +555,22 @@
         /// <param name="hasMessaging">true if this packet represents messaging capabilities.</param>
         private void HandlePositionWithTimestamp(string informationField, bool hasMessaging)
         {
+            Match match = Regex.Match(informationField, RegexStrings.PositionWithTimestamp);
+            match.AssertSuccess(
+                hasMessaging ?
+                    Type.PositionWithTimestampWithMessaging :
+                    Type.PositionWithTimestampNoMessaging,
+                nameof(informationField));
+
             HasMessaging = hasMessaging;
 
-            Timestamp = new Timestamp(informationField.Substring(1, 7));
+            Timestamp = new Timestamp(match.Groups[2].Value);
 
-            Position = new Position(informationField.Substring(8, 19));
+            Position = new Position(match.Groups[3].Value);
 
-            if (informationField.Length > 27)
+            if (match.Groups[8].Success)
             {
-                Comment = informationField.Substring(27);
+                Comment = match.Groups[8].Value;
             }
         }
     }

@@ -15,6 +15,17 @@
     public delegate void HandleTcpString(string tcpMessage);
 
     /// <summary>
+    /// Static class that defines different constants.
+    /// <summary>
+    public static class AprsIsConstants
+    {
+        public const string DefaultCallsign = "N0CALL";
+        public const string DefaultPassword = "-1";
+        public const string DefaultServerName = "rotate.aprs2.net";
+        public const string DefaultFilter = "filter r/50.5039/4.4699/50";
+    }
+
+    /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
@@ -49,7 +60,7 @@
         /// <param name="server">The specified server to be connected.</param>
         /// <param name="filter">The filter that is put for the connection.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive(string callsign, string password, string server, string filter)
+        public async Task Receive(string? callsign, string? password, string? server, string? filter)
         {
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             bool authenticated = false;

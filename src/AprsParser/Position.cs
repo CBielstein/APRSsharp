@@ -3,6 +3,8 @@
     using System;
     using System.Globalization;
     using System.Text;
+    using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
     using GeoCoordinatePortable;
 
     /// <summary>
@@ -170,19 +172,16 @@
             {
                 throw new ArgumentNullException(nameof(coords));
             }
-            else if (coords.Length != 19)
-            {
-                throw new ArgumentException(
-                    $"The given APRS coordinates has length {coords.Length} instead of the expected 19: {coords}",
-                    nameof(coords));
-            }
+
+            Match match = Regex.Match(coords, RegexStrings.PositionLatLongWithSymbols);
+            match.AssertSuccess("Coordinates", nameof(coords));
 
             Ambiguity = 0;
-            double latitude = DecodeLatitude(coords.Substring(0, 8));
-            double longitude = DecodeLongitude(coords.Substring(9, 9));
+            double latitude = DecodeLatitude(match.Groups[1].Value);
+            double longitude = DecodeLongitude(match.Groups[3].Value);
 
-            SymbolTableIdentifier = coords[8];
-            SymbolCode = coords[18];
+            SymbolTableIdentifier = match.Groups[2].Value[0];
+            SymbolCode = match.Groups[4].Value[0];
             Coordinates = new GeoCoordinate(latitude, longitude);
         }
 
@@ -196,27 +195,18 @@
             {
                 throw new ArgumentNullException(nameof(gridsquare));
             }
-            else if (gridsquare.Length != 4 &&
-                     gridsquare.Length != 6 &&
-                     gridsquare.Length != 8 &&
-                     gridsquare.Length != 10)
+
+            var match = Regex.Match(gridsquare, RegexStrings.MaidenheadGridFullLine);
+            match.AssertSuccess("Maidenhead", nameof(gridsquare));
+
+            string trimmedGridsquare = match.Groups[1].Value;
+
+            // If a third group is matched, this group is the two symbol fields.
+            if (match.Groups[2].Success)
             {
-                throw new ArgumentException(
-                    $"The given Maidenhead Location System gridsquare was {gridsquare.Length} characters length when a length of 4, 6, 8, or 10 characters was expected (including an optional two char symbol table and code).",
-                    nameof(gridsquare));
-            }
-
-            string trimmedGridsquare = gridsquare;
-
-            // If the symbol table identifier is not a letter or digit, assume it's the table.
-            // Because if it is a letter or digit, we'll assume there is no symbol information.
-            // Then trim it off for passing through to the decode functions
-            if (!char.IsLetterOrDigit(gridsquare[^2]))
-            {
-                SymbolTableIdentifier = gridsquare[^2];
-                SymbolCode = gridsquare[^1];
-
-                trimmedGridsquare = gridsquare[0..^2];
+                string symbols = match.Groups[2].Value;
+                SymbolTableIdentifier = symbols[0];
+                SymbolCode = symbols[1];
             }
 
             double latitude = DecodeFromGridsquare(trimmedGridsquare, CoordinateSystem.Latitude);

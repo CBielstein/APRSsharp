@@ -44,20 +44,15 @@
             n.ReceivedTcpMessage += PrintTcpMessage;
             Task receive = n.Receive(callsignArg, passwordArg);
 
-            ConsoleKeyInfo input;
-            input = Console.ReadKey();
-
             while (true)
             {
+                ConsoleKeyInfo input = Console.ReadKey();
+
                 if (input.Key == ConsoleKey.Q)
                 {
                     n.Disconnect();
                     await receive;
                     break;
-                }
-                else
-                {
-                   input = Console.ReadKey();
                 }
             }
          }

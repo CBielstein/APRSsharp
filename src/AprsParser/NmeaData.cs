@@ -11,56 +11,15 @@
         /// <summary>
         /// Maps three-character strings to RawGpsType values.
         /// </summary>
-        private static readonly Dictionary<string, Type> RawGpsTypeMap = new Dictionary<string, Type>()
+        private static readonly Dictionary<string, NmeaType> RawGpsTypeMap = new Dictionary<string, NmeaType>()
         {
-            { "GGA", Type.GGA },
-            { "GLL", Type.GLL },
-            { "RMC", Type.RMC },
-            { "VTG", Type.VTG },
-            { "WPT", Type.WPT },
-            { "WPL", Type.WPT },
+            { "GGA", NmeaType.GGA },
+            { "GLL", NmeaType.GLL },
+            { "RMC", NmeaType.RMC },
+            { "VTG", NmeaType.VTG },
+            { "WPT", NmeaType.WPT },
+            { "WPL", NmeaType.WPT },
         };
-
-        /// <summary>
-        /// Used to specify format during decode of raw GPS data packets.
-        /// </summary>
-        public enum Type
-        {
-            /// <summary>
-            /// Not yet decoded
-            /// </summary>
-            NotDecoded,
-
-            /// <summary>
-            /// GGA: Global Position System Fix Data
-            /// </summary>
-            GGA,
-
-            /// <summary>
-            /// GLL: Geographic Position, Latitude/Longitude Data
-            /// </summary>
-            GLL,
-
-            /// <summary>
-            /// RMC: Recommended Minimum Specific GPS/Transit Data
-            /// </summary>
-            RMC,
-
-            /// <summary>
-            /// VTG: Velocity and Track Data
-            /// </summary>
-            VTG,
-
-            /// <summary>
-            /// WPT: Way Point Location (also WPL)
-            /// </summary>
-            WPT,
-
-            /// <summary>
-            /// Not supported/known type
-            /// </summary>
-            Unknown,
-        }
 
         /// <summary>
         /// Determines the type of a raw GPS packet determined by a string.
@@ -69,7 +28,7 @@
         /// </summary>
         /// <param name="nmeaInput">String of length 3 identifying a raw GPS type or an entire NMEA string.</param>
         /// <returns>The raw GPS type represented by the argument.</returns>
-        public static Type GetType(string nmeaInput)
+        public static NmeaType GetType(string nmeaInput)
         {
             if (nmeaInput == null)
             {
@@ -97,7 +56,7 @@
             }
             catch (KeyNotFoundException)
             {
-                return Type.Unknown;
+                return NmeaType.Unknown;
             }
         }
     }

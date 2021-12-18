@@ -329,7 +329,7 @@
             }
 
             // Get type of packet
-            NmeaData.Type nmeaDataType = NmeaData.GetType(rawGpsPacket.Substring(3, 3));
+            NmeaType nmeaDataType = NmeaData.GetType(rawGpsPacket.Substring(3, 3));
 
             throw new NotImplementedException("handle RawGPSData");
         }

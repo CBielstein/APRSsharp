@@ -575,7 +575,7 @@
         /// <summary>
         /// Encodes latitude or longitude position, enforcing ambiguity.
         /// </summary>
-        /// <param name="type">CoordinateSystem to encode: Latitude or Longitude.</param>
+        /// <param name="type"><see cref="CoordinateSystem"/> to encode: Latitude or Longitude.</param>
         /// <returns>String of APRS latitude or longitude position.</returns>
         private string EncodeCoordinates(CoordinateSystem type)
         {

@@ -22,12 +22,12 @@
         };
 
         /// <summary>
-        /// Determines the type of a raw GPS packet determined by a string.
+        /// Determines the <see cref="NmeaType"/> of a raw GPS packet determined by a string.
         /// If the string is length 3, the three letters are taken as is.
         /// If the string is length 6 or longer, the indentifier is expected in the place dictated by the NMEA formats.
         /// </summary>
         /// <param name="nmeaInput">String of length 3 identifying a raw GPS type or an entire NMEA string.</param>
-        /// <returns>The raw GPS type represented by the argument.</returns>
+        /// <returns>The raw GPS <see cref="NmeaType"/> represented by the argument.</returns>
         public static NmeaType GetType(string nmeaInput)
         {
             if (nmeaInput == null)

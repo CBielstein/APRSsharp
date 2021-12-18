@@ -40,9 +40,9 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         /// <param name="informationField">The information field to decode.</param>
-        /// <param name="expectedPacketType">Expected type of the packet.</param>
+        /// <param name="expectedPacketType">Expected <see cref="PacketType"/> of the packet.</param>
         /// <param name="expectedHasMessaging">Expected hasMessaging value.</param>
-        /// <param name="expectedTimestampType">Expected Timestamp type.</param>
+        /// <param name="expectedTimestampType">Expected <see cref="TimestampType"/>.</param>
         [Theory]
         [InlineData("/092345z4903.50N/07201.75W>Test1234", PacketType.PositionWithTimestampNoMessaging, false, TimestampType.DHMz)] // No messaging, UTC
         [InlineData("@092345/4903.50N/07201.75W>Test1234", PacketType.PositionWithTimestampWithMessaging, true, TimestampType.DHMl)] // With messaging, local time
@@ -80,9 +80,9 @@
         /// based on the examples given in the APRS spec.
         /// </summary>
         /// <param name="dateTimeKind">The kind of date/time to use.</param>
-        /// <param name="timestampType">The timestamp type.</param>
+        /// <param name="timestampType">The <see cref="TimestampType"/>.</param>
         /// <param name="hasMessaging">If the packet should include messaging.</param>
-        /// <param name="packetType">Type of packet to encode.</param>
+        /// <param name="packetType"><see cref="PacketType"/> of packet to encode.</param>
         /// <param name="expectedEncoding">The expected encoded string.</param>
         [Theory]
         [InlineData(DateTimeKind.Local, TimestampType.DHMl, true, PacketType.PositionWithTimestampWithMessaging, @"@092345/4903.50N/07201.75W>Test1234")] // Local, has messaging
@@ -393,7 +393,7 @@
         /// <summary>
         /// Tests GetTypeChar.
         /// </summary>
-        /// <param name="packetType">Packet type to test.</param>
+        /// <param name="packetType"><see cref="PacketType"/> to test.</param>
         /// <param name="expectedChar">Expected character result.</param>
         [Theory]
         [InlineData(PacketType.PositionWithoutTimestampWithMessaging, '=')]

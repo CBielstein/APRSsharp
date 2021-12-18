@@ -32,7 +32,7 @@ namespace AprsSharp.Parsers.Aprs.Extensions
         /// If the Match object is not successful, throws an ArgumentException.
         /// </summary>
         /// <param name="match">Match object to check for success.</param>
-        /// <param name="type">Type that was being checked against the regex.</param>
+        /// <param name="type"><see cref="PacketType"/> that was being checked against the regex.</param>
         /// <param name="paramName">The name of the param that did not match the regex.</param>
         public static void AssertSuccess(this Match match, PacketType type, string paramName)
         {

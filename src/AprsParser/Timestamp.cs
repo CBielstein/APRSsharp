@@ -34,7 +34,7 @@
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Gets or sets a <see cref="Type"/> representing the APRS timestamp type.
+        /// Gets or sets a <see cref="TimestampType"/> representing the APRS timestamp type.
         /// </summary>
         public TimestampType DecodedType { get; set; } = TimestampType.NotDecoded;
 
@@ -173,7 +173,7 @@
         /// <summary>
         /// Encodes the data from the stored datetime as a string with the requested type.
         /// </summary>
-        /// <param name="type">The APRS timestamp type. Read about the types in the documentation for TimestampType.</param>
+        /// <param name="type">The APRS <see cref="TimestampType"/>.</param>
         /// <returns>String. 7-8 characters as defined by the APRS spec.</returns>
         public string Encode(TimestampType type)
         {
@@ -183,7 +183,7 @@
                 TimestampType.DHMl => EncodeDHM(isZulu: false),
                 TimestampType.HMS => EncodeHMS(),
                 TimestampType.MDHM => EncodeMDHM(),
-                TimestampType.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot deoce to type: {TimestampType.NotDecoded}"),
+                TimestampType.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot encode to type: {TimestampType.NotDecoded}"),
                 _ => throw new NotSupportedException(),
             };
         }

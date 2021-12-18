@@ -13,7 +13,7 @@
     public class Packet
     {
         /// <summary>
-        /// Maps a type-identifying character to a packet Type.
+        /// Maps a type-identifying character to a packet <see cref="PacketType"/>.
         /// </summary>
         private static readonly Dictionary<char, PacketType> DataTypeMap = new Dictionary<char, PacketType>()
         {
@@ -107,10 +107,10 @@
         public NmeaData? RawNmeaData { get; set; } = null;
 
         /// <summary>
-        /// Given an information field, this returns the Type of the APRS packet.
+        /// Given an information field, this returns the <see cref="PacketType"/> of the APRS packet.
         /// </summary>
         /// <param name="informationField">A string encoded APRS Information Field.</param>
-        /// <returns>PacketType of the data type.</returns>
+        /// <returns><see cref="PacketType"/> of the data type.</returns>
         public static PacketType GetDataType(string informationField)
         {
             if (informationField == null)
@@ -126,15 +126,15 @@
         }
 
         /// <summary>
-        /// Returns the char for a given PacketType.
+        /// Returns the char for a given <see cref="PacketType"/>.
         /// </summary>
-        /// <param name="type">Type to represent.</param>
+        /// <param name="type"><see cref="PacketType"/> to represent.</param>
         /// <returns>A char representing type.</returns>
         public static char GetTypeChar(PacketType type)
         {
             if (type == PacketType.DoNotUse || type == PacketType.Unused || type == PacketType.Unknown)
             {
-                throw new ArgumentException("Used invalid Type " + type);
+                throw new ArgumentException("Used invalid PacketType " + type);
             }
 
             IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
@@ -184,9 +184,9 @@
         /// <summary>
         /// Returns a string version of this packet encoded in the requested type.
         /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
+        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
         /// <returns>AX.25 APRS packet as a string.</returns>
-        public string Encode(Type encodeType)
+        public string Encode(PacketType encodeType)
         {
             throw new NotImplementedException();
         }
@@ -194,8 +194,8 @@
         /// <summary>
         /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
         /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
-        /// <param name="timeType">The type of encoding for the timestamp to use. Optional, defaults to DHMz.</param>
+        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
+        /// <param name="timeType">The <see cref="TimestampType"/> of encoding for the timestamp to use. Optional, defaults to DHMz.</param>
         /// <returns>APRS Information Field as a string.</returns>
         public string EncodeInformationField(PacketType encodeType, TimestampType timeType = TimestampType.DHMz)
         {

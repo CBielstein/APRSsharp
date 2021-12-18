@@ -1,11 +1,11 @@
-﻿namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.Parsers.Aprs.Extensions
 {
     using System;
 
     /// <summary>
-    /// Represents the NMEA data in an APRS packets.
+    /// Extension methods to encourage code reuse in this codebase.
     /// </summary>
-    public sealed class NmeaData
+    public static class StringConversionExtensions
     {
         /// <summary>
         /// Determines the <see cref="NmeaType"/> of a raw GPS packet determined by a string.
@@ -14,7 +14,7 @@
         /// </summary>
         /// <param name="nmeaInput">String of length 3 identifying a raw GPS type or an entire NMEA string.</param>
         /// <returns>The raw GPS <see cref="NmeaType"/> represented by the argument.</returns>
-        public static NmeaType GetType(string nmeaInput)
+        public static NmeaType ToNmeaType(this string nmeaInput)
         {
             if (nmeaInput == null)
             {

@@ -102,11 +102,6 @@
         public PacketType DecodedType { get; set; } = PacketType.NotDecoded;
 
         /// <summary>
-        /// Gets or sets the packet's raw NMEA data.
-        /// </summary>
-        public NmeaData? RawNmeaData { get; set; } = null;
-
-        /// <summary>
         /// Given an information field, this returns the <see cref="PacketType"/> of the APRS packet.
         /// </summary>
         /// <param name="informationField">A string encoded APRS Information Field.</param>
@@ -166,7 +161,7 @@
             }
 
             // Get type of packet
-            NmeaType nmeaDataType = NmeaData.GetType(rawGpsPacket.Substring(3, 3));
+            NmeaType nmeaDataType = rawGpsPacket.Substring(3, 3).ToNmeaType();
 
             throw new NotImplementedException("handle RawGPSData");
         }

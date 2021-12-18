@@ -38,15 +38,6 @@
         }
 
         /// <summary>
-        /// Used to specify the correct encoding type for EncodeCoordinates.
-        /// </summary>
-        private enum EncodeType
-        {
-            Latitude,
-            Longitude,
-        }
-
-        /// <summary>
         /// Gets or sets lat/long coordinates.
         /// </summary>
         public GeoCoordinate Coordinates { get; set; } = new GeoCoordinate(0, 0);
@@ -405,7 +396,7 @@
         /// <returns>Encoded APRS latitude position.</returns>
         public string EncodeLatitude()
         {
-            return EncodeCoordinates(EncodeType.Latitude);
+            return EncodeCoordinates(CoordinateSystem.Latitude);
         }
 
         /// <summary>
@@ -416,7 +407,7 @@
         /// <returns>Encoded APRS longitude position.</returns>
         public string EncodeLongitude()
         {
-            return EncodeCoordinates(EncodeType.Longitude);
+            return EncodeCoordinates(CoordinateSystem.Longitude);
         }
 
         /// <summary>
@@ -584,21 +575,21 @@
         /// <summary>
         /// Encodes latitude or longitude position, enforcing ambiguity.
         /// </summary>
-        /// <param name="type">EncodeType to encode: Latitude or Longitude.</param>
+        /// <param name="type">CoordinateSystem to encode: Latitude or Longitude.</param>
         /// <returns>String of APRS latitude or longitude position.</returns>
-        private string EncodeCoordinates(EncodeType type)
+        private string EncodeCoordinates(CoordinateSystem type)
         {
             double coords;
             char direction;
             string decimalFormat;
 
-            if (type == EncodeType.Latitude)
+            if (type == CoordinateSystem.Latitude)
             {
                 coords = Coordinates.Latitude;
                 direction = coords < 0 ? 'S' : 'N';
                 decimalFormat = "D2";
             }
-            else if (type == EncodeType.Longitude)
+            else if (type == CoordinateSystem.Longitude)
             {
                 coords = Coordinates.Longitude;
                 direction = coords > 0 ? 'E' : 'W';
@@ -606,7 +597,7 @@
             }
             else
             {
-                throw new ArgumentException($"Invalid EncodeType: {type}", nameof(type));
+                throw new ArgumentException($"Invalid CoordinateSystem: {type}", nameof(type));
             }
 
             coords = Math.Abs(coords);

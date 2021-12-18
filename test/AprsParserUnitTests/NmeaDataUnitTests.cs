@@ -11,7 +11,7 @@
         /// <summary>
         /// Tests GetType from a type identifier.
         /// </summary>
-        /// <param name="expected">Expected NmeaData.Type returned by test.</param>
+        /// <param name="expected">Expected NmeaType returned by test.</param>
         /// <param name="input">Input string to test.</param>
         [Theory]
         [InlineData(NmeaType.GGA, "GGA")]

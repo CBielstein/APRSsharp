@@ -137,8 +137,7 @@
                 throw new ArgumentException("Used invalid PacketType " + type);
             }
 
-            IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
-            return keys.Single();
+            return DataTypeMap.Single(pair => pair.Value == type).Key;
         }
 
         /// <summary>

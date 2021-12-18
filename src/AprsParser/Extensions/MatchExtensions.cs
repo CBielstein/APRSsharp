@@ -34,7 +34,7 @@ namespace AprsSharp.Parsers.Aprs.Extensions
         /// <param name="match">Match object to check for success.</param>
         /// <param name="type">Type that was being checked against the regex.</param>
         /// <param name="paramName">The name of the param that did not match the regex.</param>
-        public static void AssertSuccess(this Match match, Packet.Type type, string paramName)
+        public static void AssertSuccess(this Match match, PacketType type, string paramName)
         {
             match.AssertSuccess(type.ToString(), paramName);
         }

@@ -29,37 +29,6 @@
         }
 
         /// <summary>
-        /// Represents the type of APRS timestamp.
-        /// </summary>
-        public enum Type
-        {
-            /// <summary>
-            /// Days/Hours/Minutes zulu
-            /// </summary>
-            DHMz,
-
-            /// <summary>
-            /// Days/Hours/Minutes local
-            /// </summary>
-            DHMl,
-
-            /// <summary>
-            /// Hours/Minutes/Seconds (always zulu)
-            /// </summary>
-            HMS,
-
-            /// <summary>
-            /// Hours/Minutes/Seconds (always zulu)
-            /// </summary>
-            MDHM,
-
-            /// <summary>
-            /// Not a decoded timestamp
-            /// </summary>
-            NotDecoded,
-        }
-
-        /// <summary>
         /// Gets or sets a <see cref="DateTime"/> representing the APRS timestamp.
         /// </summary>
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
@@ -67,7 +36,7 @@
         /// <summary>
         /// Gets or sets a <see cref="Type"/> representing the APRS timestamp type.
         /// </summary>
-        public Type DecodedType { get; set; } = Type.NotDecoded;
+        public TimestampType DecodedType { get; set; } = TimestampType.NotDecoded;
 
         /// <summary>
         /// If we're given a time in DHM, we need to find the correct month and year to fill in for DateTime.
@@ -204,17 +173,17 @@
         /// <summary>
         /// Encodes the data from the stored datetime as a string with the requested type.
         /// </summary>
-        /// <param name="type">The APRS timestamp type. Read about the types in the documentation for Timestamp.Type.</param>
+        /// <param name="type">The APRS timestamp type. Read about the types in the documentation for TimestampType.</param>
         /// <returns>String. 7-8 characters as defined by the APRS spec.</returns>
-        public string Encode(Timestamp.Type type)
+        public string Encode(TimestampType type)
         {
             return type switch
             {
-                Type.DHMz => EncodeDHM(isZulu: true),
-                Type.DHMl => EncodeDHM(isZulu: false),
-                Type.HMS => EncodeHMS(),
-                Type.MDHM => EncodeMDHM(),
-                Type.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot deoce to type: {Type.NotDecoded}"),
+                TimestampType.DHMz => EncodeDHM(isZulu: true),
+                TimestampType.DHMl => EncodeDHM(isZulu: false),
+                TimestampType.HMS => EncodeHMS(),
+                TimestampType.MDHM => EncodeMDHM(),
+                TimestampType.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot deoce to type: {TimestampType.NotDecoded}"),
                 _ => throw new NotSupportedException(),
             };
         }
@@ -358,7 +327,7 @@
                 throw new ArgumentException("timestamp is not in DHM format as time indicator is " + timeIndicator + " when it should be z or /");
             }
 
-            DecodedType = wasZuluTime ? Type.DHMz : Type.DHMl;
+            DecodedType = wasZuluTime ? TimestampType.DHMz : TimestampType.DHMl;
             if (!int.TryParse(timestamp.Substring(0, 6), out _))
             {
                 throw new ArgumentException("timestamp contained non-numeric values in the first 6 spaces: " + timestamp);
@@ -394,7 +363,7 @@
                 throw new ArgumentException("timestamp is not in APRS HMS datetime format. Length is " + timestamp.Length + " when it should be 7 or format marker is " + timestamp[6] + " when it should be 'h'");
             }
 
-            DecodedType = Type.HMS;
+            DecodedType = TimestampType.HMS;
 
             string hourStr = timestamp.Substring(0, 2);
             string minuteStr = timestamp.Substring(2, 2);
@@ -433,7 +402,7 @@
                 throw new ArgumentException("timestamp is not in APRS MDHM datetime format. Length is " + timestamp.Length + " when it should be 8");
             }
 
-            DecodedType = Type.MDHM;
+            DecodedType = TimestampType.MDHM;
 
             string monthStr = timestamp.Substring(0, 2);
             string dayStr = timestamp.Substring(2, 2);

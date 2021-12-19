@@ -72,6 +72,32 @@ namespace AprsSharp.Parsers.Aprs
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="PositionPacket"/> class.
+        /// </summary>
+        /// <param name="position"><see cref="Position"/> for this packet.</param>
+        /// <param name="hasMessaging">True if the sender supports messaging.</param>
+        /// <param name="timestamp">Optional <see cref="Timestamp"/> for this packet.</param>
+        /// <param name="comment">Optional comment for this packet.</param>
+        public PositionPacket(Position position, bool hasMessaging, Timestamp? timestamp, string? comment)
+        {
+            Position = position;
+            HasMessaging = hasMessaging;
+            Timestamp = timestamp;
+            Comment = comment;
+
+            if (Timestamp == null)
+            {
+                Type = HasMessaging ? PacketType.PositionWithoutTimestampWithMessaging
+                    : PacketType.PositionWithoutTimestampNoMessaging;
+            }
+            else
+            {
+                Type = HasMessaging ? PacketType.PositionWithTimestampWithMessaging
+                    : PacketType.PositionWithTimestampNoMessaging;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the sender of the packet supports messaging.
         /// </summary>
         public bool HasMessaging { get; }

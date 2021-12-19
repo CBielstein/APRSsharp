@@ -60,51 +60,9 @@
 
             return dataTypeIdentifier.ToPacketType();
         }
-    } /*
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Packet"/> class.
-        /// If an encoded packet is provided, Decode is used to deocde in to this object.
-        /// </summary>
-        /// <param name="encodedPacket">A string encoding of an APRS packet to decode (optional).</param>
-        public Packet(string? encodedPacket = null)
-        {
-            if (encodedPacket != null)
-            {
-                Decode(encodedPacket);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the time at which the packet was sent.
-        /// </summary>
-        public Timestamp? Timestamp { get; set; } = null;
-
-        /// <summary>
-        /// Gets or sets the location from which the packet was sent.
-        /// </summary>
-        public Position? Position { get; set; } = null;
-
-        /// <summary>
-        /// Gets or sets the packet comment.
-        /// </summary>
-        public string? Comment { get; set; } = null;
-
-        /// <summary>
-        /// Gets or sets if the sender of the packet supports messaging.
-        /// </summary>
-        public bool? HasMessaging { get; set; } = false;
-
-        /// <summary>
-        /// Gets or sets the packet's destination address.
-        /// </summary>
-        public string? DestinationAddress { get; set; } = null;
-
-        /// <summary>
-        /// Gets or sets the software decode status for this packet.
-        /// </summary>
-        public PacketType DecodedType { get; set; } = PacketType.NotDecoded;
-
+    /*
         /// <summary>
         /// Decodes a position from raw GPS location (NMEA formats)
         /// This expects a three letter type to start the string
@@ -134,25 +92,6 @@
             NmeaType nmeaDataType = rawGpsPacket.Substring(3, 3).ToNmeaType();
 
             throw new NotImplementedException("handle RawGPSData");
-        }
-
-        /// <summary>
-        /// Takes a string encoding of an APRS packet, decodes it, and saves it in to this object.
-        /// </summary>
-        /// <param name="encodedPacket">A string encoding of an AX.25 APRS packet.</param>
-        public void Decode(string encodedPacket)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns a string version of this packet encoded in the requested type.
-        /// </summary>
-        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
-        /// <returns>AX.25 APRS packet as a string.</returns>
-        public string Encode(PacketType encodeType)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

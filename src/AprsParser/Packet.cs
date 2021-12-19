@@ -27,8 +27,11 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         public InfoField InfoField { get; }
 
-        /// <inheritdoc/>
-        public override string ToString()
+        /// <summary>
+        /// Encodes an APRS packet to a string.
+        /// </summary>
+        /// <returns>String representation of the packet.</returns>
+        public virtual string Encode()
         {
             throw new NotImplementedException();
         }

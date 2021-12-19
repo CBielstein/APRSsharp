@@ -6,7 +6,7 @@ namespace AprsSharp.Parsers.Aprs
     using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
-    /// Represents an APRS packet of the following types:
+    /// Represents an info field for the following types of packet:
     ///     * <see cref="PacketType.PositionWithoutTimestampNoMessaging"/>
     ///     * <see cref="PacketType.PositionWithTimestampNoMessaging"/>
     ///     * <see cref="PacketType.PositionWithoutTimestampWithMessaging"/>
@@ -17,21 +17,21 @@ namespace AprsSharp.Parsers.Aprs
         /// <summary>
         /// Initializes a new instance of the <see cref="PositionInfo"/> class.
         /// </summary>
-        /// <param name="encodedPacket">A string encoding of a <see cref="PositionInfo"/>.</param>
-        public PositionInfo(string encodedPacket)
+        /// <param name="encodedInfoField">A string encoding of a <see cref="PositionInfo"/>.</param>
+        public PositionInfo(string encodedInfoField)
         {
-            if (string.IsNullOrWhiteSpace(encodedPacket))
+            if (string.IsNullOrWhiteSpace(encodedInfoField))
             {
-                throw new ArgumentNullException(nameof(encodedPacket));
+                throw new ArgumentNullException(nameof(encodedInfoField));
             }
 
-            Type = GetPacketType(encodedPacket);
+            Type = GetPacketType(encodedInfoField);
 
             if (Type == PacketType.PositionWithoutTimestampNoMessaging)
             {
                 HasMessaging = false;
-                Match match = Regex.Match(encodedPacket, RegexStrings.PositionWithoutTimestamp);
-                match.AssertSuccess(PacketType.PositionWithoutTimestampNoMessaging, nameof(encodedPacket));
+                Match match = Regex.Match(encodedInfoField, RegexStrings.PositionWithoutTimestamp);
+                match.AssertSuccess(PacketType.PositionWithoutTimestampNoMessaging, nameof(encodedInfoField));
 
                 Position = new Position(match.Groups[1].Value);
 
@@ -49,12 +49,12 @@ namespace AprsSharp.Parsers.Aprs
             {
                 HasMessaging = Type == PacketType.PositionWithTimestampWithMessaging;
 
-                Match match = Regex.Match(encodedPacket, RegexStrings.PositionWithTimestamp);
+                Match match = Regex.Match(encodedInfoField, RegexStrings.PositionWithTimestamp);
                 match.AssertSuccess(
                     HasMessaging ?
                         PacketType.PositionWithTimestampWithMessaging :
                         PacketType.PositionWithTimestampNoMessaging,
-                    nameof(encodedPacket));
+                    nameof(encodedInfoField));
 
                 Timestamp = new Timestamp(match.Groups[2].Value);
 
@@ -67,7 +67,7 @@ namespace AprsSharp.Parsers.Aprs
             }
             else
             {
-                throw new ArgumentException($"Packet encoding not one of the position types. Type was {Type}", nameof(encodedPacket));
+                throw new ArgumentException($"Packet encoding not one of the position types. Type was {Type}", nameof(encodedInfoField));
             }
         }
 
@@ -118,14 +118,14 @@ namespace AprsSharp.Parsers.Aprs
         public Position Position { get; }
 
         /// <inheritdoc/>
-        public override string ToString() => ToString(TimestampType.DHMz);
+        public override string Encode() => Encode(TimestampType.DHMz);
 
         /// <summary>
-        /// Encodes an APRS packet to a string.
+        /// Encodes an APRS info field to a string.
         /// </summary>
         /// <param name="timeType">The <see cref="TimestampType"/> to use for timestamp encoding.</param>
-        /// <returns>String representation of the packet.</returns>
-        public string ToString(TimestampType timeType)
+        /// <returns>String representation of the info field.</returns>
+        public string Encode(TimestampType timeType = TimestampType.DHMz)
         {
             if (Position == null)
             {

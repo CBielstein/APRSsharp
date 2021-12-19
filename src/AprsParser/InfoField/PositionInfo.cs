@@ -12,13 +12,13 @@ namespace AprsSharp.Parsers.Aprs
     ///     * <see cref="PacketType.PositionWithoutTimestampWithMessaging"/>
     ///     * <see cref="PacketType.PositionWithTimestampWithMessaging"/>.
     /// </summary>
-    public class PositionPacket : AprsPacket
+    public class PositionInfo : InfoField
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PositionPacket"/> class.
+        /// Initializes a new instance of the <see cref="PositionInfo"/> class.
         /// </summary>
-        /// <param name="encodedPacket">A string encoding of a <see cref="PositionPacket"/>.</param>
-        public PositionPacket(string encodedPacket)
+        /// <param name="encodedPacket">A string encoding of a <see cref="PositionInfo"/>.</param>
+        public PositionInfo(string encodedPacket)
         {
             if (string.IsNullOrWhiteSpace(encodedPacket))
             {
@@ -72,13 +72,13 @@ namespace AprsSharp.Parsers.Aprs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PositionPacket"/> class.
+        /// Initializes a new instance of the <see cref="PositionInfo"/> class.
         /// </summary>
         /// <param name="position"><see cref="Position"/> for this packet.</param>
         /// <param name="hasMessaging">True if the sender supports messaging.</param>
         /// <param name="timestamp">Optional <see cref="Timestamp"/> for this packet.</param>
         /// <param name="comment">Optional comment for this packet.</param>
-        public PositionPacket(Position position, bool hasMessaging, Timestamp? timestamp, string? comment)
+        public PositionInfo(Position position, bool hasMessaging, Timestamp? timestamp, string? comment)
         {
             Position = position;
             HasMessaging = hasMessaging;

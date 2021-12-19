@@ -10,7 +10,7 @@
     /// A representation of an APRS Packet.
     /// Does decoding of an APRS packet as a string.
     /// </summary>
-    public abstract class AprsPacket
+    public abstract class InfoField
     {
         /// <summary>
         /// Maps a type-identifying character to a packet <see cref="PacketType"/>.
@@ -68,8 +68,8 @@
         /// Instantiates a type of APRS packet from the given string.
         /// </summary>
         /// <param name="encodedPacket">String representation of the APRS packet.</param>
-        /// <returns>An extension of <see cref="AprsPacket"/>.</returns>
-        public static AprsPacket FromString(string encodedPacket)
+        /// <returns>An extension of <see cref="InfoField"/>.</returns>
+        public static InfoField FromString(string encodedPacket)
         {
             PacketType type = GetPacketType(encodedPacket);
 
@@ -79,7 +79,7 @@
                 case PacketType.PositionWithoutTimestampWithMessaging:
                 case PacketType.PositionWithTimestampNoMessaging:
                 case PacketType.PositionWithTimestampWithMessaging:
-                    return new PositionPacket(encodedPacket);
+                    return new PositionInfo(encodedPacket);
 
                 default:
                     throw new NotImplementedException($"FromString not implemented for type {type}");

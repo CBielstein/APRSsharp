@@ -23,8 +23,8 @@
             try
             {
                 // Split the APRS field off of the TNC-2 information.
-                AprsPacket packet = AprsPacket.FromString(tcpMessage.Split(':', 2).Last());
-                Console.WriteLine($"    Type: {packet.Type}");
+                InfoField infoField = InfoField.FromString(tcpMessage.Split(':', 2).Last());
+                Console.WriteLine($"    Type: {infoField.Type}");
             }
             catch (Exception ex)
             {

@@ -10,11 +10,12 @@
     /// A representation of an APRS Packet.
     /// Does decoding of an APRS packet as a string.
     /// </summary>
-    public class Packet
+    public abstract class AprsPacket
     {
         /// <summary>
         /// Maps a type-identifying character to a packet <see cref="PacketType"/>.
         /// </summary>
+        // TODO: Move this in to extension methods for helpers?
         private static readonly Dictionary<char, PacketType> DataTypeMap = new Dictionary<char, PacketType>()
         {
             { (char)0x1c, PacketType.CurrentMicEData },
@@ -59,6 +60,62 @@
         };
 
         /// <summary>
+        /// Gets or sets the <see cref="PacketType"/> of this packet.
+        /// </summary>
+        public PacketType Type { get; protected set; }
+
+        /// <summary>
+        /// Instantiates a type of APRS packet from the given string.
+        /// </summary>
+        /// <param name="encodedPacket">String representation of the APRS packet.</param>
+        /// <returns>An extension of <see cref="AprsPacket"/>.</returns>
+        public static AprsPacket FromString(string encodedPacket)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Encodes an APRS packet to a string.
+        /// </summary>
+        /// <returns>String representation of the packet.</returns>
+        public abstract override string ToString();
+
+        /// <summary>
+        /// Gets the <see cref="PacketType"/> of a string representation of an APRS packet.
+        /// </summary>
+        /// <param name="encodedPacket">A string-encoded APRS packet.</param>
+        /// <returns><see cref="PacketType"/> of the data type.</returns>
+        protected static PacketType GetPacketType(string encodedPacket)
+        {
+            if (encodedPacket == null)
+            {
+                throw new ArgumentNullException(nameof(encodedPacket));
+            }
+
+            // TODO Issue #67: This isn't always true.
+            // '!' can come up to the 40th position.
+            char dataTypeIdentifier = char.ToUpperInvariant(encodedPacket[0]);
+
+            return DataTypeMap[dataTypeIdentifier];
+        }
+
+        /// <summary>
+        /// Returns the char for a given <see cref="PacketType"/>.
+        /// </summary>
+        /// <param name="type"><see cref="PacketType"/> to represent.</param>
+        /// <returns>A char representing type.</returns>
+        protected static char GetTypeChar(PacketType type)
+        {
+            if (type == PacketType.DoNotUse || type == PacketType.Unused || type == PacketType.Unknown)
+            {
+                throw new ArgumentException("Used invalid PacketType " + type);
+            }
+
+            return DataTypeMap.Single(pair => pair.Value == type).Key;
+        }
+    } /*
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Packet"/> class.
         /// If an encoded packet is provided, Decode is used to deocde in to this object.
         /// </summary>
@@ -100,40 +157,6 @@
         /// Gets or sets the software decode status for this packet.
         /// </summary>
         public PacketType DecodedType { get; set; } = PacketType.NotDecoded;
-
-        /// <summary>
-        /// Given an information field, this returns the <see cref="PacketType"/> of the APRS packet.
-        /// </summary>
-        /// <param name="informationField">A string encoded APRS Information Field.</param>
-        /// <returns><see cref="PacketType"/> of the data type.</returns>
-        public static PacketType GetDataType(string informationField)
-        {
-            if (informationField == null)
-            {
-                throw new ArgumentNullException(nameof(informationField));
-            }
-
-            // TODO Issue #67: This isn't always true.
-            // '!' can come up to the 40th position.
-            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
-
-            return DataTypeMap[dataTypeIdentifier];
-        }
-
-        /// <summary>
-        /// Returns the char for a given <see cref="PacketType"/>.
-        /// </summary>
-        /// <param name="type"><see cref="PacketType"/> to represent.</param>
-        /// <returns>A char representing type.</returns>
-        public static char GetTypeChar(PacketType type)
-        {
-            if (type == PacketType.DoNotUse || type == PacketType.Unused || type == PacketType.Unknown)
-            {
-                throw new ArgumentException("Used invalid PacketType " + type);
-            }
-
-            return DataTypeMap.Single(pair => pair.Value == type).Key;
-        }
 
         /// <summary>
         /// Decodes a position from raw GPS location (NMEA formats)
@@ -265,24 +288,6 @@
                     throw new NotImplementedException("handle currnet Mic-E Data (Rev 0 beta)");
                 case PacketType.OldMicEData:
                     throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
-
-                // Handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
-                case PacketType.PositionWithoutTimestampNoMessaging:
-                    {
-                        HasMessaging = false;
-                        Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
-                        match.AssertSuccess(PacketType.PositionWithoutTimestampNoMessaging, nameof(informationField));
-
-                        Position = new Position(match.Groups[1].Value);
-
-                        if (match.Groups[6].Success)
-                        {
-                            Comment = match.Groups[6].Value;
-                        }
-
-                        break;
-                    }
-
                 case PacketType.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
                 case PacketType.RawGPSData:
@@ -303,20 +308,12 @@
                     throw new NotImplementedException("handle Invalid data or test data");
                 case PacketType.SpaceWeather:
                     throw new NotImplementedException("handle Reserved - Space weather");
-                case PacketType.PositionWithTimestampNoMessaging:
-                    HandlePositionWithTimestamp(informationField, false);
-                    break;
-
                 case PacketType.Message:
                     throw new NotImplementedException("handle Message");
                 case PacketType.Object:
                     throw new NotImplementedException("handle Object");
                 case PacketType.StationCapabilities:
                     throw new NotImplementedException("handle Station capabilities");
-                case PacketType.PositionWithoutTimestampWithMessaging:
-                    // handle Position without timestamp (with APRS messaging)
-                    HasMessaging = true;
-                    throw new NotImplementedException("handle Position without timestamp (with APRS messaging)");
                 case PacketType.Status:
                     {
                         Position = new Position();
@@ -335,10 +332,6 @@
 
                 case PacketType.Query:
                     throw new NotImplementedException("handle Query");
-                case PacketType.PositionWithTimestampWithMessaging:
-                    HandlePositionWithTimestamp(informationField, true);
-                    break;
-
                 case PacketType.TelemetryData:
                     throw new NotImplementedException("handle Telemetry data");
 
@@ -378,32 +371,5 @@
                     throw new ArgumentOutOfRangeException(nameof(informationField));
             }
         }
-
-        /// <summary>
-        /// Logic for positin with timestamp with and without messaging
-        /// condensed here to save copy/paste bugs.
-        /// </summary>
-        /// <param name="informationField">The packet info field to decode.</param>
-        /// <param name="hasMessaging">true if this packet represents messaging capabilities.</param>
-        private void HandlePositionWithTimestamp(string informationField, bool hasMessaging)
-        {
-            Match match = Regex.Match(informationField, RegexStrings.PositionWithTimestamp);
-            match.AssertSuccess(
-                hasMessaging ?
-                    PacketType.PositionWithTimestampWithMessaging :
-                    PacketType.PositionWithTimestampNoMessaging,
-                nameof(informationField));
-
-            HasMessaging = hasMessaging;
-
-            Timestamp = new Timestamp(match.Groups[2].Value);
-
-            Position = new Position(match.Groups[3].Value);
-
-            if (match.Groups[8].Success)
-            {
-                Comment = match.Groups[8].Value;
-            }
-        }
-    }
+    }*/
 }

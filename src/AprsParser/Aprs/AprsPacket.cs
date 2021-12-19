@@ -71,7 +71,19 @@
         /// <returns>An extension of <see cref="AprsPacket"/>.</returns>
         public static AprsPacket FromString(string encodedPacket)
         {
-            throw new NotImplementedException();
+            PacketType type = GetPacketType(encodedPacket);
+
+            switch (type)
+            {
+                case PacketType.PositionWithoutTimestampNoMessaging:
+                case PacketType.PositionWithoutTimestampWithMessaging:
+                case PacketType.PositionWithTimestampNoMessaging:
+                case PacketType.PositionWithTimestampWithMessaging:
+                    return new PositionPacket(encodedPacket);
+
+                default:
+                    throw new NotImplementedException($"FromString not implemented for type {type}");
+            }
         }
 
         /// <summary>

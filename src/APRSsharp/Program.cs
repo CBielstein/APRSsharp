@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
@@ -14,14 +15,15 @@
         /// <summary>
         /// A function matching the delegate event to print the received message.
         /// </summary>
-        /// <param name="encodedPacket">The received tcp message that needs to be decoded and printed.</param>
-        public static void PrintPacket(string encodedPacket)
+        /// <param name="tcpMessage">The received tcp message that needs to be decoded and printed.</param>
+        public static void PrintPacket(string tcpMessage)
         {
-            Console.WriteLine($"Received: {encodedPacket}");
+            Console.WriteLine($"Received: {tcpMessage}");
 
             try
             {
-                AprsPacket packet = AprsPacket.FromString(encodedPacket);
+                // Split the APRS field off of the TNC-2 information.
+                AprsPacket packet = AprsPacket.FromString(tcpMessage.Split(':', 2).Last());
                 Console.WriteLine($"    Type: {packet.Type}");
             }
             catch (Exception ex)

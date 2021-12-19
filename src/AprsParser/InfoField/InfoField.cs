@@ -1,9 +1,7 @@
 ﻿namespace AprsSharp.Parsers.Aprs
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text.RegularExpressions;
     using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
@@ -11,53 +9,6 @@
     /// </summary>
     public abstract class InfoField
     {
-        /// <summary>
-        /// Maps a type-identifying character to a packet <see cref="PacketType"/>.
-        /// </summary>
-        // TODO: Move this in to extension methods for helpers?
-        private static readonly Dictionary<char, PacketType> DataTypeMap = new Dictionary<char, PacketType>()
-        {
-            { (char)0x1c, PacketType.CurrentMicEData },
-            { (char)0x1d, PacketType.OldMicEData },
-            { '!', PacketType.PositionWithoutTimestampNoMessaging },
-            { '\"', PacketType.Unused },
-            { '#', PacketType.PeetBrosUIIWeatherStation },
-            { '$', PacketType.RawGPSData },
-            { '%', PacketType.AgreloDFJrMicroFinder },
-            { '&', PacketType.MapFeature },
-            { '\'', PacketType.OldMicEDataCurrentTMD700 },
-            { '(', PacketType.Unused },
-            { ')', PacketType.Item },
-            { '*', PacketType.PeetBrosUIIWeatherStation },
-            { '+', PacketType.ShelterDataWithTime },
-            { ',', PacketType.InvalidOrTestData },
-            { '-', PacketType.Unused },
-            { '.', PacketType.SpaceWeather },
-            { '/', PacketType.PositionWithTimestampNoMessaging },
-            { ':', PacketType.Message },
-            { ';', PacketType.Object },
-            { '<', PacketType.StationCapabilities },
-            { '=', PacketType.PositionWithoutTimestampWithMessaging },
-            { '>', PacketType.Status },
-            { '?', PacketType.Query },
-            { '@', PacketType.PositionWithTimestampWithMessaging },
-            { 'T', PacketType.TelemetryData },
-            { '[', PacketType.MaidenheadGridLocatorBeacon },
-            { '\\', PacketType.Unused },
-            { ']', PacketType.Unused },
-            { '^', PacketType.Unused },
-            { '_', PacketType.WeatherReport },
-            { '`', PacketType.CurrentMicEDataNotTMD700 },
-            { '{', PacketType.UserDefinedAPRSPacketFormat },
-            { '}', PacketType.ThirdPartyTraffic },
-            { 'A', PacketType.DoNotUse },
-            { 'S', PacketType.DoNotUse },
-            { 'U', PacketType.DoNotUse },
-            { 'Z', PacketType.DoNotUse },
-            { '0', PacketType.DoNotUse },
-            { '9', PacketType.DoNotUse },
-        };
-
         /// <summary>
         /// Gets or sets the <see cref="PacketType"/> of this packet.
         /// </summary>
@@ -107,22 +58,7 @@
             // '!' can come up to the 40th position.
             char dataTypeIdentifier = char.ToUpperInvariant(encodedInfoField[0]);
 
-            return DataTypeMap[dataTypeIdentifier];
-        }
-
-        /// <summary>
-        /// Returns the char for a given <see cref="PacketType"/>.
-        /// </summary>
-        /// <param name="type"><see cref="PacketType"/> to represent.</param>
-        /// <returns>A char representing type.</returns>
-        protected static char GetTypeChar(PacketType type)
-        {
-            if (type == PacketType.DoNotUse || type == PacketType.Unused || type == PacketType.Unknown)
-            {
-                throw new ArgumentException("Used invalid PacketType " + type);
-            }
-
-            return DataTypeMap.Single(pair => pair.Value == type).Key;
+            return dataTypeIdentifier.ToPacketType();
         }
     } /*
 

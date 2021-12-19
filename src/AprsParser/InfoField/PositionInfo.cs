@@ -134,7 +134,7 @@ namespace AprsSharp.Parsers.Aprs
 
             StringBuilder encoded = new StringBuilder();
 
-            encoded.Append(GetTypeChar(Type));
+            encoded.Append(Type.ToChar());
 
             if (Type == PacketType.PositionWithTimestampWithMessaging ||
                 Type == PacketType.PositionWithTimestampNoMessaging)

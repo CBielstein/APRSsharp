@@ -10,7 +10,6 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     /// </summary>
     public class EnumConversionExtensionsUnitTests
     {
-
         /// <summary>
         /// Tests GetTypeChar for <see cref="PacketType.DoNotUse"/>.
         /// </summary>

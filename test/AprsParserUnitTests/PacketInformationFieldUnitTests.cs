@@ -93,9 +93,8 @@
             string informationField,
             PacketType expectedDataType)
         {
-            Assert.Equal(
-                expectedDataType,
-                Packet.GetDataType(informationField));
+            InfoField infoField = InfoField.FromString(informationField);
+            Assert.Equal(expectedDataType, infoField.Type);
         }
 
         /// <summary>

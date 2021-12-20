@@ -11,15 +11,6 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     public class EnumConversionExtensionsUnitTests
     {
         /// <summary>
-        /// Tests GetTypeChar for <see cref="PacketType.DoNotUse"/>.
-        /// </summary>
-        [Fact]
-        public void GetTypeCharDoNotUseThrows()
-        {
-            Assert.Throws<ArgumentException>(() => PacketType.DoNotUse.ToChar());
-        }
-
-        /// <summary>
         /// Tests GetTypeChar.
         /// </summary>
         /// <param name="packetType"><see cref="PacketType"/> to test.</param>

@@ -44,7 +44,6 @@ namespace AprsSharp.Parsers.Aprs
                 if (match.Groups[4].Success)
                 {
                     Comment = match.Groups[4].Value;
-                    ValidateComment(Comment);
                 }
             }
             else
@@ -84,12 +83,43 @@ namespace AprsSharp.Parsers.Aprs
         {
             Type = PacketType.Status;
 
+            if (Position != null && Timestamp != null)
+            {
+                throw new ArgumentException($"{nameof(Timestamp)} may not be specified if a position is given.");
+            }
+
             Timestamp = timestamp;
             Position = position;
 
             if (comment != null)
             {
-                ValidateComment(comment);
+                // Validate lengths
+                if (position != null && comment.Length > 53)
+                {
+                    // Delimiting space + 53 characters = 54.
+                    // We will add the space during encode, so only 53 here.
+                    throw new ArgumentException(
+                        $"With a position specified, comment may be at most 53 characters. Given comment had length {comment.Length}",
+                        nameof(comment));
+                }
+                else if (timestamp != null && comment.Length > 55)
+                {
+                    throw new ArgumentException(
+                        $"With a timestamp, comment may be at most 55 characters. Given comment had length {comment.Length}",
+                        nameof(comment));
+                }
+                else if (comment.Length > 62)
+                {
+                    throw new ArgumentException(
+                        $"Without timestamp or or position, comment may be at most 62 characters. Given comment had length {comment.Length}",
+                        nameof(comment));
+                }
+
+                // Validate no disallowed characters were used
+                if (comment.IndexOfAny(CommentDisallowedChars) != -1)
+                {
+                    throw new ArgumentException($"Comment may not include `|` or `~` but was given: {comment}", nameof(comment));
+                }
             }
 
             Comment = comment;
@@ -136,18 +166,6 @@ namespace AprsSharp.Parsers.Aprs
             }
 
             return encoded.ToString();
-        }
-
-        /// <summary>
-        /// Validates that a comment string does not contain disallowed characters.
-        /// </summary>
-        /// <param name="comment">A comment string to verify.</param>
-        private static void ValidateComment(string comment)
-        {
-            if (comment.IndexOfAny(CommentDisallowedChars) != -1)
-            {
-                throw new ArgumentException($"Comment may not include `|` or `~` but was given: {comment}", nameof(comment));
-            }
         }
     }
 }

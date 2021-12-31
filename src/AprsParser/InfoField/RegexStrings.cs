@@ -6,10 +6,16 @@ namespace AprsSharp.Parsers.Aprs
     internal static class RegexStrings
     {
         /// <summary>
-        /// Matches Maidenhead grid with optional symbols.
+        /// Same as <see cref="MaidenheadGridWithSymbols"/> but symbols are optional.
         /// Three groups: Full, alphanumeric grid, symbols.
         /// </summary>
-        public const string MaidenheadGridWithOptionalSymbols = @"([a-zA-Z0-9]{4,8})(.{2})?";
+        public const string MaidenheadGridWithOptionalSymbols = $@"{MaidenheadGridWithSymbols}?";
+
+        /// <summary>
+        /// Matches Maidenhead grid with symbols.
+        /// Three groups: Full, alphanumeric grid, symbols.
+        /// </summary>
+        public const string MaidenheadGridWithSymbols = @"([a-zA-Z0-9]{4,8})(.{2})";
 
         /// <summary>
         /// Matchdes a lat/long position, including with ambiguity, including symbols.
@@ -38,7 +44,7 @@ namespace AprsSharp.Parsers.Aprs
         /// Matches a Status info field with Maidenhead grid and optional comment (comment separated by a space)
         /// Four matches: Full, full maidenhead, alphanumeric grid, symbols, comment.
         /// </summary>
-        public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithOptionalSymbols}) ?(.+)?$";
+        public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithSymbols}) ?(.+)?$";
 
         /// <summary>
         /// Matches a PositionWithoutTimestamp info field.

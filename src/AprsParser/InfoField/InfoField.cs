@@ -106,36 +106,10 @@
 
             switch (encodeType)
             {
-                case PacketType.PositionWithTimestampWithMessaging:
-                case PacketType.PositionWithTimestampNoMessaging:
-                    encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += Timestamp!.Encode(timeType);
-                    encodedInfoField += Position!.Encode();
-                    encodedInfoField += Comment;
-                    break;
-
-                case PacketType.PositionWithoutTimestampNoMessaging:
-                case PacketType.PositionWithoutTimestampWithMessaging:
-                    encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += Position!.Encode();
-                    encodedInfoField += Comment;
-                    break;
-
                 case PacketType.MaidenheadGridLocatorBeacon:
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += Position!.EncodeGridsquare(6, false);
                     encodedInfoField += ']';
-                    if (Comment != null && Comment.Length > 0)
-                    {
-                        encodedInfoField += ' ';
-                        encodedInfoField += Comment;
-                    }
-
-                    break;
-
-                case PacketType.Status:
-                    encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += Position!.EncodeGridsquare(6, true);
                     if (Comment != null && Comment.Length > 0)
                     {
                         encodedInfoField += ' ';
@@ -200,22 +174,6 @@
                     throw new NotImplementedException("handle Object");
                 case PacketType.StationCapabilities:
                     throw new NotImplementedException("handle Station capabilities");
-                case PacketType.Status:
-                    {
-                        Position = new Position();
-                        Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
-                        match.AssertSuccess(PacketType.Status, nameof(informationField));
-
-                        Position.DecodeMaidenhead(match.Groups[1].Value);
-
-                        if (match.Groups[4].Success)
-                        {
-                            Comment = match.Groups[4].Value;
-                        }
-                    }
-
-                    break;
-
                 case PacketType.Query:
                     throw new NotImplementedException("handle Query");
                 case PacketType.TelemetryData:

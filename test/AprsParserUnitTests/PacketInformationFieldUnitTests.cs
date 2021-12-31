@@ -161,61 +161,6 @@
             string encoded = p.EncodeInformationField(PacketType.MaidenheadGridLocatorBeacon);
 
             Assert.Equal(expectedEncoding, encoded);
-        }
-
-        /// <summary>
-        /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        /// <param name="informationField">Information field for decode.</param>
-        /// <param name="expectedLatitute">Expected decoded latitute value.</param>
-        /// <param name="expectedLongitute">Expected decoded longitude value.</param>
-        /// <param name="expectedSymbolCode">Expected decoded symbol code value.</param>
-        /// <param name="expectedComment">Expected decoded comment.</param>
-        [Theory]
-        [InlineData(">IO91SX/G", 51.98, -0.46, 'G', null)]
-        [InlineData(">IO91/G", 51.5, -1.0, 'G', null)]
-        [InlineData(">IO91SX/- My house", 51.98, -0.46, '-', "My house")]
-        [InlineData(">IO91SX/- ^B7", 51.98, -0.46, '-', "^B7", Skip = "Issue #69: Packet decode does not handle Meteor Scatter beam information")]
-        public void DecodeStatusReportFormatWithMaidenhead(
-            string informationField,
-            double expectedLatitute,
-            double expectedLongitute,
-            char expectedSymbolCode,
-            string? expectedComment)
-        {
-            Packet p = new Packet();
-            p.DecodeInformationField(informationField);
-
-            Position? pos = p.Position;
-            Assert.NotNull(pos);
-            Assert.Equal(expectedLatitute, Math.Round(pos!.Coordinates.Latitude, 2));
-            Assert.Equal(expectedLongitute, Math.Round(pos!.Coordinates.Longitude, 2));
-            Assert.Equal('/', pos!.SymbolTableIdentifier);
-            Assert.Equal(expectedSymbolCode, pos!.SymbolCode);
-            Assert.Equal(expectedComment, p.Comment);
-        }
-
-        /// <summary>
-        /// Tests encoding a status report with Maidenhead info field based on the APRS spec.
-        /// </summary>
-        /// <param name="comment">Packet comment.</param>
-        /// <param name="ambiguity">Position ambiguity.</param>
-        /// <param name="expectedEncoding">Expected encoding.</param>
-        [Theory]
-        [InlineData("", 0, ">IO91SX/G")] // Without comment, no ambiguity
-        [InlineData("", 2, ">IO91/G")] // Without comment, with ambiguity
-        [InlineData("My house", 0, ">IO91SX/G My house")] // With comment, without ambiguity
-        public void EncodeStatusReportFormatWithMaidenhead(
-            string comment,
-            int ambiguity,
-            string expectedEncoding)
-        {
-            Packet p = new Packet();
-            p.Comment = comment;
-            p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', ambiguity);
-            string encoded = p.EncodeInformationField(PacketType.Status);
-
-            Assert.Equal(expectedEncoding, encoded);
         }*/
     }
 }

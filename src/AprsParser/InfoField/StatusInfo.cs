@@ -6,8 +6,7 @@ namespace AprsSharp.Parsers.Aprs
     using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
-    /// Represents an info field for the following types of packet:
-    ///     * <see cref="PacketType.Status"/>.
+    /// Represents an info field for packet type <see cref="PacketType.Status"/>.
     /// </summary>
     public class StatusInfo : InfoField
     {
@@ -60,15 +59,8 @@ namespace AprsSharp.Parsers.Aprs
         /// <param name="position">A position, which will be encoded as a maidenhead gridsquare locator.</param>
         /// <param name="comment">An optional comment.</param>
         public StatusInfo(Position position, string? comment)
+            : this(null, position, comment)
         {
-            if (comment != null)
-            {
-                ValidateComment(comment);
-            }
-
-            Position = position;
-            Comment = comment;
-            Timestamp = null;
         }
 
         /// <summary>
@@ -77,15 +69,30 @@ namespace AprsSharp.Parsers.Aprs
         /// <param name="timestamp">An optional timestamp.</param>
         /// <param name="comment">An optional comment.</param>
         public StatusInfo(Timestamp timestamp, string? comment)
+            : this(timestamp, null, comment)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StatusInfo"/> class.
+        /// Consolidates logic from the other constructors.
+        /// </summary>
+        /// <param name="timestamp">An optional timestamp.</param>
+        /// <param name="position">A position, which will be encoded as a maidenhead gridsquare locator.</param>
+        /// <param name="comment">An optional comment.</param>
+        private StatusInfo(Timestamp? timestamp, Position? position, string? comment)
+        {
+            Type = PacketType.Status;
+
+            Timestamp = timestamp;
+            Position = position;
+
             if (comment != null)
             {
                 ValidateComment(comment);
             }
 
-            Timestamp = timestamp;
             Comment = comment;
-            Position = null;
         }
 
         /// <summary>

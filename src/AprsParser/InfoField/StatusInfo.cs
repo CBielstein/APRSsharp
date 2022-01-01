@@ -48,7 +48,8 @@ namespace AprsSharp.Parsers.Aprs
             }
             else
             {
-                throw new NotImplementedException("Status report without maidenhead not yet implemented.");
+                // TODO Issue #88
+                throw new NotImplementedException("Status report without maidenhead not yet implemented.Tracked by issue #88.");
             }
         }
 
@@ -162,7 +163,8 @@ namespace AprsSharp.Parsers.Aprs
             }
             else
             {
-                throw new NotImplementedException("Status report without maidenhead not yet implemented.");
+                // TODO Issue #88
+                throw new NotImplementedException("Status report without maidenhead not yet implemented.Tracked by issue #88.");
             }
 
             return encoded.ToString();

@@ -1,7 +1,6 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
-    using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;

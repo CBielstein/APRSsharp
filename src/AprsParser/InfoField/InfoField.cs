@@ -1,7 +1,6 @@
 ﻿namespace AprsSharp.Parsers.Aprs
 {
     using System;
-    using System.Linq;
     using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>

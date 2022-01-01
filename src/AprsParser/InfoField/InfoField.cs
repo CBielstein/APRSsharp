@@ -31,6 +31,9 @@
                 case PacketType.PositionWithTimestampWithMessaging:
                     return new PositionInfo(encodedInfoField);
 
+                case PacketType.Status:
+                    return new StatusInfo(encodedInfoField);
+
                 default:
                     throw new NotImplementedException($"FromString not implemented for info field type {type}");
             }

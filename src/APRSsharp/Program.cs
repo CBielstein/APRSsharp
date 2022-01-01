@@ -18,16 +18,36 @@
         /// <param name="tcpMessage">The received tcp message that needs to be decoded and printed.</param>
         public static void PrintPacket(string tcpMessage)
         {
-            Console.WriteLine($"Received: {tcpMessage}");
+            Packet p;
 
             try
             {
-                Packet p = new Packet(tcpMessage);
-                Console.WriteLine($"    Type: {p.InfoField.Type}");
+                p = new Packet(tcpMessage);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"    Failed to decode: {ex.Message}");
+                Console.WriteLine($"Failed to decode: {ex.Message}");
+                return;
+            }
+
+            Console.WriteLine($"Received type: {p.InfoField.Type}");
+
+            // TODO: Reduce copy/paste below
+            // TODO: Clean up position printing:
+                // * Position lat/long encoding uses symbol IDs, not the most user-friendly
+                // * Gridsquare print out should probably print the correct number of characters based on ambiguitiy
+            if (p.InfoField is PositionInfo pi)
+            {
+                Console.WriteLine($"    Timestamp: {pi.Timestamp}");
+                Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(6, false)})");
+                Console.WriteLine($"    Comment: {pi.Comment}");
+                Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
+            }
+            else if (p.InfoField is StatusInfo si)
+            {
+                Console.WriteLine($"    Timestamp: {si.Timestamp}");
+                Console.WriteLine($"    Position: {si.Position?.Encode()} ({si.Position?.EncodeGridsquare(6, false)})");
+                Console.WriteLine($"    Comment: {si.Comment}");
             }
         }
 

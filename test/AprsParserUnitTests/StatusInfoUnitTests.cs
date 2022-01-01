@@ -66,17 +66,5 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             StatusInfo si = new StatusInfo(p, comment);
             Assert.Equal(expectedEncoding, si.Encode());
         }
-
-        /// <summary>
-        /// Placeholder for upcoming work.
-        /// </summary>
-        [Fact]
-        public void EncodeStatusReportWithoutMaidenhead() => throw new NotImplementedException();
-
-        /// <summary>
-        /// Placeholder for upcoming work.
-        /// </summary>
-        [Fact]
-        public void DecodeStatusReportWithoutMaidenhead() => throw new NotImplementedException();
     }
 }

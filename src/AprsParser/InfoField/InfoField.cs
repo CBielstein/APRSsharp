@@ -119,61 +119,14 @@
 
             switch (DecodedType)
             {
-                case PacketType.CurrentMicEData:
-                    throw new NotImplementedException("handle currnet Mic-E Data (Rev 0 beta)");
-                case PacketType.OldMicEData:
-                    throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
-                case PacketType.PeetBrosUIIWeatherStation:
-                    throw new NotImplementedException("handle Peet Bros U-II Weather Station");
-
                 case PacketType.RawGPSData:
                     HandleRawGps(informationField);
                     break;
-
-                case PacketType.AgreloDFJrMicroFinder:
-                    throw new NotImplementedException("handle Agrelo DFJr / MicroFinder");
-                case PacketType.MapFeature:
-                    throw new NotImplementedException("handle Reserved - Map Feature");
-                case PacketType.OldMicEDataCurrentTMD700:
-                    throw new NotImplementedException("handle Old Mic-E Data (but Current data for TM-D700");
-                case PacketType.Item:
-                    throw new NotImplementedException("handle Item");
-                case PacketType.ShelterDataWithTime:
-                    throw new NotImplementedException("handle Reserved - Shelter data with time");
-                case PacketType.InvalidOrTestData:
-                    throw new NotImplementedException("handle Invalid data or test data");
-                case PacketType.SpaceWeather:
-                    throw new NotImplementedException("handle Reserved - Space weather");
-                case PacketType.Message:
-                    throw new NotImplementedException("handle Message");
-                case PacketType.Object:
-                    throw new NotImplementedException("handle Object");
-                case PacketType.StationCapabilities:
-                    throw new NotImplementedException("handle Station capabilities");
-                case PacketType.Query:
-                    throw new NotImplementedException("handle Query");
-                case PacketType.TelemetryData:
-                    throw new NotImplementedException("handle Telemetry data");
 
                 case PacketType.WeatherReport: // TODO raw weather reports vs positionless?
                     // handle Weather report(without position)
                     Timestamp = new Timestamp(informationField.Substring(1, 8));
                     throw new NotImplementedException("handle Weather report (without position)");
-
-                case PacketType.CurrentMicEDataNotTMD700:
-                    throw new NotImplementedException("handle Current Mic-E Data (not used in TM-D700");
-                case PacketType.UserDefinedAPRSPacketFormat:
-                    throw new NotImplementedException("handle User-Defined APRS packet format");
-                case PacketType.ThirdPartyTraffic:
-                    throw new NotImplementedException("handle Third-party traffic");
-                case PacketType.DoNotUse:
-                    throw new NotImplementedException("Do not use");
-                case PacketType.Unused:
-                    throw new NotImplementedException("Unused");
-                case PacketType.Unknown:
-                    throw new NotImplementedException("Unknown");
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(informationField));
             }
         }
     }*/

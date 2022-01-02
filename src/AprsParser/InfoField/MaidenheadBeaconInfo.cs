@@ -33,9 +33,9 @@ namespace AprsSharp.Parsers.Aprs
             match.AssertSuccess(PacketType.Status, nameof(encodedInfoField));
 
             Position = new Position();
-            Position.DecodeMaidenhead(match.Groups[0].Value);
+            Position.DecodeMaidenhead(match.Groups[1].Value);
 
-            if (match.Groups[1].Success)
+            if (match.Groups[2].Success)
             {
                 Comment = match.Groups[1].Value;
             }
@@ -68,8 +68,7 @@ namespace AprsSharp.Parsers.Aprs
         {
             StringBuilder encoded = new StringBuilder();
 
-            encoded.Append(Type.ToChar());
-            encoded.Append(Position.EncodeGridsquare(6, true));
+            encoded.Append($"[{Position.EncodeGridsquare(6, false)}]");
 
             if (!string.IsNullOrEmpty(Comment))
             {

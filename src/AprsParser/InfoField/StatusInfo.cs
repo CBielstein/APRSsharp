@@ -113,8 +113,8 @@ namespace AprsSharp.Parsers.Aprs
                         nameof(comment));
                 }
 
+                // TODO Issue #90: Share this logic across all packet types with a comment.
                 // Validate no disallowed characters were used
-                // TODO: Share this logic across all packet types with a comment.
                 if (comment.IndexOfAny(CommentDisallowedChars) != -1)
                 {
                     throw new ArgumentException($"Comment may not include `|` or `~` but was given: {comment}", nameof(comment));

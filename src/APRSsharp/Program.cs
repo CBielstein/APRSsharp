@@ -20,6 +20,13 @@
             Packet p;
 
             Console.WriteLine();
+            Console.WriteLine($"Received: {tcpMessage}");
+
+            if (tcpMessage.StartsWith('#'))
+            {
+                Console.WriteLine("    Server message, not decoding.");
+                return;
+            }
 
             try
             {
@@ -27,11 +34,11 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to decode: {ex.Message}");
+                Console.WriteLine($"    FAILED: {ex.Message}");
                 return;
             }
 
-            Console.WriteLine($"Received type: {p.InfoField.Type}");
+            Console.WriteLine($"    Type: {p.InfoField.Type}");
 
             // TODO: Reduce copy/paste below
             // TODO: Clean up position printing:

@@ -100,36 +100,6 @@
         }
 
         /// <summary>
-        /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
-        /// </summary>
-        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
-        /// <param name="timeType">The <see cref="TimestampType"/> of encoding for the timestamp to use. Optional, defaults to DHMz.</param>
-        /// <returns>APRS Information Field as a string.</returns>
-        public string EncodeInformationField(PacketType encodeType, TimestampType timeType = TimestampType.DHMz)
-        {
-            string encodedInfoField = string.Empty;
-
-            switch (encodeType)
-            {
-                case PacketType.MaidenheadGridLocatorBeacon:
-                    encodedInfoField += GetTypeChar(encodeType);
-                    encodedInfoField += Position!.EncodeGridsquare(6, false);
-                    encodedInfoField += ']';
-                    if (Comment != null && Comment.Length > 0)
-                    {
-                        encodedInfoField += ' ';
-                        encodedInfoField += Comment;
-                    }
-
-                    break;
-
-                default: throw new NotImplementedException();
-            }
-
-            return encodedInfoField;
-        }
-
-        /// <summary>
         /// Takes a string representing the AX.25 Information Field or (as it's called in this case) the APRS Information Field
         /// and populates this object with the information therein.
         /// </summary>
@@ -155,6 +125,7 @@
                     throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
                 case PacketType.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
+
                 case PacketType.RawGPSData:
                     HandleRawGps(informationField);
                     break;
@@ -184,26 +155,11 @@
                 case PacketType.TelemetryData:
                     throw new NotImplementedException("handle Telemetry data");
 
-                case PacketType.MaidenheadGridLocatorBeacon:
-                    {
-                        Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
-                        match.AssertSuccess(PacketType.MaidenheadGridLocatorBeacon, nameof(informationField));
-
-                        Position = new Position();
-                        Position.DecodeMaidenhead(match.Groups[1].Value);
-
-                        if (!string.IsNullOrEmpty(match.Groups[3].Value))
-                        {
-                            Comment = match.Groups[3].Value;
-                        }
-                    }
-
-                    break;
-
                 case PacketType.WeatherReport: // TODO raw weather reports vs positionless?
                     // handle Weather report(without position)
                     Timestamp = new Timestamp(informationField.Substring(1, 8));
                     throw new NotImplementedException("handle Weather report (without position)");
+
                 case PacketType.CurrentMicEDataNotTMD700:
                     throw new NotImplementedException("handle Current Mic-E Data (not used in TM-D700");
                 case PacketType.UserDefinedAPRSPacketFormat:

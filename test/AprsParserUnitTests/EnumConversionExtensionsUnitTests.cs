@@ -16,7 +16,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// <param name="expectedChar">Expected character result.</param>
         [Theory]
         [InlineData(PacketType.PositionWithoutTimestampWithMessaging, '=')]
-        public void ConvertCharAndType(
+        public void PacketTypeConversion(
             PacketType packetType,
             char expectedChar)
         {

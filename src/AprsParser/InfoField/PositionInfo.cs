@@ -43,6 +43,8 @@ namespace AprsSharp.Parsers.Aprs
             else if (Type == PacketType.PositionWithoutTimestampWithMessaging)
             {
                 HasMessaging = true;
+
+                // TODO Issue #92
                 throw new NotImplementedException("Decoding not implemented for position without timestamp (with APRS messaging)");
             }
             else if (Type == PacketType.PositionWithTimestampNoMessaging || Type == PacketType.PositionWithTimestampWithMessaging)

@@ -12,6 +12,7 @@ namespace AprsSharp.Parsers.Aprs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MaidenheadBeaconInfo"/> class.
+        /// NOTE: This packet type is considere obsolete and is included for decoding legacy devices. Use a status report instead.
         /// </summary>
         /// <param name="encodedInfoField">A string encoding of a <see cref="StatusInfo"/>.</param>
         public MaidenheadBeaconInfo(string encodedInfoField)

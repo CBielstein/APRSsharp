@@ -84,13 +84,10 @@ namespace AprsSharp.Parsers.Aprs
         {
             Type = PacketType.Status;
 
-            if (Position != null && Timestamp != null)
+            if (position != null && timestamp != null)
             {
-                throw new ArgumentException($"{nameof(Timestamp)} may not be specified if a position is given.");
+                throw new ArgumentException($"{nameof(timestamp)} may not be specified if a position is given.");
             }
-
-            Timestamp = timestamp;
-            Position = position;
 
             if (comment != null)
             {
@@ -117,12 +114,15 @@ namespace AprsSharp.Parsers.Aprs
                 }
 
                 // Validate no disallowed characters were used
+                // TODO: Share this logic across all packet types with a comment.
                 if (comment.IndexOfAny(CommentDisallowedChars) != -1)
                 {
                     throw new ArgumentException($"Comment may not include `|` or `~` but was given: {comment}", nameof(comment));
                 }
             }
 
+            Timestamp = timestamp;
+            Position = position;
             Comment = comment;
         }
 

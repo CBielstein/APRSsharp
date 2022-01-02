@@ -23,12 +23,12 @@
 
             Assert.Throws<NotImplementedException>(() => p.DecodeInformationField("_10090556c220s004g005t077r000p000P000h50b09900wRSW"));
 
-            Assert.Equal(Packet.Type.WeatherReport, p.DecodedType);
+            Assert.Equal(PacketType.WeatherReport, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.MDHM, ts!.DecodedType);
+            Assert.Equal(TimestampType.MDHM, ts!.DecodedType);
             Assert.Equal(10, ts!.DateTime.Month);
             Assert.Equal(9, ts!.DateTime.Day);
             Assert.Equal(05, ts!.DateTime.Hour);
@@ -40,17 +40,17 @@
         /// based on the example given in the APRS spec.
         /// </summary>
         /// <param name="informationField">The information field to decode.</param>
-        /// <param name="expectedPacketType">Expected type of the packet.</param>
+        /// <param name="expectedPacketType">Expected <see cref="PacketType"/> of the packet.</param>
         /// <param name="expectedHasMessaging">Expected hasMessaging value.</param>
-        /// <param name="expectedTimestampType">Expected Timestamp type.</param>
+        /// <param name="expectedTimestampType">Expected <see cref="TimestampType"/>.</param>
         [Theory]
-        [InlineData("/092345z4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampNoMessaging, false, Timestamp.Type.DHMz)] // No messaging, UTC
-        [InlineData("@092345/4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampWithMessaging, true, Timestamp.Type.DHMl)] // With messaging, local time
+        [InlineData("/092345z4903.50N/07201.75W>Test1234", PacketType.PositionWithTimestampNoMessaging, false, TimestampType.DHMz)] // No messaging, UTC
+        [InlineData("@092345/4903.50N/07201.75W>Test1234", PacketType.PositionWithTimestampWithMessaging, true, TimestampType.DHMl)] // With messaging, local time
         public void DecodeLatLongPositionReportFormatWithTimestamp(
             string informationField,
-            Packet.Type expectedPacketType,
+            PacketType expectedPacketType,
             bool expectedHasMessaging,
-            Timestamp.Type expectedTimestampType)
+            TimestampType expectedTimestampType)
         {
             Packet p = new Packet();
 
@@ -80,18 +80,18 @@
         /// based on the examples given in the APRS spec.
         /// </summary>
         /// <param name="dateTimeKind">The kind of date/time to use.</param>
-        /// <param name="timestampType">The timestamp type.</param>
+        /// <param name="timestampType">The <see cref="TimestampType"/>.</param>
         /// <param name="hasMessaging">If the packet should include messaging.</param>
-        /// <param name="packetType">Type of packet to encode.</param>
+        /// <param name="packetType"><see cref="PacketType"/> of packet to encode.</param>
         /// <param name="expectedEncoding">The expected encoded string.</param>
         [Theory]
-        [InlineData(DateTimeKind.Local, Timestamp.Type.DHMl, true, Packet.Type.PositionWithTimestampWithMessaging, @"@092345/4903.50N/07201.75W>Test1234")] // Local, has messaging
-        [InlineData(DateTimeKind.Utc, Timestamp.Type.DHMz, false, Packet.Type.PositionWithTimestampNoMessaging, @"/092345z4903.50N/07201.75W>Test1234")] // UTC, no messaging
+        [InlineData(DateTimeKind.Local, TimestampType.DHMl, true, PacketType.PositionWithTimestampWithMessaging, @"@092345/4903.50N/07201.75W>Test1234")] // Local, has messaging
+        [InlineData(DateTimeKind.Utc, TimestampType.DHMz, false, PacketType.PositionWithTimestampNoMessaging, @"/092345z4903.50N/07201.75W>Test1234")] // UTC, no messaging
         public void EncodeLatLongPositionReportFormatWithTimestamp(
             DateTimeKind dateTimeKind,
-            Timestamp.Type timestampType,
+            TimestampType timestampType,
             bool hasMessaging,
-            Packet.Type packetType,
+            PacketType packetType,
             string expectedEncoding)
         {
             Packet p = new Packet();
@@ -116,9 +116,9 @@
         /// based on the examples given in the APRS spec.
         /// </summary>
         /// <param name="informationField">Information field for decoding.</param>
-        /// <param name="expectedPacketType">Expected decoded Packet.Type value.</param>
+        /// <param name="expectedPacketType">Expected decoded PacketType value.</param>
         /// <param name="expectedHasMessaging">Expected decoded HasMessaging value.</param>
-        /// <param name="expectedTimestampType">Expected decoded Timestamp.Type value.</param>
+        /// <param name="expectedTimestampType">Expected decoded TimestampType value.</param>
         /// <param name="expectedTimeDay">Expected decoded Timestamp day value.</param>
         /// <param name="expectedTimeHour">Expected decoded Timestamp hour value.</param>
         /// <param name="expectedTimeMinute">Expected decoded Timestamp minute value.</param>
@@ -126,45 +126,45 @@
         [Theory(Skip = "Issue #24: Fix skipped tests from old repository")]
         [InlineData( // with timestamp, with APRS messaging, local time, course/speed
             "@092345/4903.50N/07201.75W>088/036",
-            Packet.Type.PositionWithTimestampWithMessaging,
+            PacketType.PositionWithTimestampWithMessaging,
             true,
-            Timestamp.Type.DHMl,
+            TimestampType.DHMl,
             9,
             23,
             45,
             0)]
         [InlineData( // with timestamp, APRS messaging, hours/mins/secs time, PHG
             "@234517h4903.50N/07201.75W>PHG5132",
-            Packet.Type.PositionWithTimestampWithMessaging,
+            PacketType.PositionWithTimestampWithMessaging,
             true,
-            Timestamp.Type.HMS,
+            TimestampType.HMS,
             null,
             23,
             45,
             17)]
         [InlineData( // with timestamp, APRS messaging, zulu time, radio range
             "@092345z4903.50N/07201.75W>RNG0050",
-            Packet.Type.PositionWithTimestampWithMessaging,
+            PacketType.PositionWithTimestampWithMessaging,
             true,
-            Timestamp.Type.DHMz,
+            TimestampType.DHMz,
             9,
             23,
             45,
             0)]
         [InlineData( // with timestamp, hours/mins/secs time, DF, no APRS messaging
             "/234517h4903.50N/07201.75W>DFS2360",
-            Packet.Type.PositionWithTimestampNoMessaging,
+            PacketType.PositionWithTimestampNoMessaging,
             false,
-            Timestamp.Type.HMS,
+            TimestampType.HMS,
             null,
             23,
             45,
             17)]
         [InlineData(// weather report
             "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUII",
-            Packet.Type.WeatherReport,
+            PacketType.WeatherReport,
             false,
-            Timestamp.Type.DHMz,
+            TimestampType.DHMz,
             9,
             23,
             45,
@@ -172,9 +172,9 @@
             Skip = "Issue #67: Packet.GetDataType does not support complex data types")]
         public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp(
             string informationField,
-            Packet.Type expectedPacketType,
+            PacketType expectedPacketType,
             bool expectedHasMessaging,
-            Timestamp.Type expectedTimestampType,
+            TimestampType expectedTimestampType,
             int? expectedTimeDay,
             int expectedTimeHour,
             int expectedTimeMinute,
@@ -214,20 +214,20 @@
         /// based on the examples given in the APRS spec.
         /// </summary>
         /// <param name="informationField">Information field to decode.</param>
-        /// <param name="expectedPacketType">Expected decoded Packet.Type value.</param>
+        /// <param name="expectedPacketType">Expected decoded PacketType value.</param>
         /// <param name="expectedHasMessaging">Expected decoded HasMessaging value.</param>
         [Theory(Skip = "Issue #24: Fix skipped tests from old repository")]
         [InlineData( // with timestamp, course/speed/bearing/NRQ, with APRS messaging
             @"@092345z4903.50N/07201.75W\088/036/270/729",
-            Packet.Type.PositionWithTimestampWithMessaging,
+            PacketType.PositionWithTimestampWithMessaging,
             true)]
         [InlineData( // with timestamp, bearing/NRQ, no course/speed, no APRS messaging
             @"/092345z4903.50N/07201.75W\000/000/270/729",
-            Packet.Type.PositionWithTimestampNoMessaging,
+            PacketType.PositionWithTimestampNoMessaging,
             false)]
         public void DecodeDFReportFormat(
             string informationField,
-            Packet.Type expectedPacketType,
+            PacketType expectedPacketType,
             bool expectedHasMessaging)
         {
             Packet p = new Packet();
@@ -238,7 +238,7 @@
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
+            Assert.Equal(TimestampType.DHMz, ts!.DecodedType);
             Assert.Equal(09, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
             Assert.Equal(45, ts!.DateTime.Minute);
@@ -263,11 +263,11 @@
             Packet p = new Packet();
             p.DecodeInformationField("@092345z/5L!!<*e7>{?!");
 
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(PacketType.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
+            Assert.Equal(TimestampType.DHMz, ts!.DecodedType);
             Assert.Equal(09, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
             Assert.Equal(45, ts!.DateTime.Minute);
@@ -285,12 +285,12 @@
             Packet p = new Packet();
             p.DecodeInformationField("@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW");
 
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(PacketType.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(true, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
+            Assert.Equal(TimestampType.DHMz, ts!.DecodedType);
             Assert.Equal(09, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
             Assert.Equal(45, ts!.DateTime.Minute);
@@ -309,12 +309,12 @@
 
             p.DecodeInformationField("@092345z/5L!!<*e7 _7P[g005t077r000p000P000h50b09900wRSW");
 
-            Assert.Equal(Packet.Type.PositionWithTimestampWithMessaging, p.DecodedType);
+            Assert.Equal(PacketType.PositionWithTimestampWithMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
 
             Timestamp? ts = p.Timestamp;
             Assert.NotNull(ts);
-            Assert.Equal(Timestamp.Type.DHMz, ts!.DecodedType);
+            Assert.Equal(TimestampType.DHMz, ts!.DecodedType);
             Assert.Equal(09, ts!.DateTime.Day);
             Assert.Equal(23, ts!.DateTime.Hour);
             Assert.Equal(45, ts!.DateTime.Minute);
@@ -345,7 +345,7 @@
             Packet p = new Packet();
             p.DecodeInformationField(informationField);
 
-            Assert.Equal(Packet.Type.PositionWithoutTimestampNoMessaging, p.DecodedType);
+            Assert.Equal(PacketType.PositionWithoutTimestampNoMessaging, p.DecodedType);
             Assert.Equal(false, p.HasMessaging);
             Assert.Equal(expectedComment, p.Comment);
 
@@ -377,28 +377,28 @@
             p.Comment = comment;
             p.Position = new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', ambiguity);
 
-            string encoded = p.EncodeInformationField(Packet.Type.PositionWithoutTimestampNoMessaging);
+            string encoded = p.EncodeInformationField(PacketType.PositionWithoutTimestampNoMessaging);
             Assert.Equal(expectedEncoding, encoded);
         }
 
         /// <summary>
-        /// Tests GetTypeChar for <see cref="Packet.Type.DoNotUse"/>.
+        /// Tests GetTypeChar for <see cref="PacketType.DoNotUse"/>.
         /// </summary>
         [Fact]
         public void GetTypeCharDoNotUseThrows()
         {
-            Assert.Throws<ArgumentException>(() => Packet.GetTypeChar(Packet.Type.DoNotUse));
+            Assert.Throws<ArgumentException>(() => Packet.GetTypeChar(PacketType.DoNotUse));
         }
 
         /// <summary>
         /// Tests GetTypeChar.
         /// </summary>
-        /// <param name="packetType">Packet type to test.</param>
+        /// <param name="packetType"><see cref="PacketType"/> to test.</param>
         /// <param name="expectedChar">Expected character result.</param>
         [Theory]
-        [InlineData(Packet.Type.PositionWithoutTimestampWithMessaging, '=')]
+        [InlineData(PacketType.PositionWithoutTimestampWithMessaging, '=')]
         public void GetTypeChar(
-            Packet.Type packetType,
+            PacketType packetType,
             char expectedChar)
         {
             Assert.Equal(expectedChar, Packet.GetTypeChar(packetType));
@@ -410,10 +410,10 @@
         /// <param name="informationField">Input information field to test.</param>
         /// <param name="expectedDataType">Expected data type result.</param>
         [Theory]
-        [InlineData("/092345z4903.50N/07201.75W>Test1234", Packet.Type.PositionWithTimestampNoMessaging)]
+        [InlineData("/092345z4903.50N/07201.75W>Test1234", PacketType.PositionWithTimestampNoMessaging)]
         public void GetDataType(
             string informationField,
-            Packet.Type expectedDataType)
+            PacketType expectedDataType)
         {
             Assert.Equal(
                 expectedDataType,
@@ -457,7 +457,7 @@
             p.Comment = comment;
             p.Position = new Position(new GeoCoordinate(51.98, -0.46));
 
-            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(PacketType.MaidenheadGridLocatorBeacon);
 
             Assert.Equal(expectedEncoding, encoded);
         }
@@ -479,7 +479,7 @@
             p.Position = new Position();
             p.Position.DecodeMaidenhead("IO91SX");
 
-            string encoded = p.EncodeInformationField(Packet.Type.MaidenheadGridLocatorBeacon);
+            string encoded = p.EncodeInformationField(PacketType.MaidenheadGridLocatorBeacon);
 
             Assert.Equal(expectedEncoding, encoded);
         }
@@ -534,7 +534,7 @@
             Packet p = new Packet();
             p.Comment = comment;
             p.Position = new Position(new GeoCoordinate(51.98, -0.46), '/', 'G', ambiguity);
-            string encoded = p.EncodeInformationField(Packet.Type.Status);
+            string encoded = p.EncodeInformationField(PacketType.Status);
 
             Assert.Equal(expectedEncoding, encoded);
         }

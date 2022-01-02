@@ -58,7 +58,7 @@
         {
             Timestamp ts = new Timestamp("092345z");
 
-            Assert.Equal(Timestamp.Type.DHMz, ts.DecodedType);
+            Assert.Equal(TimestampType.DHMz, ts.DecodedType);
             Assert.Equal(9, ts.DateTime.Day);
             Assert.Equal(23, ts.DateTime.Hour);
             Assert.Equal(45, ts.DateTime.Minute);
@@ -73,7 +73,7 @@
         {
             Timestamp ts = new Timestamp("092345/");
 
-            Assert.Equal(Timestamp.Type.DHMl, ts.DecodedType);
+            Assert.Equal(TimestampType.DHMl, ts.DecodedType);
             Assert.Equal(9, ts.DateTime.Day);
             Assert.Equal(23, ts.DateTime.Hour);
             Assert.Equal(45, ts.DateTime.Minute);
@@ -120,7 +120,7 @@
         {
             Timestamp ts = new Timestamp("234517h");
 
-            Assert.Equal(Timestamp.Type.HMS, ts.DecodedType);
+            Assert.Equal(TimestampType.HMS, ts.DecodedType);
             Assert.Equal(23, ts.DateTime.Hour);
             Assert.Equal(45, ts.DateTime.Minute);
             Assert.Equal(17, ts.DateTime.Second);
@@ -185,7 +185,7 @@
         {
             Timestamp ts = new Timestamp("10092345");
 
-            Assert.Equal(Timestamp.Type.MDHM, ts.DecodedType);
+            Assert.Equal(TimestampType.MDHM, ts.DecodedType);
             Assert.Equal(10, ts.DateTime.Month);
             Assert.Equal(9, ts.DateTime.Day);
             Assert.Equal(23, ts.DateTime.Hour);
@@ -201,7 +201,7 @@
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
             Timestamp ts = new Timestamp(dt);
 
-            Assert.Equal("092345z", ts.Encode(Timestamp.Type.DHMz));
+            Assert.Equal("092345z", ts.Encode(TimestampType.DHMz));
         }
 
         /// <summary>
@@ -213,7 +213,7 @@
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Local);
             Timestamp ts = new Timestamp(dt);
 
-            Assert.Equal("092345/", ts.Encode(Timestamp.Type.DHMl));
+            Assert.Equal("092345/", ts.Encode(TimestampType.DHMl));
         }
 
         /// <summary>
@@ -229,7 +229,7 @@
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
             Timestamp ts = new Timestamp(dt.ToLocalTime());
 
-            Assert.Equal("234517h", ts.Encode(Timestamp.Type.HMS));
+            Assert.Equal("234517h", ts.Encode(TimestampType.HMS));
         }
 
         /// <summary>
@@ -244,7 +244,7 @@
         {
             DateTime dt = new DateTime(2016, 10, 9, 23, 45, 17, DateTimeKind.Utc);
             Timestamp ts = new Timestamp(dt.ToLocalTime());
-            Assert.Equal("10092345", ts.Encode(Timestamp.Type.MDHM));
+            Assert.Equal("10092345", ts.Encode(TimestampType.MDHM));
         }
     }
 }

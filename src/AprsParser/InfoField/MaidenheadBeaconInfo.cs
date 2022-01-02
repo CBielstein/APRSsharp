@@ -37,7 +37,7 @@ namespace AprsSharp.Parsers.Aprs
 
             if (match.Groups[2].Success)
             {
-                Comment = match.Groups[1].Value;
+                Comment = match.Groups[2].Value;
             }
         }
 

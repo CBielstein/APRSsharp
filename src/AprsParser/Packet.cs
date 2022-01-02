@@ -19,6 +19,7 @@ namespace AprsSharp.Parsers.Aprs
                 throw new ArgumentNullException(nameof(encodedPacket));
             }
 
+            // TODO Issue #79: Actually parse the full fields in the APRS/TNC2 string.
             InfoField = InfoField.FromString(encodedPacket.Split(':', 2).Last());
         }
 

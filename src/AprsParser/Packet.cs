@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs
+﻿namespace AprsSharp.Parsers.Aprs
 {
     using System;
     using System.Linq;

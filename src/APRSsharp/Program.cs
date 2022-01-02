@@ -19,6 +19,8 @@
         {
             Packet p;
 
+            Console.WriteLine();
+
             try
             {
                 p = new Packet(tcpMessage);
@@ -47,6 +49,11 @@
                 Console.WriteLine($"    Timestamp: {si.Timestamp}");
                 Console.WriteLine($"    Position: {si.Position?.Encode()} ({si.Position?.EncodeGridsquare(6, false)})");
                 Console.WriteLine($"    Comment: {si.Comment}");
+            }
+            else if (p.InfoField is MaidenheadBeaconInfo mbi)
+            {
+                Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(6, false)}");
+                Console.WriteLine($"    Comment: {mbi.Comment}");
             }
         }
 

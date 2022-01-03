@@ -46,20 +46,20 @@
                 // * Gridsquare print out should probably print the correct number of characters based on ambiguitiy
             if (p.InfoField is PositionInfo pi)
             {
-                Console.WriteLine($"    Timestamp: {pi.Timestamp}");
-                Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(6, false)})");
+                Console.WriteLine($"    Timestamp: {pi.Timestamp?.DateTime} {pi.Timestamp?.DateTime.Kind}");
+                Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(4, false)})");
                 Console.WriteLine($"    Comment: {pi.Comment}");
                 Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
             }
             else if (p.InfoField is StatusInfo si)
             {
-                Console.WriteLine($"    Timestamp: {si.Timestamp}");
-                Console.WriteLine($"    Position: {si.Position?.Encode()} ({si.Position?.EncodeGridsquare(6, false)})");
+                Console.WriteLine($"    Timestamp: {si.Timestamp?.DateTime} {si.Timestamp?.DateTime.Kind}");
+                Console.WriteLine($"    Position: {si.Position?.Encode()} ({si.Position?.EncodeGridsquare(4, false)})");
                 Console.WriteLine($"    Comment: {si.Comment}");
             }
             else if (p.InfoField is MaidenheadBeaconInfo mbi)
             {
-                Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(6, false)}");
+                Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(4, false)}");
                 Console.WriteLine($"    Comment: {mbi.Comment}");
             }
         }

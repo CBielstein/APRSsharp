@@ -42,6 +42,8 @@
                 Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(4, false)}");
                 Console.WriteLine($"    Comment: {mbi.Comment}");
             }
+
+            Console.WriteLine();
         }
 
         /// <summary>

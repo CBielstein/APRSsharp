@@ -111,8 +111,10 @@
                             }
                         }
                     }
-
-                    Thread.Sleep(500);
+                    else
+                    {
+                        Thread.Yield();
+                    }
                 }
             });
         }

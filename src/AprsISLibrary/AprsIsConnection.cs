@@ -1,4 +1,4 @@
-﻿namespace AprsISLibrary
+﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
     using System.IO;
@@ -15,19 +15,25 @@
     public delegate void HandleTcpString(string tcpMessage);
 
     /// <summary>
-    /// Represent the library for aprs.
+    /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
+    /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
-    public class AprsISLib
+    public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AprsISLib"/> class.
+        /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
-        /// <param name="tcpConnection">Optionally, a TcpConnection to use for communication.</param>
-        public AprsISLib(ITcpConnection? tcpConnection = null)
+        /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
+        public AprsIsConnection(ITcpConnection tcpConnection)
         {
-            this.tcpConnection = tcpConnection ?? new TcpConnection();
+            if (tcpConnection == null)
+            {
+                throw new ArgumentNullException(nameof(tcpConnection));
+            }
+
+            this.tcpConnection = tcpConnection;
         }
 
         /// <summary>
@@ -36,37 +42,24 @@
         public event HandleTcpString? ReceivedTcpMessage;
 
         /// <summary>
-        /// The methods for receiving packets.
+        /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
+        /// <param name="callsign">The users callsign string.</param>
+        /// <param name="password">The users password string.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive()
+        public async Task Receive(string? callsign, string? password)
         {
-            // Variables string callsign = "N0CALL
-            string callsign = "NOCALL"; // Radius of 50km of Seattle's Space Needle
-            string password = "-1";
-            Console.WriteLine("empty strings input");
-            await Receive(callsign, password).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// The receiving method.
-        /// </summary>
-        /// <param name="callsign">Specifying the different strings.</param>
-        /// <param name="password">Specifying the password input strings.</param>
-        /// <returns>An async task.</returns>
-        public async Task Receive(string callsign, string password)
-        {
-            // Variables string callsign = "N0CALL
-            string filter = "filter r/50.5039/4.4699/50"; // Radius of Belgium's Space Needle
+            callsign = callsign ?? "N0CALL";
+            password = password ?? "-1";
+            string filter = "filter r/50.5039/4.4699/50";
             string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             string server = "rotate.aprs2.net";
             bool authenticated = false;
-            Console.WriteLine("inputs");
 
             // Open connection
             tcpConnection.Connect(server, 14580);
 
-            // Receive
+           // Receive
             await Task.Run(() =>
             {
                 while (true)
@@ -75,7 +68,6 @@
 
                     if (!string.IsNullOrEmpty(received))
                     {
-                        Console.WriteLine(received);
                         ReceivedTcpMessage?.Invoke(received);
 
                         if (received.StartsWith('#'))

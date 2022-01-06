@@ -3,237 +3,72 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
     /// A representation of an APRS Packet.
     /// Does decoding of an APRS packet as a string.
     /// </summary>
-    public partial class Packet
+    public class Packet
     {
         /// <summary>
-        /// Maps a type-identifying character to a packet Type.
+        /// Maps a type-identifying character to a packet <see cref="PacketType"/>.
         /// </summary>
-        private static readonly Dictionary<char, Type> DataTypeMap = new Dictionary<char, Type>()
+        private static readonly Dictionary<char, PacketType> DataTypeMap = new Dictionary<char, PacketType>()
         {
-            { (char)0x1c, Type.CurrentMicEData },
-            { (char)0x1d, Type.OldMicEData },
-            { '!', Type.PositionWithoutTimestampNoMessaging },
-            { '\"', Type.Unused },
-            { '#', Type.PeetBrosUIIWeatherStation },
-            { '$', Type.RawGPSData },
-            { '%', Type.AgreloDFJrMicroFinder },
-            { '&', Type.MapFeature },
-            { '\'', Type.OldMicEDataCurrentTMD700 },
-            { '(', Type.Unused },
-            { ')', Type.Item },
-            { '*', Type.PeetBrosUIIWeatherStation },
-            { '+', Type.ShelterDataWithTime },
-            { ',', Type.InvalidOrTestData },
-            { '-', Type.Unused },
-            { '.', Type.SpaceWeather },
-            { '/', Type.PositionWithTimestampNoMessaging },
-            { ':', Type.Message },
-            { ';', Type.Object },
-            { '<', Type.StationCapabilities },
-            { '=', Type.PositionWithoutTimestampWithMessaging },
-            { '>', Type.Status },
-            { '?', Type.Query },
-            { '@', Type.PositionWithTimestampWithMessaging },
-            { 'T', Type.TelemetryData },
-            { '[', Type.MaidenheadGridLocatorBeacon },
-            { '\\', Type.Unused },
-            { ']', Type.Unused },
-            { '^', Type.Unused },
-            { '_', Type.WeatherReport },
-            { '`', Type.CurrentMicEDataNotTMD700 },
-            { '{', Type.UserDefinedAPRSPacketFormat },
-            { '}', Type.ThirdPartyTraffic },
-            { 'A', Type.DoNotUse },
-            { 'S', Type.DoNotUse },
-            { 'U', Type.DoNotUse },
-            { 'Z', Type.DoNotUse },
-            { '0', Type.DoNotUse },
-            { '9', Type.DoNotUse },
+            { (char)0x1c, PacketType.CurrentMicEData },
+            { (char)0x1d, PacketType.OldMicEData },
+            { '!', PacketType.PositionWithoutTimestampNoMessaging },
+            { '\"', PacketType.Unused },
+            { '#', PacketType.PeetBrosUIIWeatherStation },
+            { '$', PacketType.RawGPSData },
+            { '%', PacketType.AgreloDFJrMicroFinder },
+            { '&', PacketType.MapFeature },
+            { '\'', PacketType.OldMicEDataCurrentTMD700 },
+            { '(', PacketType.Unused },
+            { ')', PacketType.Item },
+            { '*', PacketType.PeetBrosUIIWeatherStation },
+            { '+', PacketType.ShelterDataWithTime },
+            { ',', PacketType.InvalidOrTestData },
+            { '-', PacketType.Unused },
+            { '.', PacketType.SpaceWeather },
+            { '/', PacketType.PositionWithTimestampNoMessaging },
+            { ':', PacketType.Message },
+            { ';', PacketType.Object },
+            { '<', PacketType.StationCapabilities },
+            { '=', PacketType.PositionWithoutTimestampWithMessaging },
+            { '>', PacketType.Status },
+            { '?', PacketType.Query },
+            { '@', PacketType.PositionWithTimestampWithMessaging },
+            { 'T', PacketType.TelemetryData },
+            { '[', PacketType.MaidenheadGridLocatorBeacon },
+            { '\\', PacketType.Unused },
+            { ']', PacketType.Unused },
+            { '^', PacketType.Unused },
+            { '_', PacketType.WeatherReport },
+            { '`', PacketType.CurrentMicEDataNotTMD700 },
+            { '{', PacketType.UserDefinedAPRSPacketFormat },
+            { '}', PacketType.ThirdPartyTraffic },
+            { 'A', PacketType.DoNotUse },
+            { 'S', PacketType.DoNotUse },
+            { 'U', PacketType.DoNotUse },
+            { 'Z', PacketType.DoNotUse },
+            { '0', PacketType.DoNotUse },
+            { '9', PacketType.DoNotUse },
         };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Packet"/> class.
-        /// Constructs a new Packet object by decoding the encodedPacket string.
-        /// Really just a shortcut for calling the Decode function.
+        /// If an encoded packet is provided, Decode is used to deocde in to this object.
         /// </summary>
-        /// <param name="encodedPacket">A string encoding of an APRS packet.</param>
-        public Packet(string encodedPacket)
+        /// <param name="encodedPacket">A string encoding of an APRS packet to decode (optional).</param>
+        public Packet(string? encodedPacket = null)
         {
-            Decode(encodedPacket);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Packet"/> class.
-        /// Empty constructor.
-        /// </summary>
-        public Packet()
-        {
-        }
-
-        /// <summary>
-        /// The APRS packet type.
-        /// </summary>
-        public enum Type
-        {
-            /// <summary>
-            /// This packet was not decoded
-            /// </summary>
-            NotDecoded,
-
-            /// <summary>
-            /// Current Mic-E Data (Rev 0 beta)
-            /// </summary>
-            CurrentMicEData,
-
-            /// <summary>
-            /// Old Mic-E Data (Rev 0 beta)
-            /// </summary>
-            OldMicEData,
-
-            /// <summary>
-            /// Position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
-            /// </summary>
-            PositionWithoutTimestampNoMessaging,
-
-            /// <summary>
-            /// Peet Bros U-II Weather Station
-            /// </summary>
-            PeetBrosUIIWeatherStation,
-
-            /// <summary>
-            /// Raw GPS data or Ultimeter 2000
-            /// </summary>
-            RawGPSData,
-
-            /// <summary>
-            /// Agrelo DFJr / MicroFinder
-            /// </summary>
-            AgreloDFJrMicroFinder,
-
-            /// <summary>
-            /// [Reserved - Map Feature]
-            /// </summary>
-            MapFeature,
-
-            /// <summary>
-            /// Old Mic-E Data (but Current data for TM-D700)
-            /// </summary>
-            OldMicEDataCurrentTMD700,
-
-            /// <summary>
-            /// Item
-            /// </summary>
-            Item,
-
-            /// <summary>
-            /// [Reserved - shelter data with time]
-            /// </summary>
-            ShelterDataWithTime,
-
-            /// <summary>
-            /// Invalid data or test data
-            /// </summary>
-            InvalidOrTestData,
-
-            /// <summary>
-            /// [Reserved - Space Weather]
-            /// </summary>
-            SpaceWeather,
-
-            /// <summary>
-            /// Unused
-            /// </summary>
-            Unused,
-
-            /// <summary>
-            /// Position with timestamp (no APRS messaging)
-            /// </summary>
-            PositionWithTimestampNoMessaging,
-
-            /// <summary>
-            /// Message
-            /// </summary>
-            Message,
-
-            /// <summary>
-            /// Object
-            /// </summary>
-            Object,
-
-            /// <summary>
-            /// Station Capabilities
-            /// </summary>
-            StationCapabilities,
-
-            /// <summary>
-            /// Position without timestamp (with APRS messaging)
-            /// </summary>
-            PositionWithoutTimestampWithMessaging,
-
-            /// <summary>
-            /// Status
-            /// </summary>
-            Status,
-
-            /// <summary>
-            /// Query
-            /// </summary>
-            Query,
-
-            /// <summary>
-            /// [Do not use]
-            /// </summary>
-            DoNotUse,
-
-            /// <summary>
-            /// Positionwith timestamp (with APRS messaging)
-            /// </summary>
-            PositionWithTimestampWithMessaging,
-
-            /// <summary>
-            /// Telemetry data
-            /// </summary>
-            TelemetryData,
-
-            /// <summary>
-            /// Maidenhead grid locator beacon (obsolete)
-            /// </summary>
-            MaidenheadGridLocatorBeacon,
-
-            /// <summary>
-            /// Weather Report (without position)
-            /// </summary>
-            WeatherReport,
-
-            /// <summary>
-            /// Current Mic-E Data (not used in TM-D700)
-            /// </summary>
-            CurrentMicEDataNotTMD700,
-
-            /// <summary>
-            /// User-Defined APRS packet format
-            /// </summary>
-            UserDefinedAPRSPacketFormat,
-
-            /// <summary>
-            /// [Do not use - TNC stream switch character]
-            /// </summary>
-            DoNotUseTNSStreamSwitchCharacter,
-
-            /// <summary>
-            /// Third-party traffic
-            /// </summary>
-            ThirdPartyTraffic,
-
-            /// <summary>
-            /// Not a recognized symbol
-            /// </summary>
-            Unknown,
+            if (encodedPacket != null)
+            {
+                Decode(encodedPacket);
+            }
         }
 
         /// <summary>
@@ -264,12 +99,72 @@
         /// <summary>
         /// Gets or sets the software decode status for this packet.
         /// </summary>
-        public Type DecodedType { get; set; } = Type.NotDecoded;
+        public PacketType DecodedType { get; set; } = PacketType.NotDecoded;
 
         /// <summary>
-        /// Gets or sets the packet's raw NMEA data.
+        /// Given an information field, this returns the <see cref="PacketType"/> of the APRS packet.
         /// </summary>
-        public NmeaData? RawNmeaData { get; set; } = null;
+        /// <param name="informationField">A string encoded APRS Information Field.</param>
+        /// <returns><see cref="PacketType"/> of the data type.</returns>
+        public static PacketType GetDataType(string informationField)
+        {
+            if (informationField == null)
+            {
+                throw new ArgumentNullException(nameof(informationField));
+            }
+
+            // TODO Issue #67: This isn't always true.
+            // '!' can come up to the 40th position.
+            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
+
+            return DataTypeMap[dataTypeIdentifier];
+        }
+
+        /// <summary>
+        /// Returns the char for a given <see cref="PacketType"/>.
+        /// </summary>
+        /// <param name="type"><see cref="PacketType"/> to represent.</param>
+        /// <returns>A char representing type.</returns>
+        public static char GetTypeChar(PacketType type)
+        {
+            if (type == PacketType.DoNotUse || type == PacketType.Unused || type == PacketType.Unknown)
+            {
+                throw new ArgumentException("Used invalid PacketType " + type);
+            }
+
+            return DataTypeMap.Single(pair => pair.Value == type).Key;
+        }
+
+        /// <summary>
+        /// Decodes a position from raw GPS location (NMEA formats)
+        /// This expects a three letter type to start the string
+        /// Supported formats:
+        ///     None yet.
+        /// </summary>
+        /// <param name="rawGpsPacket">The full packet. Decoded.</param>
+        public static void HandleRawGps(string rawGpsPacket)
+        {
+            if (rawGpsPacket == null)
+            {
+                throw new ArgumentNullException(nameof(rawGpsPacket));
+            }
+            else if (rawGpsPacket.Length < 6)
+            {
+                // 6 is the length of the identifier $GPxxx, so the string is invalid if it isn't at least that long
+                throw new ArgumentException("rawGpsPacket should be 6 or more characters in length. Given length: " + rawGpsPacket.Length);
+            }
+
+            // Ensure start of identifier is valid
+            if (!rawGpsPacket.Substring(0, 3).Equals("$GP", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentNullException("rawGpsPacket should have started with $GP. Given packet started with:" + rawGpsPacket.Substring(0, 3));
+            }
+
+            // Get type of packet
+            NmeaType nmeaDataType = rawGpsPacket.Substring(3, 3).ToNmeaType();
+
+            throw new NotImplementedException("handle RawGPSData");
+        }
 
         /// <summary>
         /// Takes a string encoding of an APRS packet, decodes it, and saves it in to this object.
@@ -283,9 +178,9 @@
         /// <summary>
         /// Returns a string version of this packet encoded in the requested type.
         /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
+        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
         /// <returns>AX.25 APRS packet as a string.</returns>
-        public string Encode(Type encodeType)
+        public string Encode(PacketType encodeType)
         {
             throw new NotImplementedException();
         }
@@ -293,41 +188,31 @@
         /// <summary>
         /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
         /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
+        /// <param name="encodeType">The <see cref="PacketType"/> of encoding to use.</param>
+        /// <param name="timeType">The <see cref="TimestampType"/> of encoding for the timestamp to use. Optional, defaults to DHMz.</param>
         /// <returns>APRS Information Field as a string.</returns>
-        public string EncodeInformationField(Type encodeType)
-        {
-            return EncodeInformationField(encodeType, Timestamp.Type.DHMz);
-        }
-
-        /// <summary>
-        /// Returns a string of the APRS Information Field (or the AX.25 Information Field) given the proper encoding.
-        /// </summary>
-        /// <param name="encodeType">The type of encoding to use.</param>
-        /// <param name="timeType">The type of encoding for the timestamp to use.</param>
-        /// <returns>APRS Information Field as a string.</returns>
-        public string EncodeInformationField(Type encodeType, Timestamp.Type timeType)
+        public string EncodeInformationField(PacketType encodeType, TimestampType timeType = TimestampType.DHMz)
         {
             string encodedInfoField = string.Empty;
 
             switch (encodeType)
             {
-                case Type.PositionWithTimestampWithMessaging:
-                case Type.PositionWithTimestampNoMessaging:
+                case PacketType.PositionWithTimestampWithMessaging:
+                case PacketType.PositionWithTimestampNoMessaging:
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += Timestamp!.Encode(timeType);
                     encodedInfoField += Position!.Encode();
                     encodedInfoField += Comment;
                     break;
 
-                case Type.PositionWithoutTimestampNoMessaging:
-                case Type.PositionWithoutTimestampWithMessaging:
+                case PacketType.PositionWithoutTimestampNoMessaging:
+                case PacketType.PositionWithoutTimestampWithMessaging:
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += Position!.Encode();
                     encodedInfoField += Comment;
                     break;
 
-                case Type.MaidenheadGridLocatorBeacon:
+                case PacketType.MaidenheadGridLocatorBeacon:
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += Position!.EncodeGridsquare(6, false);
                     encodedInfoField += ']';
@@ -339,7 +224,7 @@
 
                     break;
 
-                case Type.Status:
+                case PacketType.Status:
                     encodedInfoField += GetTypeChar(encodeType);
                     encodedInfoField += Position!.EncodeGridsquare(6, true);
                     if (Comment != null && Comment.Length > 0)
@@ -365,7 +250,7 @@
         {
             if (informationField == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(informationField));
             }
             else if (informationField.Length == 0)
             {
@@ -376,181 +261,122 @@
 
             switch (DecodedType)
             {
-                case Type.CurrentMicEData:
+                case PacketType.CurrentMicEData:
                     throw new NotImplementedException("handle currnet Mic-E Data (Rev 0 beta)");
-                case Type.OldMicEData:
+                case PacketType.OldMicEData:
                     throw new NotImplementedException("handle old Mic-E Data (Rev 0 beta)");
-                case Type.PositionWithoutTimestampNoMessaging:
-                    // handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
-                    HasMessaging = false;
-                    Position = new Position(informationField.Substring(1, 19));
 
-                    if (informationField.Length > 20)
+                // Handle position without timestamp (no APRS messaging), or Ultimeter 2000 WX Station
+                case PacketType.PositionWithoutTimestampNoMessaging:
                     {
-                        Comment = informationField.Substring(20);
+                        HasMessaging = false;
+                        Match match = Regex.Match(informationField, RegexStrings.PositionWithoutTimestamp);
+                        match.AssertSuccess(PacketType.PositionWithoutTimestampNoMessaging, nameof(informationField));
+
+                        Position = new Position(match.Groups[1].Value);
+
+                        if (match.Groups[6].Success)
+                        {
+                            Comment = match.Groups[6].Value;
+                        }
+
+                        break;
                     }
 
-                    break;
-
-                case Type.PeetBrosUIIWeatherStation:
+                case PacketType.PeetBrosUIIWeatherStation:
                     throw new NotImplementedException("handle Peet Bros U-II Weather Station");
-                case Type.RawGPSData:
+                case PacketType.RawGPSData:
                     HandleRawGps(informationField);
                     break;
 
-                case Type.AgreloDFJrMicroFinder:
+                case PacketType.AgreloDFJrMicroFinder:
                     throw new NotImplementedException("handle Agrelo DFJr / MicroFinder");
-                case Type.MapFeature:
+                case PacketType.MapFeature:
                     throw new NotImplementedException("handle Reserved - Map Feature");
-                case Type.OldMicEDataCurrentTMD700:
+                case PacketType.OldMicEDataCurrentTMD700:
                     throw new NotImplementedException("handle Old Mic-E Data (but Current data for TM-D700");
-                case Type.Item:
+                case PacketType.Item:
                     throw new NotImplementedException("handle Item");
-                case Type.ShelterDataWithTime:
+                case PacketType.ShelterDataWithTime:
                     throw new NotImplementedException("handle Reserved - Shelter data with time");
-                case Type.InvalidOrTestData:
+                case PacketType.InvalidOrTestData:
                     throw new NotImplementedException("handle Invalid data or test data");
-                case Type.SpaceWeather:
+                case PacketType.SpaceWeather:
                     throw new NotImplementedException("handle Reserved - Space weather");
-                case Type.PositionWithTimestampNoMessaging:
+                case PacketType.PositionWithTimestampNoMessaging:
                     HandlePositionWithTimestamp(informationField, false);
                     break;
 
-                case Type.Message:
+                case PacketType.Message:
                     throw new NotImplementedException("handle Message");
-                case Type.Object:
+                case PacketType.Object:
                     throw new NotImplementedException("handle Object");
-                case Type.StationCapabilities:
+                case PacketType.StationCapabilities:
                     throw new NotImplementedException("handle Station capabilities");
-                case Type.PositionWithoutTimestampWithMessaging:
+                case PacketType.PositionWithoutTimestampWithMessaging:
                     // handle Position without timestamp (with APRS messaging)
                     HasMessaging = true;
                     throw new NotImplementedException("handle Position without timestamp (with APRS messaging)");
-                case Type.Status:
+                case PacketType.Status:
                     {
                         Position = new Position();
-                        int endGridsquare = informationField.IndexOf(' ');
-                        if (endGridsquare == -1)
-                        {
-                            Position.DecodeMaidenhead(informationField.Substring(1));
-                        }
-                        else
-                        {
-                            Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
-                        }
+                        Match match = Regex.Match(informationField, RegexStrings.StatusWithMaidenheadAndComment);
+                        match.AssertSuccess(PacketType.Status, nameof(informationField));
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+
+                        if (match.Groups[4].Success)
                         {
-                            Comment = informationField.Substring(endGridsquare + 1);
+                            Comment = match.Groups[4].Value;
                         }
                     }
 
                     break;
 
-                case Type.Query:
+                case PacketType.Query:
                     throw new NotImplementedException("handle Query");
-                case Type.PositionWithTimestampWithMessaging:
+                case PacketType.PositionWithTimestampWithMessaging:
                     HandlePositionWithTimestamp(informationField, true);
                     break;
 
-                case Type.TelemetryData:
+                case PacketType.TelemetryData:
                     throw new NotImplementedException("handle Telemetry data");
 
-                case Type.MaidenheadGridLocatorBeacon:
-                    Position = new Position();
+                case PacketType.MaidenheadGridLocatorBeacon:
                     {
-                        Position = new Position();
-                        int endGridsquare = informationField.IndexOf(']');
-                        Position.DecodeMaidenhead(informationField.Substring(1, endGridsquare - 1));
+                        Match match = Regex.Match(informationField, RegexStrings.MaidenheadGridLocatorBeacon);
+                        match.AssertSuccess(PacketType.MaidenheadGridLocatorBeacon, nameof(informationField));
 
-                        if (endGridsquare + 1 < informationField.Length)
+                        Position = new Position();
+                        Position.DecodeMaidenhead(match.Groups[1].Value);
+
+                        if (!string.IsNullOrEmpty(match.Groups[3].Value))
                         {
-                            Comment = informationField.Substring(endGridsquare + 1);
+                            Comment = match.Groups[3].Value;
                         }
                     }
 
                     break;
 
-                case Type.WeatherReport: // TODO raw weather reports vs positionless?
+                case PacketType.WeatherReport: // TODO raw weather reports vs positionless?
                     // handle Weather report(without position)
                     Timestamp = new Timestamp(informationField.Substring(1, 8));
                     throw new NotImplementedException("handle Weather report (without position)");
-                case Type.CurrentMicEDataNotTMD700:
+                case PacketType.CurrentMicEDataNotTMD700:
                     throw new NotImplementedException("handle Current Mic-E Data (not used in TM-D700");
-                case Type.UserDefinedAPRSPacketFormat:
+                case PacketType.UserDefinedAPRSPacketFormat:
                     throw new NotImplementedException("handle User-Defined APRS packet format");
-                case Type.ThirdPartyTraffic:
+                case PacketType.ThirdPartyTraffic:
                     throw new NotImplementedException("handle Third-party traffic");
-                case Type.DoNotUse:
+                case PacketType.DoNotUse:
                     throw new NotImplementedException("Do not use");
-                case Type.Unused:
+                case PacketType.Unused:
                     throw new NotImplementedException("Unused");
-                case Type.Unknown:
+                case PacketType.Unknown:
                     throw new NotImplementedException("Unknown");
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(informationField));
             }
-        }
-
-        /// <summary>
-        /// Given an information field, this returns the Type of the APRS packet.
-        /// </summary>
-        /// <param name="informationField">A string encoded APRS Information Field.</param>
-        /// <returns>Packet.Type of the data type.</returns>
-        public Type GetDataType(string informationField)
-        {
-            // TODO: This isn't always true.
-            // '!' can come up to the 40th position.
-            char dataTypeIdentifier = char.ToUpperInvariant(informationField[0]);
-
-            return DataTypeMap[dataTypeIdentifier];
-        }
-
-        /// <summary>
-        /// Returns the char for a given Packet.Type.
-        /// </summary>
-        /// <param name="type">Type to represent.</param>
-        /// <returns>A char representing type.</returns>
-        public char GetTypeChar(Type type)
-        {
-            if (type == Type.DoNotUse || type == Type.Unused || type == Type.Unknown)
-            {
-                throw new ArgumentException("Used invalid Type " + type);
-            }
-
-            IEnumerable<char> keys = DataTypeMap.Keys.Where(x => DataTypeMap[x] == type);
-            return keys.Single();
-        }
-
-        /// <summary>
-        /// Decodes a position from raw GPS location (NMEA formats)
-        /// This expects a three letter type to start the string
-        /// Supported formats:
-        ///     None yet.
-        /// </summary>
-        /// <param name="rawGpsPacket">The full packet. Decoded.</param>
-        public void HandleRawGps(string rawGpsPacket)
-        {
-            if (rawGpsPacket == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else if (rawGpsPacket.Length < 6)
-            {
-                // 6 is the length of the identifier $GPxxx, so the string is invalid if it isn't at least that long
-                throw new ArgumentException("rawGpsPacket should be 6 or more characters in length. Given length: " + rawGpsPacket.Length);
-            }
-
-            string upperRawPacket = rawGpsPacket.ToUpperInvariant();
-
-            // Ensure start of identifier is valid
-            if (!upperRawPacket.Substring(0, 3).Equals("$GP"))
-            {
-                throw new ArgumentNullException("rawGpsPacket should have started with $GP. Given packet started with:" + upperRawPacket.Substring(0, 3));
-            }
-
-            // Get type of packet
-            NmeaData.Type nmeaDataType = NmeaData.GetType(upperRawPacket.Substring(3, 3));
         }
 
         /// <summary>
@@ -561,15 +387,22 @@
         /// <param name="hasMessaging">true if this packet represents messaging capabilities.</param>
         private void HandlePositionWithTimestamp(string informationField, bool hasMessaging)
         {
+            Match match = Regex.Match(informationField, RegexStrings.PositionWithTimestamp);
+            match.AssertSuccess(
+                hasMessaging ?
+                    PacketType.PositionWithTimestampWithMessaging :
+                    PacketType.PositionWithTimestampNoMessaging,
+                nameof(informationField));
+
             HasMessaging = hasMessaging;
 
-            Timestamp = new Timestamp(informationField.Substring(1, 7));
+            Timestamp = new Timestamp(match.Groups[2].Value);
 
-            Position = new Position(informationField.Substring(8, 19));
+            Position = new Position(match.Groups[3].Value);
 
-            if (informationField.Length > 27)
+            if (match.Groups[8].Success)
             {
-                Comment = informationField.Substring(27);
+                Comment = match.Groups[8].Value;
             }
         }
     }

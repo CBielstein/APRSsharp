@@ -1,7 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
-    using AprsISLibrary;
+    using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
 
     /// <summary>
@@ -11,41 +11,39 @@
     public class Program
     {
         /// <summary>
+        /// A function matching the delegate event to print the received message.
+        /// </summary>
+        /// <param name="tcpMessage">The received tcp message that needs to be printed.</param>
+        public static void PrintTcpMessage(string tcpMessage)
+        {
+            Console.WriteLine(tcpMessage);
+        }
+
+        /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
         /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
         public static void Main(string[] args)
         {
-            AprsISLib n = new AprsISLib();
-            string callsign;
-            string filter;
-            string password;
+            using TcpConnection tcpConnection = new TcpConnection();
+            AprsIsConnection n = new AprsIsConnection(tcpConnection);
 
             // get input from the user
             Console.WriteLine("Enter your callsign: ");
-            callsign = Console.ReadLine();
-            Console.WriteLine("Enter your filter name: ");
-            filter = Console.ReadLine();
+            string? callsign = Console.ReadLine();
             Console.WriteLine("Enter your password: ");
-            password = Console.ReadLine();
-
-            if (!string.IsNullOrEmpty(callsign) && !string.IsNullOrEmpty(password))
-            {
-               n.Receive(callsign, password);
-            }
-            else
-            {
-               n.Receive();
-            }
+            string? password = Console.ReadLine();
+            n.ReceivedTcpMessage += PrintTcpMessage;
+            n.Receive(callsign, password);
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");
-            var packetName = Console.ReadLine();
+            string packetName = Console.ReadLine() ?? throw new ArgumentNullException(nameof(packetName), "Did not provide packet name");
             Packet p = new Packet();
             p.DecodeInformationField(packetName);
             Timestamp? ts = p.Timestamp;
             Position? pos = p.Position;
             Console.WriteLine($"\nHello, your packet name is, {p.Comment}, at cordinates, {pos?.Coordinates}, and time, {ts?.DateTime.Hour}");
-         }
+        }
     }
 }

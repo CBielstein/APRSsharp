@@ -1,4 +1,4 @@
-namespace AprsISLibrary
+﻿namespace AprsSharp.Connections.AprsIs
 {
     /// <summary>
     /// Abstracts a TCP connection.

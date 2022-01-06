@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Parsers.Aprs
 {
     using System;
+    using System.Globalization;
 
     /// <summary>
     /// Represents, encodes, and decodes an APRS timestamp.
@@ -28,116 +29,14 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Timestamp"/> class
-        /// from a different <see cref="Timestamp"/> object.
-        /// </summary>
-        /// <param name="ts">Timestamp to copy.</param>
-        public Timestamp(Timestamp ts)
-        {
-            DateTime = ts.DateTime;
-            DecodedType = ts.DecodedType;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Timestamp"/> class.
-        /// </summary>
-        public Timestamp()
-        {
-        }
-
-        /// <summary>
-        /// Represents the type of APRS timestamp.
-        /// </summary>
-        public enum Type
-        {
-            /// <summary>
-            /// Days/Hours/Minutes zulu
-            /// </summary>
-            DHMz,
-
-            /// <summary>
-            /// Days/Hours/Minutes local
-            /// </summary>
-            DHMl,
-
-            /// <summary>
-            /// Hours/Minutes/Seconds (always zulu)
-            /// </summary>
-            HMS,
-
-            /// <summary>
-            /// Hours/Minutes/Seconds (always zulu)
-            /// </summary>
-            MDHM,
-
-            /// <summary>
-            /// Not a decoded timestamp
-            /// </summary>
-            NotDecoded,
-        }
-
-        /// <summary>
         /// Gets or sets a <see cref="DateTime"/> representing the APRS timestamp.
         /// </summary>
-        public DateTime DateTime { get; set; } = DateTime.Now.ToUniversalTime();
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
 
         /// <summary>
-        /// Gets or sets a <see cref="Type"/> representing the APRS timestamp type.
+        /// Gets or sets a <see cref="TimestampType"/> representing the APRS timestamp type.
         /// </summary>
-        public Type DecodedType { get; set; } = Type.NotDecoded;
-
-        /// <summary>
-        /// Encodes the data from the stored datetime as a string with the requested type.
-        /// </summary>
-        /// <param name="type">The APRS timestamp type. Read about the types in the documentation for Timestamp.Type.</param>
-        /// <returns>String. 7-8 characters as defined by the APRS spec.</returns>
-        public string Encode(Timestamp.Type type)
-        {
-            return type switch
-            {
-                Type.DHMz => EncodeDHM(isZulu: true),
-                Type.DHMl => EncodeDHM(isZulu: false),
-                Type.HMS => EncodeHMS(),
-                Type.MDHM => EncodeMDHM(),
-                Type.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot deoce to type: {Type.NotDecoded}"),
-                _ => throw new NotSupportedException(),
-            };
-        }
-
-        /// <summary>
-        /// Takes the APRS Time Format string, detects the formatting, and decodes it in to this object.
-        /// </summary>
-        /// <param name="timestamp">APRS timestamp.</param>
-        public void Decode(string timestamp)
-        {
-            if (timestamp == null)
-            {
-                throw new ArgumentNullException();
-            }
-            else if (timestamp.Length != 7 && timestamp.Length != 8)
-            {
-                throw new ArgumentException("The given APRS timestamp is " + timestamp.Length + " characters long instead of the required 7-8.");
-            }
-
-            char timeIndicator = timestamp[6];
-
-            if (timeIndicator == 'z' || timeIndicator == '/')
-            {
-                DecodeDHM(timestamp);
-            }
-            else if (timeIndicator == 'h')
-            {
-                DecodeHMS(timestamp);
-            }
-            else if (char.IsNumber(timeIndicator))
-            {
-                DecodeMDHM(timestamp);
-            }
-            else
-            {
-                throw new ArgumentException("timestamp was not a valid APRS format (did not have a valid Time Indicator character)");
-            }
-        }
+        public TimestampType DecodedType { get; set; } = TimestampType.NotDecoded;
 
         /// <summary>
         /// If we're given a time in DHM, we need to find the correct month and year to fill in for DateTime.
@@ -147,7 +46,7 @@
         /// <param name="hint">A hint to the timeframe we're looking for. Generally, DateTime.Now.</param>
         /// <param name="year">The year in which the most recent occurance of that day number occured.</param>
         /// <param name="month">The month in which the most recent occurance of that day number occured.</param>
-        public void FindCorrectYearAndMonth(
+        public static void FindCorrectYearAndMonth(
             int day,
             DateTime hint,
             out int year,
@@ -191,7 +90,7 @@
         /// <param name="day">Found day.</param>
         /// <param name="month">Found month.</param>
         /// <param name="year">Found year.</param>
-        public void FindCorrectDayMonthAndYear(
+        public static void FindCorrectDayMonthAndYear(
             int hour,
             int minute,
             int second,
@@ -224,7 +123,7 @@
         /// <param name="minute">Packet minute.</param>
         /// <param name="hint">Usually DateTime.Now.</param>
         /// <param name="year">Found year.</param>
-        public void FindCorrectYear(
+        public static void FindCorrectYear(
             int month,
             int day,
             int hour,
@@ -258,17 +157,70 @@
 
                     ++numRetries;
                 }
-                catch (ArgumentOutOfRangeException e)
+                catch (ArgumentOutOfRangeException)
                 {
                     ++numRetries;
                     if (numRetries >= 4)
                     {
-                        throw e;
+                        throw;
                     }
                 }
             }
 
             year = packet.Year;
+        }
+
+        /// <summary>
+        /// Encodes the data from the stored datetime as a string with the requested type.
+        /// </summary>
+        /// <param name="type">The APRS <see cref="TimestampType"/>.</param>
+        /// <returns>String. 7-8 characters as defined by the APRS spec.</returns>
+        public string Encode(TimestampType type)
+        {
+            return type switch
+            {
+                TimestampType.DHMz => EncodeDHM(isZulu: true),
+                TimestampType.DHMl => EncodeDHM(isZulu: false),
+                TimestampType.HMS => EncodeHMS(),
+                TimestampType.MDHM => EncodeMDHM(),
+                TimestampType.NotDecoded => throw new ArgumentOutOfRangeException(nameof(type), $"Cannot encode to type: {TimestampType.NotDecoded}"),
+                _ => throw new NotSupportedException(),
+            };
+        }
+
+        /// <summary>
+        /// Takes the APRS Time Format string, detects the formatting, and decodes it in to this object.
+        /// </summary>
+        /// <param name="timestamp">APRS timestamp.</param>
+        public void Decode(string timestamp)
+        {
+            if (timestamp == null)
+            {
+                throw new ArgumentNullException(nameof(timestamp));
+            }
+            else if (timestamp.Length != 7 && timestamp.Length != 8)
+            {
+                throw new ArgumentException("The given APRS timestamp is " + timestamp.Length + " characters long instead of the required 7-8.");
+            }
+
+            char timeIndicator = timestamp[6];
+
+            if (timeIndicator == 'z' || timeIndicator == '/')
+            {
+                DecodeDHM(timestamp);
+            }
+            else if (timeIndicator == 'h')
+            {
+                DecodeHMS(timestamp);
+            }
+            else if (char.IsNumber(timeIndicator))
+            {
+                DecodeMDHM(timestamp);
+            }
+            else
+            {
+                throw new ArgumentException("timestamp was not a valid APRS format (did not have a valid Time Indicator character)");
+            }
         }
 
         /// <summary>
@@ -282,13 +234,13 @@
             DateTime convertedDateTime = isZulu ? DateTime.ToUniversalTime() : DateTime.ToLocalTime();
 
             // Add day
-            encodedPacket += convertedDateTime.Day.ToString("D2");
+            encodedPacket += convertedDateTime.Day.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add hour
-            encodedPacket += convertedDateTime.Hour.ToString("D2");
+            encodedPacket += convertedDateTime.Hour.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add minute
-            encodedPacket += convertedDateTime.Minute.ToString("D2");
+            encodedPacket += convertedDateTime.Minute.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add time indicator
             encodedPacket += isZulu ? "z" : "/";
@@ -306,13 +258,13 @@
             DateTime convertedDateTime = DateTime.ToUniversalTime();
 
             // Add hour
-            encodedPacket += convertedDateTime.Hour.ToString("D2");
+            encodedPacket += convertedDateTime.Hour.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add minute
-            encodedPacket += convertedDateTime.Minute.ToString("D2");
+            encodedPacket += convertedDateTime.Minute.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add second
-            encodedPacket += convertedDateTime.Second.ToString("D2");
+            encodedPacket += convertedDateTime.Second.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add the time indicator
             encodedPacket += "h";
@@ -330,16 +282,16 @@
             DateTime convertedDateTime = DateTime.ToUniversalTime();
 
             // Add month
-            encodedPacket += convertedDateTime.Month.ToString("D2");
+            encodedPacket += convertedDateTime.Month.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add day
-            encodedPacket += convertedDateTime.Day.ToString("D2");
+            encodedPacket += convertedDateTime.Day.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add hour
-            encodedPacket += convertedDateTime.Hour.ToString("D2");
+            encodedPacket += convertedDateTime.Hour.ToString("D2", CultureInfo.InvariantCulture);
 
             // Add minute
-            encodedPacket += convertedDateTime.Minute.ToString("D2");
+            encodedPacket += convertedDateTime.Minute.ToString("D2", CultureInfo.InvariantCulture);
 
             return encodedPacket;
         }
@@ -352,7 +304,7 @@
         {
             if (timestamp == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(timestamp));
             }
             else if (timestamp.Length != 7)
             {
@@ -375,7 +327,7 @@
                 throw new ArgumentException("timestamp is not in DHM format as time indicator is " + timeIndicator + " when it should be z or /");
             }
 
-            DecodedType = wasZuluTime ? Type.DHMz : Type.DHMl;
+            DecodedType = wasZuluTime ? TimestampType.DHMz : TimestampType.DHMl;
             if (!int.TryParse(timestamp.Substring(0, 6), out _))
             {
                 throw new ArgumentException("timestamp contained non-numeric values in the first 6 spaces: " + timestamp);
@@ -385,10 +337,10 @@
             string hourStr = timestamp.Substring(2, 2);
             string minuteStr = timestamp.Substring(4, 2);
 
-            int day = int.Parse(dayStr);
-            int hour = int.Parse(hourStr);
-            int minute = int.Parse(minuteStr);
-            DateTime hint = wasZuluTime ? DateTime.Now.ToUniversalTime() : DateTime.Now;
+            int day = int.Parse(dayStr, CultureInfo.InvariantCulture);
+            int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
+            int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
+            DateTime hint = wasZuluTime ? DateTime.UtcNow : DateTime.Now;
 
             FindCorrectYearAndMonth(day, hint, out int year, out int month);
             DateTimeKind dtKind = wasZuluTime ? DateTimeKind.Utc : DateTimeKind.Local;
@@ -404,23 +356,23 @@
         {
             if (timestamp == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(timestamp));
             }
             else if (timestamp.Length != 7 || timestamp[6] != 'h')
             {
                 throw new ArgumentException("timestamp is not in APRS HMS datetime format. Length is " + timestamp.Length + " when it should be 7 or format marker is " + timestamp[6] + " when it should be 'h'");
             }
 
-            DecodedType = Type.HMS;
+            DecodedType = TimestampType.HMS;
 
             string hourStr = timestamp.Substring(0, 2);
             string minuteStr = timestamp.Substring(2, 2);
             string secondStr = timestamp.Substring(4, 2);
 
-            int hour = int.Parse(hourStr);
-            int minute = int.Parse(minuteStr);
-            int second = int.Parse(secondStr);
-            DateTime hint = DateTime.Now.ToUniversalTime();
+            int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
+            int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
+            int second = int.Parse(secondStr, CultureInfo.InvariantCulture);
+            DateTime hint = DateTime.UtcNow;
 
             FindCorrectDayMonthAndYear(
                 hour,
@@ -443,25 +395,25 @@
         {
             if (timestamp == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException(nameof(timestamp));
             }
             else if (timestamp.Length != 8)
             {
                 throw new ArgumentException("timestamp is not in APRS MDHM datetime format. Length is " + timestamp.Length + " when it should be 8");
             }
 
-            DecodedType = Type.MDHM;
+            DecodedType = TimestampType.MDHM;
 
             string monthStr = timestamp.Substring(0, 2);
             string dayStr = timestamp.Substring(2, 2);
             string hourStr = timestamp.Substring(4, 2);
             string minuteStr = timestamp.Substring(6, 2);
 
-            int month = int.Parse(monthStr);
-            int day = int.Parse(dayStr);
-            int hour = int.Parse(hourStr);
-            int minute = int.Parse(minuteStr);
-            DateTime hint = DateTime.Now.ToUniversalTime();
+            int month = int.Parse(monthStr, CultureInfo.InvariantCulture);
+            int day = int.Parse(dayStr, CultureInfo.InvariantCulture);
+            int hour = int.Parse(hourStr, CultureInfo.InvariantCulture);
+            int minute = int.Parse(minuteStr, CultureInfo.InvariantCulture);
+            DateTime hint = DateTime.UtcNow;
 
             FindCorrectYear(
                 month,

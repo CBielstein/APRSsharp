@@ -1,0 +1,7 @@
+# Each line is a file pattern followed by one or more owners.
+# https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence, these will
+# be requested for review when someone opens a pull request
+*       @CBielstein @eddywine

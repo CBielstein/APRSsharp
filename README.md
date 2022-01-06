@@ -24,12 +24,37 @@ visualizing APRS digital packets in a straight-forward manner.
 This project is provided as [open source](LICENSE) and developed by the
 community for the community.
 
+### Further Documentation
+
+See supplemental documentation for APRS# constituent projects:
+
+* [AprsParser](src/AprsParser/AprsParser.md)
+* [KissTnc](src/KissTnc/KissTnc.md)
+
 ## Contributions
 
 Please see the [code of conduct](CODE_OF_CONDUCT.md) and
 [contributing document](CONTRIBUTING.MD) for details on contributing to
 this project.
 
-## Dependencies
+## Development
 
-The target is .NET Core 3.1 for development (netcoreapp3.1)
+### Dependencies
+
+The target is .NET 6.0 for development.
+
+### Building
+
+Warnings are treated as errors in the release build (as in CI builds) but are
+left as warnings in local development. To verify your code is warning-free, you
+can run `dotnet build -c Release` to get the release build behavior.
+
+### Generating / Publishing console application binary file
+
+To generate the console application binary, go to the APRSsharp folder
+(`AprsSharp\src\APRSsharp`) and run the command `dotnet publish -c Release` to generate
+the console application.
+The resulting binary will be placed in
+`bin\Release\net6.0\win-x86\publish`.
+Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
+output directory.

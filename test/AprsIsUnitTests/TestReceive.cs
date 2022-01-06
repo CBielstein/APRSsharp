@@ -3,7 +3,7 @@ namespace AprsIsUnitTests
     using System;
     using System.Collections.Generic;
     using System.Threading;
-    using AprsISLibrary;
+    using AprsSharp.Connections.AprsIs;
     using Moq;
     using Xunit;
 
@@ -27,12 +27,12 @@ namespace AprsIsUnitTests
             string testMessage = "This is a test message";
             mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
 
-            var arpsIs = new AprsISLib(mockTcpConnection.Object);
+            var arpsIs = new AprsIsConnection(mockTcpConnection.Object);
             arpsIs.ReceivedTcpMessage += TestTcpHandler;
 
             // Action
             // Receive some packets from it.
-            _ = arpsIs.Receive();
+            _ = arpsIs.Receive(null, null);
 
             while (!eventHandled)
             {

@@ -1,5 +1,6 @@
 namespace AprsSharpUnitTests.Connections.AprsIs
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using AprsSharp.Connections.AprsIs;
@@ -26,21 +27,18 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
 
             // Create connection and register a callback
-            var arpsIs = new AprsIsConnection(mockTcpConnection.Object);
-            arpsIs.ReceivedTcpMessage += (string message) =>
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
                 eventHandled = true;
             };
 
             // Receive some packets from it.
-            _ = arpsIs.Receive(null, null);
+            _ = aprsIs.Receive(null, null);
 
             // Wait to ensure the message is received
-            while (!eventHandled)
-            {
-                Thread.Sleep(100);
-            }
+            WaitForCondition(() => eventHandled, 500);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -68,21 +66,18 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(loginResponse);
 
             // Create connection and register a callback
-            var arpsIs = new AprsIsConnection(mockTcpConnection.Object);
-            arpsIs.ReceivedTcpMessage += (string message) =>
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
                 eventHandled = true;
             };
 
             // Receive some packets from it.
-            _ = arpsIs.Receive("N0CALL", "-1");
+            _ = aprsIs.Receive("N0CALL", "-1");
 
             // Wait to ensure the messages are sent and received
-            while (!eventHandled || tcpMessagesReceived.Count < 2)
-            {
-                Thread.Sleep(100);
-            }
+            WaitForCondition(() => aprsIs.LoggedIn, 1000);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -91,12 +86,35 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Assert.Contains(loginResponse, tcpMessagesReceived);
 
             // Assert that the login was completed
-            Assert.True(arpsIs.LoggedIn);
+            Assert.True(aprsIs.LoggedIn);
 
             // Assert that the login message was sent to the server
             mockTcpConnection.Verify(mock =>
                 mock.SendString(It.Is((string m) =>
                     m.Equals(expectedLoginMessage, System.StringComparison.InvariantCulture))));
+        }
+
+        /// <summary>
+        /// Waits for a specified condition or thows an exception if a time limit is reached.
+        /// </summary>
+        /// <param name="condition">A function returnig bool to check.</param>
+        /// <param name="timeoutMs">Timeout in milliseconds.</param>
+        /// <returns>True, if the condition is met before the timeout. Otherwise, throws an exception.</returns>
+        private static bool WaitForCondition(Func<bool> condition, int timeoutMs)
+        {
+            DateTime start = DateTime.UtcNow;
+
+            while ((DateTime.UtcNow - start).TotalMilliseconds <= timeoutMs)
+            {
+                if (condition())
+                {
+                    return true;
+                }
+
+                Thread.Yield();
+            }
+
+            throw new TimeoutException();
         }
     }
 }

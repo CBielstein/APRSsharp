@@ -1,6 +1,5 @@
 namespace AprsIsUnitTests
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using AprsSharp.Connections.AprsIs;
@@ -12,42 +11,39 @@ namespace AprsIsUnitTests
     /// </summary>
     public class ReceiveUnitTests
     {
-        private readonly IList<string> tcpMessagesReceived = new List<string>();
-        private bool eventHandled = false;
-
         /// <summary>
         /// Receive raises event on TCP message received.
         /// </summary>
         [Fact]
-        public void TestReceiveEvent()
+        public void TestReceivedTcpMessageEvent()
         {
-            // Setup
+            IList<string> tcpMessagesReceived = new List<string>();
+            bool eventHandled = false;
+            string testMessage = "This is a test message";
+
             // Create an APRS IS connection object.
             var mockTcpConnection = new Mock<ITcpConnection>();
-            string testMessage = "This is a test message";
             mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
 
             var arpsIs = new AprsIsConnection(mockTcpConnection.Object);
-            arpsIs.ReceivedTcpMessage += TestTcpHandler;
+            arpsIs.ReceivedTcpMessage += (string message) =>
+            {
+                tcpMessagesReceived.Add(message);
+                eventHandled = true;
+            };
 
-            // Action
             // Receive some packets from it.
             _ = arpsIs.Receive(null, null);
 
+            // Wait to ensure the message is sent
             while (!eventHandled)
             {
                 Thread.Sleep(100);
             }
 
-            // Assertions
+            Assert.Equal(1, tcpMessagesReceived.Count);
             Assert.NotEmpty(tcpMessagesReceived);
             Assert.Contains(testMessage, tcpMessagesReceived);
-        }
-
-        private void TestTcpHandler(string tcpMessage)
-        {
-            tcpMessagesReceived.Add(tcpMessage);
-            eventHandled = true;
         }
     }
 }

@@ -88,10 +88,13 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Assert that the login was completed
             Assert.True(aprsIs.LoggedIn);
 
-            // Assert that the login message was sent to the server
-            mockTcpConnection.Verify(mock =>
-                mock.SendString(It.Is((string m) =>
-                    m.Equals(expectedLoginMessage, System.StringComparison.InvariantCulture))));
+            // Assert that a connection was started and the login message was sent to the server
+            mockTcpConnection.Verify(mock => mock.Connect(
+                    It.Is<string>(s => s.Equals("rotate.aprs2.net", StringComparison.Ordinal)),
+                    It.Is<int>(p => p == 14580)));
+
+            mockTcpConnection.Verify(mock => mock.SendString(
+                    It.Is<string>(m => m.Equals(expectedLoginMessage, StringComparison.Ordinal))));
         }
 
         /// <summary>

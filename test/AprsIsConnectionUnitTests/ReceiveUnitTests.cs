@@ -50,7 +50,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Tests that <see cref="AprsIsConnection.Receive(string?, string?)"/> handles server login.
         /// </summary>
         [Fact]
-        public void ReceiveHandlesAuth()
+        public void ReceiveHandlesLogin()
         {
             IList<string> tcpMessagesReceived = new List<string>();
             bool eventHandled = false;
@@ -77,7 +77,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.LoggedIn, 1000);
+            WaitForCondition(() => aprsIs.LoggedIn, 1500);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);

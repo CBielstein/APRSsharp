@@ -75,48 +75,45 @@
             // Open connection
             tcpConnection.Connect(server, 14580);
 
-           // Receive
-            await Task.Run(() =>
+            // Receive
+            while (true)
             {
-                while (true)
+                string? received = tcpConnection.ReceiveString();
+
+                if (!string.IsNullOrEmpty(received))
                 {
-                    string? received = tcpConnection.ReceiveString();
+                    ReceivedTcpMessage?.Invoke(received);
 
-                    if (!string.IsNullOrEmpty(received))
+                    if (received.StartsWith('#'))
                     {
-                        ReceivedTcpMessage?.Invoke(received);
-
-                        if (received.StartsWith('#'))
+                        if (received.Contains("logresp"))
                         {
-                            if (received.Contains("logresp"))
-                            {
-                                LoggedIn = true;
-                            }
-
-                            if (!LoggedIn)
-                            {
-                                tcpConnection.SendString(loginMessage);
-                            }
+                            LoggedIn = true;
                         }
-                        else if (ReceivedPacket != null)
+
+                        if (!LoggedIn)
                         {
-                            try
-                            {
-                                Packet p = new Packet(received);
-                                ReceivedPacket.Invoke(p);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
-                            }
+                            tcpConnection.SendString(loginMessage);
                         }
                     }
-                    else
+                    else if (ReceivedPacket != null)
                     {
-                        Thread.Yield();
+                        try
+                        {
+                            Packet p = new Packet(received);
+                            ReceivedPacket.Invoke(p);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                        }
                     }
                 }
-            });
+                else
+                {
+                    Thread.Yield();
+                }
+            }
         }
     }
 }

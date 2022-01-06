@@ -8,9 +8,9 @@ namespace AprsIsUnitTests
     using Xunit;
 
     /// <summary>
-    /// Unit tests for APRS IS library.
+    /// Unit tests for the Receive method on <see cref="AprsIsConnection"/>.
     /// </summary>
-    public class TestReceive
+    public class ReceiveUnitTests
     {
         private readonly IList<string> tcpMessagesReceived = new List<string>();
         private bool eventHandled = false;

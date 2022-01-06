@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AprsISLibrary\AprsIsConnection.csproj" />
+    <ProjectReference Include="..\..\src\AprsIsConnection\AprsIsConnection.csproj" />
   </ItemGroup>
 
 </Project>

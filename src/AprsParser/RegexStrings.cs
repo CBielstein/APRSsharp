@@ -6,10 +6,22 @@ namespace AprsSharp.Parsers.Aprs
     internal static class RegexStrings
     {
         /// <summary>
-        /// Matches Maidenhead grid with optional symbols.
+        /// Same as <see cref="MaidenheadGridWithSymbols"/> but symbols are optional.
         /// Three groups: Full, alphanumeric grid, symbols.
         /// </summary>
-        public const string MaidenheadGridWithOptionalSymbols = @"([a-zA-Z0-9]{4,8})(.{2})?";
+        public const string MaidenheadGridWithOptionalSymbols = $@"{MaidenheadGridWithSymbols}?";
+
+        /// <summary>
+        /// Matches Maidenhead grid with symbols.
+        /// Three groups: Full, alphanumeric grid, symbols.
+        /// </summary>
+        public const string MaidenheadGridWithSymbols = @"([a-zA-Z0-9]{4,8})(.{2})";
+
+        /// <summary>
+        /// Matches Maidenhead grid of 4-6 characters without symbols.
+        /// One group: Full match.
+        /// </summary>
+        public const string MaidenheadGrid4or6NoSymbols = @"([a-zA-Z0-9]{4,6})";
 
         /// <summary>
         /// Matchdes a lat/long position, including with ambiguity, including symbols.
@@ -30,15 +42,15 @@ namespace AprsSharp.Parsers.Aprs
 
         /// <summary>
         /// Matches a Miadenhead Grid in square brackets [] with comment.
-        /// Four groups: Full, alphanumeric grid, symbols, comment.
+        /// Four groups: Full, alphanumeric grid, comment.
         /// </summary>
-        public const string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGridWithOptionalSymbols}\](.+)?$";
+        public const string MaidenheadGridLocatorBeacon = $@"^\[{MaidenheadGrid4or6NoSymbols}\](.+)?$";
 
         /// <summary>
         /// Matches a Status info field with Maidenhead grid and optional comment (comment separated by a space)
         /// Four matches: Full, full maidenhead, alphanumeric grid, symbols, comment.
         /// </summary>
-        public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithOptionalSymbols}) ?(.+)?$";
+        public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithSymbols}) ?(.+)?$";
 
         /// <summary>
         /// Matches a PositionWithoutTimestamp info field.

@@ -6,11 +6,6 @@ namespace AprsSharp.Parsers.Aprs
     public enum PacketType
     {
         /// <summary>
-        /// This packet was not decoded
-        /// </summary>
-        NotDecoded,
-
-        /// <summary>
         /// Current Mic-E Data (Rev 0 beta)
         /// </summary>
         CurrentMicEData,

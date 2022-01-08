@@ -73,14 +73,19 @@
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
+            n.ReceivedTcpMessage += PrintPacket;
 
             // get input from the user
-            Console.WriteLine("Enter your callsign: ");
+            Console.Write("Enter your callsign: ");
             string? callsign = Console.ReadLine();
-            Console.WriteLine("Enter your password: ");
+
+            Console.Write("Enter your password: ");
             string? password = Console.ReadLine();
-            n.ReceivedTcpMessage += PrintPacket;
-            await n.Receive(callsign, password);
+
+            Console.Write("Enter your filter (optional): ");
+            string? filter = Console.ReadLine();
+
+            await n.Receive(callsign, password, filter);
         }
     }
 }

@@ -4,7 +4,7 @@ namespace AprsSharp.Parsers.Aprs.Extensions
     using System.Text.RegularExpressions;
 
     /// <summary>
-    /// Extension methods to encourage code reuse in this codebase.
+    /// Extension methods for <see cref="Match"/>.
     /// </summary>
     public static class MatchExtensions
     {

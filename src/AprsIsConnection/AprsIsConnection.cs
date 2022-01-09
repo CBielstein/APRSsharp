@@ -1,10 +1,6 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -52,12 +48,13 @@
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
+        /// <param name="filter">The APRS-IS filter string for server-side filtering.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive(string? callsign, string? password)
+        public async Task Receive(string? callsign, string? password, string? filter)
         {
-            callsign = callsign ?? "N0CALL";
-            password = password ?? "-1";
-            string filter = "filter r/50.5039/4.4699/50";
+            callsign ??= "N0CALL";
+            password ??= "-1";
+            filter ??= "filter r/50.5039/4.4699/50";
             string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
             string server = "rotate.aprs2.net";
 

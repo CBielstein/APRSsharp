@@ -35,7 +35,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = aprsIs.Receive(null, null);
+            _ = aprsIs.Receive(null, null, null);
 
             // Wait to ensure the message is received
             WaitForCondition(() => eventHandled, 500);
@@ -47,7 +47,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
-        /// Tests that <see cref="AprsIsConnection.Receive(string?, string?)"/> handles server login.
+        /// Tests that <see cref="AprsIsConnection.Receive(string?, string?, string?)"/> handles server login.
         /// </summary>
         [Fact]
         public void ReceiveHandlesLogin()
@@ -74,7 +74,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = aprsIs.Receive("N0CALL", "-1");
+            _ = aprsIs.Receive("N0CALL", "-1", null);
 
             // Wait to ensure the messages are sent and received
             WaitForCondition(() => aprsIs.LoggedIn, 1500);

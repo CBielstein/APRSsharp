@@ -15,23 +15,23 @@
     public delegate void HandleTcpString(string tcpMessage);
 
     /// <summary>
-    /// Static class that defines different constants.
-    /// <summary>
-    public static class AprsIsConstants
-    {
-        public const string DefaultCallsign = "N0CALL";
-        public const string DefaultPassword = "-1";
-        public const string DefaultServerName = "rotate.aprs2.net";
-        public const string DefaultFilter = "filter r/50.5039/4.4699/50";
-    }
-
-    /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+
+        /// <summary>
+        /// Static class that defines different constants.
+        /// <summary>
+        public static class AprsIsConstants
+        {
+            public const string DefaultCallsign = "N0CALL";
+            public const string DefaultPassword = "-1";
+            public const string DefaultServerName = "rotate.aprs2.net";
+            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.

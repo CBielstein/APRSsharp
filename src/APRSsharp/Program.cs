@@ -32,26 +32,26 @@
             var rootCommand = new RootCommand
                 {
                 new Option<string>(
-                    aliases: new string[] { "--password", "--p", "--pass" },
-                    getDefaultValue: () => AprsIsConstants.DefaultPassword,
+                    aliases: new string[] { "--password", "-pwd", "-pass" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultPassword,
                     description: "A user password whose argument is parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--callsign", "--c", "--cgn" },
-                    getDefaultValue: () => AprsIsConstants.DefaultCallsign,
+                    aliases: new string[] { "--callsign", "-c", "-cgn" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultCallsign,
                     description: "A user callsign parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--server", "--s", "--svr" },
-                    getDefaultValue: () => AprsIsConstants.DefaultServerName,
+                    aliases: new string[] { "--server", "-s", "-svr" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultServerName,
                     description: "A specified server parsed as a string"),
                 new Option<string>(
-                    aliases: new string[] { "--filter", "--f" },
-                    getDefaultValue: () => AprsIsConstants.DefaultFilter,
+                    aliases: new string[] { "--filter", "-f" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultFilter,
                     description: "A user filter parsed as a string"),
                 };
             rootCommand.Description = "AprsSharp console app";
 
             // The paremeters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string, IConsole>(HandleAprsConnection);
+            rootCommand.Handler = CommandHandler.Create<string?, string?, string?, string?, IConsole>(HandleAprsConnection);
 
             rootCommand.Invoke(args);
         }
@@ -64,23 +64,18 @@
         /// <param name="server"> The specified server to connect.</param>
         /// <param name="filter"> The filter that will be used for receiving the packets.</param>
         /// <param name="console"> Flexibility in running in different consoles.</param>
-        public static void HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
+        public static void HandleAprsConnection(string? callsign, string? password, string? server, string? filter, IConsole console)
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
-<<<<<<< HEAD
-            n.ReceivedTcpMessage += PrintTcpMessage;
-            n.Receive(callsign, password, server, filter);
-=======
 
             // get input from the user
-            Console.WriteLine("Enter your callsign: ");
-            string? callsign = Console.ReadLine();
-            Console.WriteLine("Enter your password: ");
-            string? password = Console.ReadLine();
+            Console.Write("Enter your callsign: ");
+            callsign ??= Console.ReadLine();
+            Console.Write("Enter your password: ");
+            password ??= Console.ReadLine();
             n.ReceivedTcpMessage += PrintTcpMessage;
-            n.Receive(callsign, password);
->>>>>>> main
+            n.Receive(callsign, password, server, filter);
 
             // skeleton method that will be used to handle the decoded packets
             Console.WriteLine("Enter the packet name ");

@@ -58,3 +58,9 @@ The resulting binary will be placed in
 `bin\Release\net6.0\win-x86\publish`.
 Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
 output directory.
+
+### Testing the project/application binary file
+
+To test the generated console application binary, go to the APRSsharp folder
+(`AprsSharp\src\APRSsharp`) and run the command `dotnet run`
+

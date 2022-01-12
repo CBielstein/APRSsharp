@@ -19,6 +19,17 @@
         private readonly ITcpConnection tcpConnection;
 
         /// <summary>
+        /// Static class that defines different constants.
+        /// <summary>
+        public static class AprsIsConstants
+        {
+            public const string DefaultCallsign = "N0CALL";
+            public const string DefaultPassword = "-1";
+            public const string DefaultServerName = "rotate.aprs2.net";
+            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
@@ -65,7 +76,6 @@
                 while (true)
                 {
                     string? received = tcpConnection.ReceiveString();
-
                     if (!string.IsNullOrEmpty(received))
                     {
                         ReceivedTcpMessage?.Invoke(received);

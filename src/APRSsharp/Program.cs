@@ -75,17 +75,26 @@
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
             n.ReceivedTcpMessage += PrintPacket;
 
+            string? input;
+
             // get input from the user
             Console.Write("Enter your callsign: ");
-            string? callsign = Console.ReadLine();
+            input = Console.ReadLine();
+            string callsign = !string.IsNullOrWhiteSpace(input) ? input : throw new ArgumentException("Callsign must be provided");
 
-            Console.Write("Enter your password: ");
-            string? password = Console.ReadLine();
+            Console.Write("Enter your password (optional): ");
+            input = Console.ReadLine();
+            string password = !string.IsNullOrWhiteSpace(input) ? input : "-1";
+
+            Console.Write("Enter server (optional): ");
+            input = Console.ReadLine();
+            string server = !string.IsNullOrWhiteSpace(input) ? input : "rotate.aprs2.net";
 
             Console.Write("Enter your filter (optional): ");
-            string? filter = Console.ReadLine();
+            input = Console.ReadLine();
+            string filter = !string.IsNullOrWhiteSpace(input) ? input : "r/50.5039/4.4699/50";
 
-            await n.Receive(callsign, password, filter);
+            await n.Receive(callsign, password, server, filter);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Mock underlying TCP connection
             string testMessage = "This is a test message";
             var mockTcpConnection = new Mock<ITcpConnection>();
-            mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString()).Returns(testMessage).Returns(string.Empty);
 
             // Create connection and register a callback
             var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
@@ -40,7 +40,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 500);
+            WaitForCondition(() => eventHandled, 750);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);

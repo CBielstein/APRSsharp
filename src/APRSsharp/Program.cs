@@ -20,8 +20,8 @@
             Console.WriteLine();
             Console.WriteLine($"Received type: {p.InfoField.Type}");
 
-            // TODO: Reduce copy/paste below
-            // TODO: Clean up position printing:
+            // TODO Issue #103: Reduce copy/paste below
+            // TODO Issue #103: Clean up position printing:
                 // * Position lat/long encoding uses symbol IDs, not the most user-friendly
                 // * Gridsquare print out should probably print the correct number of characters based on ambiguitiy
             if (p.InfoField is PositionInfo pi)

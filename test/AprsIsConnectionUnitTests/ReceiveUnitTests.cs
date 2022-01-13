@@ -8,12 +8,12 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     using Xunit;
 
     /// <summary>
-    /// Unit tests for the Receive method on <see cref="AprsIsConnection"/>.
+    /// Unit tests for <see cref="AprsIsConnection.Receive(string, string, string, string?)"/>.
     /// </summary>
     public class ReceiveUnitTests
     {
         /// <summary>
-        /// Receive raises event on TCP message received.
+        /// <see cref="AprsIsConnection.Receive(string, string, string, string?)"/> raises event on TCP message received.
         /// </summary>
         [Fact]
         public void ReceivedTcpMessageEvent()
@@ -35,7 +35,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = aprsIs.Receive(null, null, null);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
             WaitForCondition(() => eventHandled, 500);
@@ -47,7 +47,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
-        /// Tests that <see cref="AprsIsConnection.Receive(string?, string?, string?)"/> handles server login.
+        /// Tests that <see cref="AprsIsConnection.Receive(string, string, string, string?)"/> handles server login.
         /// </summary>
         [Fact]
         public void ReceiveHandlesLogin()
@@ -74,7 +74,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = aprsIs.Receive("N0CALL", "-1", null);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             WaitForCondition(() => aprsIs.LoggedIn, 1500);
@@ -90,7 +90,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Assert that a connection was started and the login message was sent to the server
             mockTcpConnection.Verify(mock => mock.Connect(
-                    It.Is<string>(s => s.Equals("rotate.aprs2.net", StringComparison.Ordinal)),
+                    It.Is<string>(s => s.Equals("example.com", StringComparison.Ordinal)),
                     It.Is<int>(p => p == 14580)));
 
             mockTcpConnection.Verify(mock => mock.SendString(

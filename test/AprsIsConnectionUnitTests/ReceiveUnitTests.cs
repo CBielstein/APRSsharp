@@ -101,7 +101,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
         /// <summary>
         /// Verifies that the <see cref="AprsIsConnection.ReceivedPacket"/> event is raised when
-        /// a packet is decoded in <see cref="AprsIsConnection.Receive(string?, string?, string?)"/>.
+        /// a packet is decoded in <see cref="AprsIsConnection.Receive(string, string, string, string?)"/>.
         /// </summary>
         [Fact]
         public void ReceivedPacketEvent()

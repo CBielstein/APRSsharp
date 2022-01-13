@@ -48,15 +48,17 @@
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
-        /// <param name="filter">The APRS-IS filter string for server-side filtering.</param>
+        /// <param name="server">The APRS-IS server to contact.</param>
+        /// <param name="filter">The APRS-IS filter string for server-side filtering.
+        /// Null sends no filter, which is not recommended for most clients and servers.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive(string? callsign, string? password, string? filter)
+        public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            callsign ??= "N0CALL";
-            password ??= "-1";
-            filter ??= "filter r/50.5039/4.4699/50";
-            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
-            string server = "rotate.aprs2.net";
+            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1";
+            if (filter != null)
+            {
+                loginMessage += $" filter {filter}";
+            }
 
             // Open connection
             tcpConnection.Connect(server, 14580);

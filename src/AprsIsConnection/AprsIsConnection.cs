@@ -38,6 +38,12 @@
         public event HandleTcpString? ReceivedTcpMessage;
 
         /// <summary>
+        /// Gets a value indicating whether this connection is logged in to the server.
+        /// Note that this is not the same as successful password authentication.
+        /// </summary>
+        public bool LoggedIn { get; private set; } = false;
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
@@ -48,12 +54,10 @@
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            bool authenticated = false;
-
-            string authString = $"user {callsign} pass {password} vers AprsSharp 0.1";
+            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1";
             if (filter != null)
             {
-                authString += $" filter {filter}";
+                loginMessage += $" filter {filter}";
             }
 
             // Open connection
@@ -74,12 +78,12 @@
                         {
                             if (received.Contains("logresp"))
                             {
-                                authenticated = true;
+                                LoggedIn = true;
                             }
 
-                            if (!authenticated)
+                            if (!LoggedIn)
                             {
-                                tcpConnection.SendString(authString);
+                                tcpConnection.SendString(loginMessage);
                             }
                         }
                     }

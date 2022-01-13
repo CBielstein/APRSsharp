@@ -124,7 +124,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = aprsIs.Receive(null, null, null);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
             WaitForCondition(() => eventHandled, 500);

@@ -27,7 +27,12 @@
 
             if (p.InfoField is StatusInfo si)
             {
-                Assert.Equal(new GeoCoordinate(51.98, -0.46), si?.Position?.Coordinates);
+                // Coordinates not precise when coming from gridhead
+                double latitude = si?.Position?.Coordinates.Latitude ?? throw new Exception("Latitude should not be null");
+                double longitude = si?.Position?.Coordinates.Longitude ?? throw new Exception("Longitude should not be null");
+                Assert.Equal(51.98, Math.Round(latitude, 2));
+                Assert.Equal(-0.46, Math.Round(longitude, 2));
+                Assert.Equal("IO91SX", si?.Position?.EncodeGridsquare(6, false));
                 Assert.Equal('/', si?.Position?.SymbolTableIdentifier);
                 Assert.Equal('G', si?.Position?.SymbolCode);
                 Assert.Equal("My house", si?.Comment);
@@ -62,7 +67,14 @@
                 Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pi?.Position?.Coordinates);
                 Assert.Equal('/', pi?.Position?.SymbolTableIdentifier);
                 Assert.Equal('>', pi?.Position?.SymbolCode);
-                Assert.Equal(new DateTime(2016, 12, 9, 23, 45, 0, 0, DateTimeKind.Utc), pi?.Timestamp?.DateTime);
+
+                // This is using day/hour/minute encoding, so only check those
+                Assert.Equal(9, pi?.Timestamp?.DateTime.Day);
+                Assert.Equal(23, pi?.Timestamp?.DateTime.Hour);
+                Assert.Equal(45, pi?.Timestamp?.DateTime.Minute);
+                Assert.Equal(TimestampType.DHMz, pi?.Timestamp?.DecodedType);
+                Assert.Equal(DateTimeKind.Utc, pi?.Timestamp?.DateTime.Kind);
+
                 Assert.Equal("Test1234", pi?.Comment);
                 Assert.False(pi?.HasMessaging);
             }

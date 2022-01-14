@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
     /// Represents a full APRS packet.
@@ -20,8 +22,13 @@
                 throw new ArgumentNullException(nameof(encodedPacket));
             }
 
-            // TODO Issue #79: Actually parse the full fields in the APRS/TNC2 string.
-            InfoField = InfoField.FromString(encodedPacket.Split(':', 2).Last());
+            Match match = Regex.Match(encodedPacket, RegexStrings.Tnc2Packet);
+            match.AssertSuccess("Full TNC2 Packet", nameof(encodedPacket));
+
+            Sender = match.Groups[1].Value;
+            Path = match.Groups[2].Value.Split(',');
+            ReceivedTime = DateTime.UtcNow;
+            InfoField = InfoField.FromString(match.Groups[3].Value);
         }
 
         /// <summary>

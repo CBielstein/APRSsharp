@@ -1,6 +1,7 @@
 ﻿namespace AprsSharpUnitTests.Parsers.Aprs
 {
     using System;
+    using System.Linq;
     using AprsSharp.Parsers.Aprs;
     using GeoCoordinatePortable;
     using Xunit;
@@ -20,7 +21,7 @@
             Packet p = new Packet(encoded);
 
             Assert.Equal("N0CALL", p.Sender);
-            Assert.Equal("WIDE2-2", p.Path.Length.Single());
+            Assert.Equal("WIDE2-2", p.Path.Single());
             Assert.True((p.ReceivedTime - DateTime.UtcNow) < TimeSpan.FromMinutes(1));
             Assert.Equal(PacketType.Status, p.InfoField.Type);
 
@@ -49,14 +50,14 @@
             Packet p = new Packet(encoded);
 
             Assert.Equal("N0CALL", p.Sender);
-            Assert.Equal(3, p.Path.Length);
+            Assert.Equal(3, p.Path.Count);
             Assert.Equal("WIDE1-1", p.Path[0]);
             Assert.Equal("igate", p.Path[1]);
             Assert.Equal("TCPIP*", p.Path[2]);
             Assert.True((p.ReceivedTime - DateTime.UtcNow) < TimeSpan.FromMinutes(1));
             Assert.Equal(PacketType.PositionWithTimestampNoMessaging, p.InfoField.Type);
 
-            if (p.InfoField.Type is PositionInfo pi)
+            if (p.InfoField is PositionInfo pi)
             {
                 Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pi?.Position?.Coordinates);
                 Assert.Equal('/', pi?.Position?.SymbolTableIdentifier);

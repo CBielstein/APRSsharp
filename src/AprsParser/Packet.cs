@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Parsers.Aprs
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     /// <summary>
@@ -22,6 +23,21 @@
             // TODO Issue #79: Actually parse the full fields in the APRS/TNC2 string.
             InfoField = InfoField.FromString(encodedPacket.Split(':', 2).Last());
         }
+
+        /// <summary>
+        /// Gets the sender's callsign.
+        /// </summary>
+        public string Sender { get; }
+
+        /// <summary>
+        /// Gets the APRS path (UNPROTO path) of the packet.
+        /// </summary>
+        public IList<string> Path { get; }
+
+        /// <summary>
+        /// Gets the time this packet was received.
+        /// </summary>
+        public DateTime ReceivedTime { get; }
 
         /// <summary>
         /// Gets the APRS information field for this packet.

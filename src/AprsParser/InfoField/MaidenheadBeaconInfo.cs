@@ -72,7 +72,7 @@ namespace AprsSharp.Parsers.Aprs
 
             if (!string.IsNullOrEmpty(Comment))
             {
-                encoded.Append($" {Comment}");
+                encoded.Append(Comment);
             }
 
             return encoded.ToString();

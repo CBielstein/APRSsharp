@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using AprsSharp.Parsers.Aprs.Extensions;
 
@@ -32,6 +31,20 @@
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Packet"/> class.
+        /// </summary>
+        /// <param name="sender">The callsign of the sender.</param>
+        /// <param name="path">The digipath for the packet.</param>
+        /// <param name="infoField">An <see cref="InfoField"/> or extending class to send.</param>
+        public Packet(string sender, IList<string> path, InfoField infoField)
+        {
+            Sender = sender;
+            Path = path;
+            InfoField = infoField;
+            ReceivedTime = null;
+        }
+
+        /// <summary>
         /// Gets the sender's callsign.
         /// </summary>
         public string Sender { get; }
@@ -42,9 +55,10 @@
         public IList<string> Path { get; }
 
         /// <summary>
-        /// Gets the time this packet was received.
+        /// Gets the time this packet was decoded.
+        /// Null if this packet was created instead of decoded.
         /// </summary>
-        public DateTime ReceivedTime { get; }
+        public DateTime? ReceivedTime { get; }
 
         /// <summary>
         /// Gets the APRS information field for this packet.

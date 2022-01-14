@@ -57,7 +57,7 @@
         /// <returns>String representation of the packet.</returns>
         public virtual string Encode()
         {
-            throw new NotImplementedException();
+            return $"{Sender}>{string.Join(',', Path)}:{InfoField.Encode()}";
         }
     }
 }

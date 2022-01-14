@@ -50,7 +50,7 @@
         public string Sender { get; }
 
         /// <summary>
-        /// Gets the APRS path (UNPROTO path) of the packet.
+        /// Gets the APRS digipath of the packet.
         /// </summary>
         public IList<string> Path { get; }
 

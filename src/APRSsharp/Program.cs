@@ -14,10 +14,10 @@
     {
         private static bool TryPrintWeatherStat(string comment, char element, string display, int length = 3)
         {
-            var match = Regex.Match(comment, $"{element}(.{{{length}}})");
+            var match = Regex.Match(comment, $"{element}([0-9]{{{length}}})");
             if (match.Success)
             {
-                Console.WriteLine($"    {display}: {match.Groups[1].Value}");
+                Console.WriteLine($"    {display}: {int.Parse(match.Groups[1].Value)}");
             }
 
             return match.Success;
@@ -50,18 +50,15 @@
 
                 if (pi.Comment is not null)
                 {
-                    var windCombined = Regex.Match(pi.Comment, @"([0-9]{3})\/([0-9]{3})");
-                    if (windCombined.Success)
-                    {
-                        Console.WriteLine($"    Wind direction: {windCombined.Groups[1].Value} degrees");
-                        Console.WriteLine($"    Wind speed (one-minute sustained): {windCombined.Groups[2].Value} mph");
-                    }
-                    else
-                    {
-                        TryPrintWeatherStat(pi.Comment, 'c', "Wind direction (degrees)");
-                        TryPrintWeatherStat(pi.Comment, 's', "Wind speed (one-minute sustained)");
-                    }
+                    // Positionless
+                    TryPrintWeatherStat(pi.Comment, 'c', "Wind direction (degrees)");
+                    TryPrintWeatherStat(pi.Comment, 's', "Wind speed (one-minute sustained)");
 
+                    // Positioned
+                    TryPrintWeatherStat(pi.Comment, '$', "Wind direction (degrees)");
+                    TryPrintWeatherStat(pi.Comment, '/', "Wind speed (one-minute sustained)");
+
+                    // Both
                     TryPrintWeatherStat(pi.Comment, 'g', "Wind gust (5 minute max, mph)");
                     TryPrintWeatherStat(pi.Comment, 't', "Temperature (F)");
                     TryPrintWeatherStat(pi.Comment, 'r', "1-hour rainfall (100th of inch)");

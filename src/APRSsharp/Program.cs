@@ -38,6 +38,9 @@
                 return;
             }
 
+            Console.WriteLine($"    Sender: {p.Sender}");
+            Console.WriteLine($"    Path: {string.Join(',', p.Path)}");
+            Console.WriteLine($"    Received At: {p.ReceivedTime} {p.ReceivedTime?.Kind}");
             Console.WriteLine($"    Type: {p.InfoField.Type}");
 
             // TODO: Reduce copy/paste below

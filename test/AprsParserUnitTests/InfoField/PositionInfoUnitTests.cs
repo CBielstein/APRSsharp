@@ -10,6 +10,47 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     /// </summary>
     public class PositionInfoUnitTests
     {
+       /// <summary>
+        /// Verifies decoding and re-encoding a full prosition packet in TNC2 format.
+        /// </summary>
+        [Fact]
+        public void TestRoundTrip()
+        {
+            string encoded = "N0CALL>WIDE1-1,igate,TCPIP*:/092345z4903.50N/07201.75W>Test1234";
+            Packet p = new Packet(encoded);
+
+            Assert.Equal("N0CALL", p.Sender);
+            Assert.Equal(3, p.Path.Count);
+            Assert.Equal("WIDE1-1", p.Path[0]);
+            Assert.Equal("igate", p.Path[1]);
+            Assert.Equal("TCPIP*", p.Path[2]);
+            Assert.True((p.ReceivedTime - DateTime.UtcNow) < TimeSpan.FromMinutes(1));
+            Assert.Equal(PacketType.PositionWithTimestampNoMessaging, p.InfoField.Type);
+
+            if (p.InfoField is PositionInfo pi)
+            {
+                Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pi?.Position?.Coordinates);
+                Assert.Equal('/', pi?.Position?.SymbolTableIdentifier);
+                Assert.Equal('>', pi?.Position?.SymbolCode);
+
+                // This is using day/hour/minute encoding, so only check those
+                Assert.Equal(9, pi?.Timestamp?.DateTime.Day);
+                Assert.Equal(23, pi?.Timestamp?.DateTime.Hour);
+                Assert.Equal(45, pi?.Timestamp?.DateTime.Minute);
+                Assert.Equal(TimestampType.DHMz, pi?.Timestamp?.DecodedType);
+                Assert.Equal(DateTimeKind.Utc, pi?.Timestamp?.DateTime.Kind);
+
+                Assert.Equal("Test1234", pi?.Comment);
+                Assert.False(pi?.HasMessaging);
+            }
+            else
+            {
+                Assert.IsType<PositionInfo>(p.InfoField);
+            }
+
+            Assert.Equal(encoded, p.Encode());
+        }
+
         /// <summary>
         /// Decodes a lat/long position report format with timestamp and comment
         /// based on the example given in the APRS spec.

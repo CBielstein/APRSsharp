@@ -79,5 +79,15 @@ namespace AprsSharp.Parsers.Aprs
         ///     Optional comment.
         /// </summary>
         public const string PositionWithTimestamp = $@"^([/@])([0-9]{{6}}[/zh0-9])({PositionLatLongWithSymbols})(.+)?$";
+
+        /// <summary>
+        /// Matches a full TNC2-encoded packet.
+        /// 4 matches:
+        ///     Full
+        ///     Sender callsign
+        ///     Path
+        ///     Info field.
+        /// </summary>
+        public const string Tnc2Packet = @"^([^>]+)>([^:]+):(.+)$";
     }
 }

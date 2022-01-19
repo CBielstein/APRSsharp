@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
@@ -11,6 +12,17 @@
     /// </summary>
     public class Program
     {
+        private static bool TryPrintWeatherStat(string comment, char element, string display, int length = 3)
+        {
+            var match = Regex.Match(comment, $"{element}(.{{{length}}})");
+            if (match.Success)
+            {
+                Console.WriteLine($"    {display}: {match.Groups[1].Value}");
+            }
+
+            return match.Success;
+        }
+
         /// <summary>
         /// A function matching the delegate event to print the received packet.
         /// </summary>
@@ -35,6 +47,32 @@
                 Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(4, false)})");
                 Console.WriteLine($"    Comment: {pi.Comment}");
                 Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
+
+                if (pi.Comment is not null)
+                {
+                    var windCombined = Regex.Match(pi.Comment, @"([0-9]{3})\/([0-9]{3})");
+                    if (windCombined.Success)
+                    {
+                        Console.WriteLine($"    Wind direction: {windCombined.Groups[1].Value} degrees");
+                        Console.WriteLine($"    Wind speed (one-minute sustained): {windCombined.Groups[2].Value} mph");
+                    }
+                    else
+                    {
+                        TryPrintWeatherStat(pi.Comment, 'c', "Wind direction (degrees)");
+                        TryPrintWeatherStat(pi.Comment, 's', "Wind speed (one-minute sustained)");
+                    }
+
+                    TryPrintWeatherStat(pi.Comment, 'g', "Wind gust (5 minute max, mph)");
+                    TryPrintWeatherStat(pi.Comment, 't', "Temperature (F)");
+                    TryPrintWeatherStat(pi.Comment, 'r', "1-hour rainfall (100th of inch)");
+                    TryPrintWeatherStat(pi.Comment, 'p', "24-hour rainfall (100th of inch)");
+                    TryPrintWeatherStat(pi.Comment, 'P', "Rainfall since midnight (100th of inch)");
+                    TryPrintWeatherStat(pi.Comment, 'h', "Humidity", 2);
+                    TryPrintWeatherStat(pi.Comment, 'b', "Barometric pressure", 5);
+                    TryPrintWeatherStat(pi.Comment, 'L', "Luminosity");
+                    TryPrintWeatherStat(pi.Comment, 'l', "Luminosity (1000 + following value)");
+                    TryPrintWeatherStat(pi.Comment, '#', "Raw rain");
+                }
             }
             else if (p.InfoField is StatusInfo si)
             {

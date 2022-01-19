@@ -20,6 +20,11 @@
             Console.WriteLine();
             Console.WriteLine($"Received type: {p.InfoField.Type}");
 
+            Console.WriteLine($"    Sender: {p.Sender}");
+            Console.WriteLine($"    Path: {string.Join(',', p.Path)}");
+            Console.WriteLine($"    Received At: {p.ReceivedTime} {p.ReceivedTime?.Kind}");
+            Console.WriteLine($"    Type: {p.InfoField.Type}");
+
             // TODO Issue #103: Reduce copy/paste below
             // TODO Issue #103: Clean up position printing:
                 // * Position lat/long encoding uses symbol IDs, not the most user-friendly

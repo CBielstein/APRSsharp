@@ -9,6 +9,52 @@
     public abstract class InfoField
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="InfoField"/> class.
+        /// </summary>
+        public InfoField()
+        {
+            Type = PacketType.Unknown;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfoField"/> class from an encoded string.
+        /// </summary>
+        /// <param name="encodedInfoField">An encoded InfoField from which to pull the Type.</param>
+        public InfoField(string encodedInfoField)
+        {
+            if (encodedInfoField == null)
+            {
+                throw new ArgumentNullException(nameof(encodedInfoField));
+            }
+
+            Type = GetPacketType(encodedInfoField);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfoField"/> class from a <see cref="PacketType"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="PacketType"/> of this <see cref="InfoField"/>.</param>
+        public InfoField(PacketType type)
+        {
+            Type = type;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfoField"/> class from another <see cref="InfoField"/>.
+        /// This is the copy constructor.
+        /// </summary>
+        /// <param name="infoField">An <see cref="InfoField"/> to copy.</param>
+        public InfoField(InfoField infoField)
+        {
+            if (infoField == null)
+            {
+                throw new ArgumentNullException(nameof(infoField));
+            }
+
+            Type = infoField.Type;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="PacketType"/> of this packet.
         /// </summary>
         public PacketType Type { get; protected set; }

@@ -10,18 +10,50 @@ namespace AprsSharp.Parsers.Aprs
     public class WeatherInfo : PositionInfo
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WeatherInfo"/> class.
+        /// Initializes a new instance of the <see cref="WeatherInfo"/> class from an encoded <see cref="InfoField"/>.
         /// </summary>
         /// <param name="encodedInfoField">A string encoding of a <see cref="PositionInfo"/> with weather information.</param>
         public WeatherInfo(string encodedInfoField)
-            : base(encodedInfoField)
+            : this(new PositionInfo(encodedInfoField))
         {
-            if ((Position.SymbolTableIdentifier != '/' && Position.SymbolTableIdentifier != '\\') ||
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WeatherInfo"/> class from a <see cref="PositionInfo"/>.
+        /// </summary>
+        /// <param name="positionInfo">A <see cref="PositionInfo"/> from which to decode a <see cref="WeatherInfo"/>.</param>
+        public WeatherInfo(PositionInfo positionInfo)
+            : base(positionInfo)
+        {
+            if (positionInfo == null)
+            {
+                throw new ArgumentNullException(nameof(positionInfo));
+            }
+
+            if ((positionInfo.Position.SymbolTableIdentifier != '/' && positionInfo.Position.SymbolTableIdentifier != '\\') ||
                 Position.SymbolCode != '_')
             {
                 throw new ArgumentException(
-                    $@"Encoded packet must have weather symbol (`/_` or `\_`). Given: `{Position.SymbolTableIdentifier}{Position.SymbolCode}",
-                    nameof(encodedInfoField));
+                    $@"Encoded packet must have weather symbol (`/_` or `\_`). Given: `{positionInfo.Position.SymbolTableIdentifier}{positionInfo.Position.SymbolCode}",
+                    nameof(positionInfo));
+            }
+
+            WindDirection = GetWeatherMeasurement('$');
+            WindSpeed = GetWeatherMeasurement('/');
+            WindGust = GetWeatherMeasurement('g');
+            Temperature = GetWeatherMeasurement('t');
+            Rainfall1Hour = GetWeatherMeasurement('r');
+            Rainfall24Hour = GetWeatherMeasurement('p');
+            RainfallSinceMidnight = GetWeatherMeasurement('P');
+            Humidity = GetWeatherMeasurement('h', 2);
+            BarometricPressure = GetWeatherMeasurement('b', 5);
+            RainRaw = GetWeatherMeasurement('#');
+
+            Luminosity = GetWeatherMeasurement('l') + 1000;
+
+            if (Luminosity == null)
+            {
+                Luminosity = GetWeatherMeasurement('L');
             }
         }
 

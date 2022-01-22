@@ -12,17 +12,6 @@
     /// </summary>
     public class Program
     {
-        private static bool TryPrintWeatherStat(string comment, char element, string display, int length = 3)
-        {
-            var match = Regex.Match(comment, $"{element}([0-9]{{{length}}})");
-            if (match.Success)
-            {
-                Console.WriteLine($"    {display}: {int.Parse(match.Groups[1].Value)}");
-            }
-
-            return match.Success;
-        }
-
         /// <summary>
         /// A function matching the delegate event to print the received packet.
         /// </summary>
@@ -48,27 +37,19 @@
                 Console.WriteLine($"    Comment: {pi.Comment}");
                 Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
 
-                if (pi.Comment is not null)
+                if (p.InfoField is WeatherInfo wi)
                 {
-                    // Positionless
-                    TryPrintWeatherStat(pi.Comment, 'c', "Wind direction (degrees)");
-                    TryPrintWeatherStat(pi.Comment, 's', "Wind speed (one-minute sustained)");
-
-                    // Positioned
-                    TryPrintWeatherStat(pi.Comment, '$', "Wind direction (degrees)");
-                    TryPrintWeatherStat(pi.Comment, '/', "Wind speed (one-minute sustained)");
-
-                    // Both
-                    TryPrintWeatherStat(pi.Comment, 'g', "Wind gust (5 minute max, mph)");
-                    TryPrintWeatherStat(pi.Comment, 't', "Temperature (F)");
-                    TryPrintWeatherStat(pi.Comment, 'r', "1-hour rainfall (100th of inch)");
-                    TryPrintWeatherStat(pi.Comment, 'p', "24-hour rainfall (100th of inch)");
-                    TryPrintWeatherStat(pi.Comment, 'P', "Rainfall since midnight (100th of inch)");
-                    TryPrintWeatherStat(pi.Comment, 'h', "Humidity", 2);
-                    TryPrintWeatherStat(pi.Comment, 'b', "Barometric pressure", 5);
-                    TryPrintWeatherStat(pi.Comment, 'L', "Luminosity");
-                    TryPrintWeatherStat(pi.Comment, 'l', "Luminosity (1000 + following value)");
-                    TryPrintWeatherStat(pi.Comment, '#', "Raw rain");
+                    Console.WriteLine($"Wind direction (degrees): {wi.WindDirection}");
+                    Console.WriteLine($"Wind speed (one-minute sustained): {wi.WindSpeed}");
+                    Console.WriteLine($"Wind gust (5 minute max, mph): {wi.WindGust}");
+                    Console.WriteLine($"Temperature (F): {wi.Temperature}");
+                    Console.WriteLine($"1-hour rainfall (100th of inch): {wi.Rainfall1Hour}");
+                    Console.WriteLine($"24-hour rainfall (100th of inch): {wi.Rainfall24Hour}");
+                    Console.WriteLine($"Rainfall since midnight (100th of inch): {wi.RainfallSinceMidnight}");
+                    Console.WriteLine($"Humidity: {wi.Humidity}");
+                    Console.WriteLine($"Barometric pressure: {wi.BarometricPressure}");
+                    Console.WriteLine($"Luminosity: {wi.Luminosity}");
+                    Console.WriteLine($"Raw rain: {wi.RainRaw}");
                 }
             }
             else if (p.InfoField is StatusInfo si)

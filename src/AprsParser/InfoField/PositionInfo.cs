@@ -19,13 +19,12 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         /// <param name="encodedInfoField">A string encoding of a <see cref="PositionInfo"/>.</param>
         public PositionInfo(string encodedInfoField)
+            : base(encodedInfoField)
         {
             if (string.IsNullOrWhiteSpace(encodedInfoField))
             {
                 throw new ArgumentNullException(nameof(encodedInfoField));
             }
-
-            Type = GetPacketType(encodedInfoField);
 
             if (Type == PacketType.PositionWithoutTimestampNoMessaging)
             {
@@ -97,6 +96,25 @@ namespace AprsSharp.Parsers.Aprs
                 Type = HasMessaging ? PacketType.PositionWithTimestampWithMessaging
                     : PacketType.PositionWithTimestampNoMessaging;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PositionInfo"/> class.
+        /// This is the copy constructor.
+        /// </summary>
+        /// <param name="positionInfo">A <see cref="PositionInfo"/> to copy.</param>
+        public PositionInfo(PositionInfo positionInfo)
+            : base(positionInfo)
+        {
+            if (positionInfo == null)
+            {
+                throw new ArgumentNullException(nameof(positionInfo));
+            }
+
+            HasMessaging = positionInfo.HasMessaging;
+            Comment = positionInfo.Comment;
+            Timestamp = positionInfo.Timestamp;
+            Position = positionInfo.Position;
         }
 
         /// <summary>

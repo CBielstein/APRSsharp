@@ -4,6 +4,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     using System.Collections.Generic;
     using System.Threading;
     using AprsSharp.Connections.AprsIs;
+    using AprsSharp.Parsers.Aprs;
     using Moq;
     using Xunit;
 
@@ -13,7 +14,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     public class ReceiveUnitTests
     {
         /// <summary>
-        /// <see cref="AprsIsConnection.Receive(string, string, string, string?)"/> raises event on TCP message received.
+        /// Verifies that the <see cref="AprsIsConnection.ReceivedTcpMessage"/> event is raised when
+        /// a TCP message is received in <see cref="AprsIsConnection.Receive(string, string, string, string?)"/>.
         /// </summary>
         [Fact]
         public void ReceivedTcpMessageEvent()
@@ -24,7 +26,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Mock underlying TCP connection
             string testMessage = "This is a test message";
             var mockTcpConnection = new Mock<ITcpConnection>();
-            mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(testMessage);
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString()).Returns(testMessage).Returns(string.Empty);
 
             // Create connection and register a callback
             var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
@@ -38,7 +40,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 500);
+            WaitForCondition(() => eventHandled, 750);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -95,6 +97,59 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             mockTcpConnection.Verify(mock => mock.SendString(
                     It.Is<string>(m => m.Equals(expectedLoginMessage, StringComparison.Ordinal))));
+        }
+
+        /// <summary>
+        /// Verifies that the <see cref="AprsIsConnection.ReceivedPacket"/> event is raised when
+        /// a packet is decoded in <see cref="AprsIsConnection.Receive(string, string, string, string?)"/>.
+        /// </summary>
+        [Fact]
+        public void ReceivedPacketEvent()
+        {
+            IList<string> tcpMessagesReceived = new List<string>();
+            bool eventHandled = false;
+            Packet? receivedPacket = null;
+
+            // Mock underlying TCP connection
+            string encodedPacket = @"N0CALL>igate,T2serv:>CN76wv\L Lighthouse!";
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(encodedPacket);
+
+            // Create connection and register a callback
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ReceivedPacket += (Packet p) =>
+            {
+                receivedPacket = p;
+                eventHandled = true;
+            };
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
+
+            // Wait to ensure the message is received
+            WaitForCondition(() => eventHandled, 1000);
+
+            // Assert the callback was triggered and that the expected message was received.
+            Assert.True(eventHandled);
+
+            if (receivedPacket == null)
+            {
+                Assert.NotNull(receivedPacket);
+            }
+            else
+            {
+                Assert.Equal(PacketType.Status, receivedPacket.InfoField.Type);
+                Assert.IsType<StatusInfo>(receivedPacket.InfoField);
+
+                StatusInfo si = (StatusInfo)receivedPacket.InfoField;
+
+                Assert.NotNull(si.Position);
+                Assert.Equal("CN76wv", si.Position?.EncodeGridsquare(6, false), ignoreCase: true);
+                Assert.Equal('\\', si.Position?.SymbolTableIdentifier);
+                Assert.Equal('L', si.Position?.SymbolCode);
+                Assert.Null(si.Timestamp);
+                Assert.Equal("Lighthouse!", si.Comment);
+            }
         }
 
         /// <summary>

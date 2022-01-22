@@ -3,12 +3,19 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AprsSharp.Parsers.Aprs;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
     /// </summary>
     /// <param name="tcpMessage">The TCP message.</param>
     public delegate void HandleTcpString(string tcpMessage);
+
+    /// <summary>
+    /// Delegate for handling a decoded APRS packet.
+    /// </summary>
+    /// <param name="packet">Decoded APRS <see cref="Packet"/>.</param>
+    public delegate void HandlePacket(Packet packet);
 
     /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
@@ -38,6 +45,11 @@
         public event HandleTcpString? ReceivedTcpMessage;
 
         /// <summary>
+        /// Event raised when an APRS packet is received and decoded.
+        /// </summary>
+        public event HandlePacket? ReceivedPacket;
+
+        /// <summary>
         /// Gets a value indicating whether this connection is logged in to the server.
         /// Note that this is not the same as successful password authentication.
         /// </summary>
@@ -63,7 +75,7 @@
             // Open connection
             tcpConnection.Connect(server, 14580);
 
-           // Receive
+            // Receive
             await Task.Run(() =>
             {
                 while (true)
@@ -86,9 +98,23 @@
                                 tcpConnection.SendString(loginMessage);
                             }
                         }
+                        else if (ReceivedPacket != null)
+                        {
+                            try
+                            {
+                                Packet p = new Packet(received);
+                                ReceivedPacket.Invoke(p);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                            }
+                        }
                     }
-
-                    Thread.Sleep(500);
+                    else
+                    {
+                        Thread.Yield();
+                    }
                 }
             });
         }

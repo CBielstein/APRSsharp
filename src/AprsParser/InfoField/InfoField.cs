@@ -74,7 +74,8 @@
                 case PacketType.PositionWithoutTimestampWithMessaging:
                 case PacketType.PositionWithTimestampNoMessaging:
                 case PacketType.PositionWithTimestampWithMessaging:
-                    return new PositionInfo(encodedInfoField);
+                    PositionInfo positionInfo = new PositionInfo(encodedInfoField);
+                    return positionInfo.Position.IsWeatherSymbol() ? new WeatherInfo(positionInfo) : positionInfo;
 
                 case PacketType.Status:
                     return new StatusInfo(encodedInfoField);

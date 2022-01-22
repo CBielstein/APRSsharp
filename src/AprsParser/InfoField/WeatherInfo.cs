@@ -3,6 +3,7 @@ namespace AprsSharp.Parsers.Aprs
     using System;
     using System.Globalization;
     using System.Text.RegularExpressions;
+    using AprsSharp.Parsers.Aprs.Extensions;
 
     /// <summary>
     /// Represents an info field for position packets carrying weather information.
@@ -30,8 +31,7 @@ namespace AprsSharp.Parsers.Aprs
                 throw new ArgumentNullException(nameof(positionInfo));
             }
 
-            if ((positionInfo.Position.SymbolTableIdentifier != '/' && positionInfo.Position.SymbolTableIdentifier != '\\') ||
-                Position.SymbolCode != '_')
+            if (!positionInfo.Position.IsWeatherSymbol())
             {
                 throw new ArgumentException(
                     $@"Encoded packet must have weather symbol (`/_` or `\_`). Given: `{positionInfo.Position.SymbolTableIdentifier}{positionInfo.Position.SymbolCode}",

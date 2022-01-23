@@ -56,6 +56,25 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             // TODO: Reuse the InfoField constructor on other types to reduce code duplication?
 
             Assert.Equal(encodedInfoField, wi.Encode());
+
+            WeatherInfo encodeWi = new WeatherInfo(
+                wi.Position,
+                false,
+                null,
+                null,
+                220,
+                4,
+                5,
+                77,
+                0,
+                0,
+                0,
+                50,
+                expectedBarometricPressure,
+                null,
+                null);
+
+            Assert.Equal(encodedInfoField, encodeWi.Encode());
         }
     }
 }

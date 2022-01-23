@@ -63,10 +63,47 @@ namespace AprsSharp.Parsers.Aprs
         /// <param name="position"><see cref="Position"/> for this packet.</param>
         /// <param name="hasMessaging">True if the sender supports messaging.</param>
         /// <param name="timestamp">Optional <see cref="Timestamp"/> for this packet.</param>
-        /// <param name="comment">Optional comment for this packet.</param>
-        public WeatherInfo(Position position, bool hasMessaging, Timestamp? timestamp, string? comment)
+        /// <param name="comment">Optional comment for this packet, will be appended after encoded weather information.</param>
+        /// <param name="windDirection">Wind direction in degrees.</param>
+        /// <param name="windSpeed">Wind speed 1-minute sustained in miles per hour.</param>
+        /// <param name="windGust">5-minute max wind gust in miles per hour.</param>
+        /// <param name="temperature">Temperature in degrees Fahrenheit.</param>
+        /// <param name="rainfall1Hour">1-hour rainfall in 100ths of an inch.</param>
+        /// <param name="rainfall24Hour">24-hour rainfall in 100ths of an inch.</param>
+        /// <param name="rainfallSinceMidnight">Rainfall since midnight in 100ths of an inch.</param>
+        /// <param name="humidity">Humidity in percentage.</param>
+        /// <param name="barometricPressure">Barometric pressure in 10ths of millibars/10ths of hPascal.</param>
+        /// <param name="luminosity">Luminosity in watts per square meter.</param>
+        /// <param name="rainRaw">Raw rain.</param>
+        public WeatherInfo(
+            Position position,
+            bool hasMessaging,
+            Timestamp? timestamp,
+            string? comment,
+            int? windDirection,
+            int? windSpeed,
+            int? windGust,
+            int? temperature,
+            int? rainfall1Hour,
+            int? rainfall24Hour,
+            int? rainfallSinceMidnight,
+            int? humidity,
+            int? barometricPressure,
+            int? luminosity,
+            int? rainRaw)
             : base(position, hasMessaging, timestamp, comment)
         {
+            WindDirection = windDirection;
+            WindSpeed = windSpeed;
+            WindGust = windGust;
+            Temperature = temperature;
+            Rainfall1Hour = rainfall1Hour;
+            Rainfall24Hour = rainfall24Hour;
+            RainfallSinceMidnight = rainfallSinceMidnight;
+            Humidity = humidity;
+            BarometricPressure = barometricPressure;
+            Luminosity = luminosity;
+            RainRaw = rainRaw;
         }
 
         /// <summary>

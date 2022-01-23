@@ -11,7 +11,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     public class PositionInfoUnitTests
     {
        /// <summary>
-        /// Verifies decoding and re-encoding a full prosition packet in TNC2 format.
+        /// Verifies decoding and re-encoding a full position packet in TNC2 format.
         /// </summary>
         [Fact]
         public void TestRoundTrip()

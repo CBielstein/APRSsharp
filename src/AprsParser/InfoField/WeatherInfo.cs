@@ -38,7 +38,7 @@ namespace AprsSharp.Parsers.Aprs
                     nameof(positionInfo));
             }
 
-            WindDirection = GetWeatherMeasurement('$');
+            WindDirection = GetWeatherMeasurement('^');
             WindSpeed = GetWeatherMeasurement('/');
             WindGust = GetWeatherMeasurement('g');
             Temperature = GetWeatherMeasurement('t');

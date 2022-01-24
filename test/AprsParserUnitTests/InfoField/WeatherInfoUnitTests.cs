@@ -77,7 +77,6 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(50, wi.Humidity);
             Assert.Equal(expectedBarometricPressure, wi.BarometricPressure);
 
-            // TODO: Reuse the InfoField constructor on other types to reduce code duplication?
             // TODO: Un-skip other tests involving weather from the original repo.
 
             Assert.Equal(encodedInfoField, wi.Encode());

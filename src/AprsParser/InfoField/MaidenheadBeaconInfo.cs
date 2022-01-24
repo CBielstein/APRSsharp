@@ -16,13 +16,12 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         /// <param name="encodedInfoField">A string encoding of a <see cref="StatusInfo"/>.</param>
         public MaidenheadBeaconInfo(string encodedInfoField)
+            : base(encodedInfoField)
         {
             if (string.IsNullOrWhiteSpace(encodedInfoField))
             {
                 throw new ArgumentNullException(nameof(encodedInfoField));
             }
-
-            Type = GetPacketType(encodedInfoField);
 
             if (Type != PacketType.MaidenheadGridLocatorBeacon)
             {
@@ -47,8 +46,8 @@ namespace AprsSharp.Parsers.Aprs
         /// <param name="position">A position, which will be encoded as a maidenhead gridsquare locator.</param>
         /// <param name="comment">An optional comment.</param>
         public MaidenheadBeaconInfo(Position position, string? comment)
+            : base(PacketType.MaidenheadGridLocatorBeacon)
         {
-            Type = PacketType.MaidenheadGridLocatorBeacon;
             Comment = comment;
             Position = position ?? throw new ArgumentNullException(nameof(position));
         }

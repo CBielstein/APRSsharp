@@ -99,7 +99,7 @@
         /// </summary>
         /// <param name="encodedInfoField">A string-encoded APRS info field.</param>
         /// <returns><see cref="PacketType"/> of the info field.</returns>
-        protected static PacketType GetPacketType(string encodedInfoField)
+        private static PacketType GetPacketType(string encodedInfoField)
         {
             if (encodedInfoField == null)
             {

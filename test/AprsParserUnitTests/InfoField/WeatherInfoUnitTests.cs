@@ -13,23 +13,46 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     public class WeatherInfoUnitTests
     {
         /// <summary>
-        /// Verifies decoding and re-encoding a "complete weather packet" with position but without timestamp.
+        /// Verifies decoding and re-encoding a "complete weather packet" with position.
+        /// These strings are taken directly from examples in the APRS 1.01 specification.
         /// </summary>
         /// <param name="encodedInfoField">The fully-encoded weather info field.</param>
         /// <param name="expectedComment">The expected comment after decode.</param>
         /// <param name="expectedBarometricPressure">The expected barometric pressure after decode.</param>
+        /// <param name="expectedTemperature">The expected temperature after decode.</param>
+        /// <param name="expectedPacketType">The expected <see cref="PacketType"/> after decode.</param>
         [Theory]
-        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW", "220/004g005t077r000p000P000h50b09900wRSW", 9900)]
-        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW", "220/004g005t077r000p000P000h50b.....wRSW", null)]
-        public void TestCompletePositionNoTimestamp(string encodedInfoField, string expectedComment, int? expectedBarometricPressure)
+        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW", "220/004g005t077r000p000P000h50b09900wRSW", 9900, 77, PacketType.PositionWithoutTimestampNoMessaging)]
+        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW", "220/004g005t077r000p000P000h50b.....wRSW", null, 77, PacketType.PositionWithoutTimestampNoMessaging)]
+        [InlineData("@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW", "220/004g005t-07r000p000P000h50b09900wRSW", 9900, -7, PacketType.PositionWithTimestampWithMessaging)]
+        public void TestCompleteWeatherReport(
+            string encodedInfoField,
+            string expectedComment,
+            int? expectedBarometricPressure,
+            int expectedTemperature,
+            PacketType expectedPacketType)
         {
             WeatherInfo wi = new WeatherInfo(encodedInfoField);
 
             Assert.IsAssignableFrom<PositionInfo>(wi);
             Assert.IsType<WeatherInfo>(wi);
 
-            Assert.Equal(PacketType.PositionWithoutTimestampNoMessaging, wi.Type);
-            Assert.False(wi.HasMessaging);
+            Assert.Equal(expectedPacketType, wi.Type);
+            Assert.Equal(wi.Type == PacketType.PositionWithoutTimestampWithMessaging || wi.Type == PacketType.PositionWithTimestampWithMessaging, wi.HasMessaging);
+
+            if (wi.Type == PacketType.PositionWithTimestampNoMessaging || wi.Type == PacketType.PositionWithTimestampWithMessaging)
+            {
+                Assert.NotNull(wi.Timestamp);
+                Assert.Equal(TimestampType.DHMz, wi.Timestamp?.DecodedType);
+                Assert.Equal(9, wi.Timestamp?.DateTime.Day);
+                Assert.Equal(23, wi.Timestamp?.DateTime.Hour);
+                Assert.Equal(45, wi.Timestamp?.DateTime.Minute);
+                Assert.Equal(DateTimeKind.Utc, wi.Timestamp?.DateTime.Kind);
+            }
+            else
+            {
+                Assert.Null(wi.Timestamp);
+            }
 
             Assert.Equal('/', wi.Position.SymbolTableIdentifier);
             Assert.Equal('_', wi.Position.SymbolCode);
@@ -43,7 +66,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(220, wi.WindDirection);
             Assert.Equal(4, wi.WindSpeed);
             Assert.Equal(5, wi.WindGust);
-            Assert.Equal(77, wi.Temperature);
+            Assert.Equal(expectedTemperature, wi.Temperature);
             Assert.Equal(0, wi.Rainfall1Hour);
             Assert.Equal(0, wi.Rainfall24Hour);
             Assert.Equal(0, wi.RainfallSinceMidnight);

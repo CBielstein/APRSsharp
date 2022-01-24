@@ -50,18 +50,19 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.Equal(50, wi.Humidity);
             Assert.Equal(expectedBarometricPressure, wi.BarometricPressure);
 
-            // TODO: Assert APRS software
-            // TODO: Assert WX unit
-            // TODO: Encode new object
             // TODO: Reuse the InfoField constructor on other types to reduce code duplication?
+            // TODO: Un-skip other tests involving weather from the original repo.
 
             Assert.Equal(encodedInfoField, wi.Encode());
+
+            // TODO Issue #105: Update this test (here and perhaps above) when the additional comment info is saved separately.
+            string additionalComment = "wRSW";
 
             WeatherInfo encodeWi = new WeatherInfo(
                 wi.Position,
                 false,
                 null,
-                null,
+                additionalComment,
                 220,
                 4,
                 5,

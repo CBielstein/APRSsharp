@@ -203,7 +203,7 @@ namespace AprsSharp.Parsers.Aprs
             if (Luminosity != null)
             {
                 char lum = Luminosity < 1000 ? 'L' : 'l';
-                sb.Append($"{lum}{Luminosity % 1000}");
+                sb.Append($"{lum}{(Luminosity % 1000).ToWeatherEncoding()}");
             }
 
             if (RainRaw != null)

@@ -17,19 +17,85 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// These strings are taken directly from examples in the APRS 1.01 specification.
         /// </summary>
         /// <param name="encodedInfoField">The fully-encoded weather info field.</param>
+        /// <param name="expectedEncodingResult">Expected result of info field encoding.
+        ///     Different on some packets as APRS# code currently includes fields such as humidity even if it is null (`h..`).
+        ///     This appears in line with existing software.</param>
         /// <param name="expectedComment">The expected comment after decode.</param>
-        /// <param name="expectedBarometricPressure">The expected barometric pressure after decode.</param>
+        /// <param name="expectedWindDir">The expected wind direction after decode.</param>
+        /// <param name="expectedWindSpeeed">The expected wind speed after decode.</param>
+        /// <param name="expectedWindGust">The expected wind gust speed after decode.</param>
         /// <param name="expectedTemperature">The expected temperature after decode.</param>
+        /// <param name="expectedrainfallSinceMidnight">The expected rainfall since midnight after decode.</param>
+        /// <param name="expectedHumidity">The expected humidity after decode.</param>
+        /// <param name="expectedBarometricPressure">The expected barometric pressure after decode.</param>
+        /// <param name="additionalComment">An additional input to the comment for encode.
+        ///     TODO Issue #105: Update (or at least review) this logic when the additional comment info is saved separately.</param>
         /// <param name="expectedPacketType">The expected <see cref="PacketType"/> after decode.</param>
         [Theory]
-        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW", "220/004g005t077r000p000P000h50b09900wRSW", 9900, 77, PacketType.PositionWithoutTimestampNoMessaging)]
-        [InlineData("!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW", "220/004g005t077r000p000P000h50b.....wRSW", null, 77, PacketType.PositionWithoutTimestampNoMessaging)]
-        [InlineData("@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW", "220/004g005t-07r000p000P000h50b09900wRSW", 9900, -7, PacketType.PositionWithTimestampWithMessaging)]
+        [InlineData(
+            "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW",
+            "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW",
+            "220/004g005t077r000p000P000h50b09900wRSW",
+            220,
+            4,
+            5,
+            77,
+            0,
+            50,
+            9900,
+            "wRSW",
+            PacketType.PositionWithoutTimestampNoMessaging)]
+        [InlineData(
+            "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW",
+            "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW",
+            "220/004g005t077r000p000P000h50b.....wRSW",
+            220,
+            4,
+            5,
+            77,
+            0,
+            50,
+            null,
+            "wRSW",
+            PacketType.PositionWithoutTimestampNoMessaging)]
+        [InlineData(
+            "@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW",
+            "@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW",
+            "220/004g005t-07r000p000P000h50b09900wRSW",
+            220,
+            4,
+            5,
+            -7,
+            0,
+            50,
+            9900,
+            "wRSW",
+            PacketType.PositionWithTimestampWithMessaging)]
+        [InlineData(
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUII",
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000P...h..b.....dUII",
+            "090/000g000t066r000p000...dUII",
+            90,
+            0,
+            0,
+            66,
+            null,
+            null,
+            null,
+            "dUII",
+            PacketType.PositionWithTimestampWithMessaging)]
         public void TestCompleteWeatherReport(
             string encodedInfoField,
+            string expectedEncodingResult,
             string expectedComment,
+            int? expectedWindDir,
+            int? expectedWindSpeeed,
+            int? expectedWindGust,
+            int? expectedTemperature,
+            int? expectedrainfallSinceMidnight,
+            int? expectedHumidity,
             int? expectedBarometricPressure,
-            int expectedTemperature,
+            string additionalComment,
             PacketType expectedPacketType)
         {
             WeatherInfo wi = new WeatherInfo(encodedInfoField);
@@ -67,42 +133,37 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             Assert.Equal(expectedComment, wi.Comment);
 
-            Assert.Equal(220, wi.WindDirection);
-            Assert.Equal(4, wi.WindSpeed);
-            Assert.Equal(5, wi.WindGust);
+            Assert.Equal(expectedWindDir, wi.WindDirection);
+            Assert.Equal(expectedWindSpeeed, wi.WindSpeed);
+            Assert.Equal(expectedWindGust, wi.WindGust);
             Assert.Equal(expectedTemperature, wi.Temperature);
             Assert.Equal(0, wi.Rainfall1Hour);
             Assert.Equal(0, wi.Rainfall24Hour);
-            Assert.Equal(0, wi.RainfallSinceMidnight);
-            Assert.Equal(50, wi.Humidity);
+            Assert.Equal(expectedrainfallSinceMidnight, wi.RainfallSinceMidnight);
+            Assert.Equal(expectedHumidity, wi.Humidity);
             Assert.Equal(expectedBarometricPressure, wi.BarometricPressure);
 
-            // TODO: Un-skip other tests involving weather from the original repo.
-
             Assert.Equal(encodedInfoField, wi.Encode());
-
-            // TODO Issue #105: Update this test (here and perhaps above) when the additional comment info is saved separately.
-            string additionalComment = "wRSW";
 
             WeatherInfo encodeWi = new WeatherInfo(
                 wi.Position,
                 expectedHasMessaging,
                 encodeTimestamp,
                 additionalComment,
-                220,
-                4,
-                5,
+                expectedWindDir,
+                expectedWindSpeeed,
+                expectedWindGust,
                 expectedTemperature,
                 0,
                 0,
-                0,
-                50,
+                expectedrainfallSinceMidnight,
+                expectedHumidity,
                 expectedBarometricPressure,
                 null,
                 null,
                 null);
 
-            Assert.Equal(encodedInfoField, encodeWi.Encode());
+            Assert.Equal(expectedEncodingResult, encodeWi.Encode());
         }
     }
 }

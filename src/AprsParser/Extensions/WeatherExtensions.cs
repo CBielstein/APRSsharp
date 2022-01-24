@@ -31,7 +31,21 @@ namespace AprsSharp.Parsers.Aprs.Extensions
         /// <returns>The integer as a string or all dots if null.</returns>
         public static string ToWeatherEncoding(this int? measurement, int encodingLength = 3)
         {
-            return measurement?.ToString(CultureInfo.InvariantCulture).PadLeft(encodingLength, '0') ?? new string('.', encodingLength);
+            if (measurement == null)
+            {
+                return new string('.', encodingLength);
+            }
+
+            string encoded = Math.Abs(measurement.Value).ToString(CultureInfo.InvariantCulture).PadLeft(encodingLength, '0');
+
+            // If negative, ensure the negative sign is at the front of the padding zeros instead of in the middle
+            // that's why we take the absolute value above, so that we can put the negative sign all the way at the front.
+            if (measurement < 0)
+            {
+                encoded = $"-{encoded.Substring(1)}";
+            }
+
+            return encoded;
         }
     }
 }

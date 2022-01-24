@@ -37,9 +37,11 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             Assert.IsAssignableFrom<PositionInfo>(wi);
             Assert.IsType<WeatherInfo>(wi);
 
+            bool expectedHasMessaging = wi.Type == PacketType.PositionWithoutTimestampWithMessaging || wi.Type == PacketType.PositionWithTimestampWithMessaging;
             Assert.Equal(expectedPacketType, wi.Type);
-            Assert.Equal(wi.Type == PacketType.PositionWithoutTimestampWithMessaging || wi.Type == PacketType.PositionWithTimestampWithMessaging, wi.HasMessaging);
+            Assert.Equal(expectedHasMessaging, wi.HasMessaging);
 
+            Timestamp? encodeTimestamp = null;
             if (wi.Type == PacketType.PositionWithTimestampNoMessaging || wi.Type == PacketType.PositionWithTimestampWithMessaging)
             {
                 Assert.NotNull(wi.Timestamp);
@@ -48,6 +50,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 Assert.Equal(23, wi.Timestamp?.DateTime.Hour);
                 Assert.Equal(45, wi.Timestamp?.DateTime.Minute);
                 Assert.Equal(DateTimeKind.Utc, wi.Timestamp?.DateTime.Kind);
+
+                encodeTimestamp = new Timestamp(new DateTime(2022, 1, 9, 23, 45, 0, DateTimeKind.Utc));
             }
             else
             {
@@ -83,13 +87,13 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             WeatherInfo encodeWi = new WeatherInfo(
                 wi.Position,
-                false,
-                null,
+                expectedHasMessaging,
+                encodeTimestamp,
                 additionalComment,
                 220,
                 4,
                 5,
-                77,
+                expectedTemperature,
                 0,
                 0,
                 0,

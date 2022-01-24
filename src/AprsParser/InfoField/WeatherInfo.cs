@@ -170,12 +170,14 @@ namespace AprsSharp.Parsers.Aprs
         /// <summary>
         /// Retrieves an APRS weather measurement from the comment string.
         /// </summary>
-        /// <param name="element">The weather element to fetch, as defined by the ARPS specification.</param>
+        /// <param name="measurementKey">The weather element to fetch, as defined by the key the ARPS specification.</param>
         /// <param name="length">The expected number of digits in the measurement.</param>
         /// <returns>An int value, if found. Else, null.</returns>
-        private int? GetWeatherMeasurement(char element, int length = 3)
+        private int? GetWeatherMeasurement(char measurementKey, int length = 3)
         {
-            var match = Regex.Match(Comment, $"{element}([0-9]{{{length}}})");
+            // Regex below looks for the measurement key followed by either `length` numbers
+            // or a negative number of `length - 1` digits (to allow for the negative sign)
+            var match = Regex.Match(Comment, $"{measurementKey}(([0-9]{{{length}}})|(-[0-9]{{{length - 1}}}))");
             return match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         }
 

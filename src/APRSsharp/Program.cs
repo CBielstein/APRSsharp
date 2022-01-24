@@ -50,6 +50,7 @@
                     Console.WriteLine($"Barometric pressure: {wi.BarometricPressure}");
                     Console.WriteLine($"Luminosity: {wi.Luminosity}");
                     Console.WriteLine($"Raw rain: {wi.RainRaw}");
+                    Console.WriteLine($"Snow (inches, last 24 hours): {wi.Snow}");
                 }
             }
             else if (p.InfoField is StatusInfo si)

@@ -123,9 +123,9 @@ namespace AprsSharp.Parsers.Aprs
         public bool HasMessaging { get; }
 
         /// <summary>
-        /// Gets the packet comment.
+        /// Gets or sets the packet comment.
         /// </summary>
-        public string? Comment { get; }
+        public string? Comment { get; protected set; }
 
         /// <summary>
         /// Gets the time at which the message was sent.

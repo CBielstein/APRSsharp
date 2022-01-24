@@ -72,6 +72,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 50,
                 expectedBarometricPressure,
                 null,
+                null,
                 null);
 
             Assert.Equal(encodedInfoField, encodeWi.Encode());

@@ -2,6 +2,7 @@ namespace AprsSharp.Parsers.Aprs
 {
     using System;
     using System.Globalization;
+    using System.Text;
     using System.Text.RegularExpressions;
     using AprsSharp.Parsers.Aprs.Extensions;
 
@@ -47,14 +48,9 @@ namespace AprsSharp.Parsers.Aprs
             RainfallSinceMidnight = GetWeatherMeasurement('P');
             Humidity = GetWeatherMeasurement('h', 2);
             BarometricPressure = GetWeatherMeasurement('b', 5);
+            Luminosity = GetWeatherMeasurement('L') ?? GetWeatherMeasurement('l') + 1000;
             RainRaw = GetWeatherMeasurement('#');
-
-            Luminosity = GetWeatherMeasurement('l') + 1000;
-
-            if (Luminosity == null)
-            {
-                Luminosity = GetWeatherMeasurement('L');
-            }
+            Snow = GetWeatherMeasurement('s');
         }
 
         /// <summary>
@@ -75,6 +71,7 @@ namespace AprsSharp.Parsers.Aprs
         /// <param name="barometricPressure">Barometric pressure in 10ths of millibars/10ths of hPascal.</param>
         /// <param name="luminosity">Luminosity in watts per square meter.</param>
         /// <param name="rainRaw">Raw rain.</param>
+        /// <param name="snow">Snowfall in inches in the last 24 hours.</param>
         public WeatherInfo(
             Position position,
             bool hasMessaging,
@@ -90,7 +87,8 @@ namespace AprsSharp.Parsers.Aprs
             int? humidity,
             int? barometricPressure,
             int? luminosity,
-            int? rainRaw)
+            int? rainRaw,
+            int? snow)
             : base(position, hasMessaging, timestamp, comment)
         {
             WindDirection = windDirection;
@@ -104,6 +102,9 @@ namespace AprsSharp.Parsers.Aprs
             BarometricPressure = barometricPressure;
             Luminosity = luminosity;
             RainRaw = rainRaw;
+            Snow = snow;
+
+            Comment = $"{EncodeWeatherInfo()}{comment}";
         }
 
         /// <summary>
@@ -162,6 +163,11 @@ namespace AprsSharp.Parsers.Aprs
         public int? RainRaw { get; }
 
         /// <summary>
+        /// Gets snowfall in inches in the last 24 hours.
+        /// </summary>
+        public int? Snow { get; }
+
+        /// <summary>
         /// Retrieves an APRS weather measurement from the comment string.
         /// </summary>
         /// <param name="element">The weather element to fetch, as defined by the ARPS specification.</param>
@@ -171,6 +177,44 @@ namespace AprsSharp.Parsers.Aprs
         {
             var match = Regex.Match(Comment, $"{element}([0-9]{{{length}}})");
             return match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : null;
+        }
+
+        /// <summary>
+        /// Encodes weather information to be placed in the comment field.
+        /// </summary>
+        /// <returns>An APRS encoding of weather information on this packet.</returns>
+        private string EncodeWeatherInfo()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(WindDirection.ToWeatherEncoding());
+            sb.Append($"/{WindSpeed.ToWeatherEncoding()}");
+            sb.Append($"g{WindGust.ToWeatherEncoding()}");
+            sb.Append($"t{Temperature.ToWeatherEncoding()}");
+            sb.Append($"r{Rainfall1Hour.ToWeatherEncoding()}");
+            sb.Append($"p{Rainfall24Hour.ToWeatherEncoding()}");
+            sb.Append($"P{RainfallSinceMidnight.ToWeatherEncoding()}");
+            sb.Append($"h{Humidity.ToWeatherEncoding(2)}");
+            sb.Append($"b{BarometricPressure.ToWeatherEncoding(5)}");
+
+            // Only add less common measurements if provided
+            if (Luminosity != null)
+            {
+                char lum = Luminosity < 1000 ? 'L' : 'l';
+                sb.Append($"{lum}{Luminosity % 1000}");
+            }
+
+            if (RainRaw != null)
+            {
+                sb.Append($"#{RainRaw.ToWeatherEncoding()}");
+            }
+
+            if (Snow != null)
+            {
+                sb.Append($"s{Snow.ToWeatherEncoding()}");
+            }
+
+            return sb.ToString();
         }
     }
 }

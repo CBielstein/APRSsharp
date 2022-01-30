@@ -63,7 +63,7 @@ namespace AprsSharp.Parsers.Aprs
         ///     Symbol code
         ///     Optional comment.
         /// </summary>
-        public const string PositionWithoutTimestamp = $@"^!({PositionLatLongWithSymbols})(.+)?$";
+        public const string PositionWithoutTimestamp = $@"^[!=]({PositionLatLongWithSymbols})(.+)?$";
 
         /// <summary>
         /// Matches a PositionWithTimestamp info field.

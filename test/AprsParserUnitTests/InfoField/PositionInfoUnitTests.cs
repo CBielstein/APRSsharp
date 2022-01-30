@@ -11,7 +11,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     public class PositionInfoUnitTests
     {
        /// <summary>
-        /// Verifies decoding and re-encoding a full prosition packet in TNC2 format.
+        /// Verifies decoding and re-encoding a full position packet in TNC2 format.
         /// </summary>
         [Fact]
         public void TestRoundTrip()
@@ -167,16 +167,6 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             23,
             45,
             17)]
-        [InlineData(// weather report
-            "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUII",
-            PacketType.WeatherReport,
-            false,
-            TimestampType.DHMz,
-            9,
-            23,
-            45,
-            0,
-            Skip = "Issue #67: Packet.GetDataType does not support complex data types")]
         public void DecodeLatLongPositionReportFormatWithDataExtensionAndTimestamp(
             string informationField,
             PacketType expectedPacketType,

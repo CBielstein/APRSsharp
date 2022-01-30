@@ -19,13 +19,12 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         /// <param name="encodedInfoField">A string encoding of a <see cref="PositionInfo"/>.</param>
         public PositionInfo(string encodedInfoField)
+            : base(encodedInfoField)
         {
             if (string.IsNullOrWhiteSpace(encodedInfoField))
             {
                 throw new ArgumentNullException(nameof(encodedInfoField));
             }
-
-            Type = GetPacketType(encodedInfoField);
 
             if (Type == PacketType.PositionWithoutTimestampNoMessaging || Type == PacketType.PositionWithoutTimestampWithMessaging)
             {
@@ -94,14 +93,33 @@ namespace AprsSharp.Parsers.Aprs
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="PositionInfo"/> class.
+        /// This is the copy constructor.
+        /// </summary>
+        /// <param name="positionInfo">A <see cref="PositionInfo"/> to copy.</param>
+        public PositionInfo(PositionInfo positionInfo)
+            : base(positionInfo)
+        {
+            if (positionInfo == null)
+            {
+                throw new ArgumentNullException(nameof(positionInfo));
+            }
+
+            HasMessaging = positionInfo.HasMessaging;
+            Comment = positionInfo.Comment;
+            Timestamp = positionInfo.Timestamp;
+            Position = positionInfo.Position;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the sender of the packet supports messaging.
         /// </summary>
         public bool HasMessaging { get; }
 
         /// <summary>
-        /// Gets the packet comment.
+        /// Gets or sets the packet comment.
         /// </summary>
-        public string? Comment { get; }
+        public string? Comment { get; protected set; }
 
         /// <summary>
         /// Gets the time at which the message was sent.

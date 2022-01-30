@@ -35,6 +35,22 @@
                 Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(4, false)})");
                 Console.WriteLine($"    Comment: {pi.Comment}");
                 Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
+
+                if (p.InfoField is WeatherInfo wi)
+                {
+                    Console.WriteLine($"Wind direction (degrees): {wi.WindDirection}");
+                    Console.WriteLine($"Wind speed (one-minute sustained): {wi.WindSpeed}");
+                    Console.WriteLine($"Wind gust (5 minute max, mph): {wi.WindGust}");
+                    Console.WriteLine($"Temperature (F): {wi.Temperature}");
+                    Console.WriteLine($"1-hour rainfall (100th of inch): {wi.Rainfall1Hour}");
+                    Console.WriteLine($"24-hour rainfall (100th of inch): {wi.Rainfall24Hour}");
+                    Console.WriteLine($"Rainfall since midnight (100th of inch): {wi.RainfallSinceMidnight}");
+                    Console.WriteLine($"Humidity: {wi.Humidity}");
+                    Console.WriteLine($"Barometric pressure: {wi.BarometricPressure}");
+                    Console.WriteLine($"Luminosity: {wi.Luminosity}");
+                    Console.WriteLine($"Raw rain: {wi.RainRaw}");
+                    Console.WriteLine($"Snow (inches, last 24 hours): {wi.Snow}");
+                }
             }
             else if (p.InfoField is StatusInfo si)
             {

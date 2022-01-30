@@ -26,9 +26,10 @@ namespace AprsSharp.Parsers.Aprs
                 throw new ArgumentNullException(nameof(encodedInfoField));
             }
 
-            if (Type == PacketType.PositionWithoutTimestampNoMessaging)
+            if (Type == PacketType.PositionWithoutTimestampNoMessaging || Type == PacketType.PositionWithoutTimestampWithMessaging)
             {
-                HasMessaging = false;
+                HasMessaging = Type == PacketType.PositionWithoutTimestampWithMessaging;
+
                 Match match = Regex.Match(encodedInfoField, RegexStrings.PositionWithoutTimestamp);
                 match.AssertSuccess(PacketType.PositionWithoutTimestampNoMessaging, nameof(encodedInfoField));
 
@@ -38,13 +39,6 @@ namespace AprsSharp.Parsers.Aprs
                 {
                     Comment = match.Groups[6].Value;
                 }
-            }
-            else if (Type == PacketType.PositionWithoutTimestampWithMessaging)
-            {
-                HasMessaging = true;
-
-                // TODO Issue #92
-                throw new NotImplementedException("Decoding not implemented for position without timestamp (with APRS messaging)");
             }
             else if (Type == PacketType.PositionWithTimestampNoMessaging || Type == PacketType.PositionWithTimestampWithMessaging)
             {

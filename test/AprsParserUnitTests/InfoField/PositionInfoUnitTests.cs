@@ -271,21 +271,26 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// <param name="expectedLatitute">Expected decoded latitute.</param>
         /// <param name="expectedLongitute">Expected decoded longitude.</param>
         /// <param name="expectedAmbiguity">Expected decoded ambiguity.</param>
+        /// <param name="expectedHasMessaging">Expected APRS messaging support.</param>
         [Theory]
-        [InlineData("!4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292, 0)] // no timestamp, no APRS messaging, with comment
-        [InlineData("!49  .  N/072  .  W-", null, 49, -72, 4)] // no timestamp, no APRS messaging, location to nearest degree
-        [InlineData("!4903.50N/07201.75W-Test /A=001234", "Test /A=001234", 49.0583, -72.0292, 0, Skip = "Issue #68: Packet decode does not handle altitude data")]
+        [InlineData("!4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292, 0, false)] // no timestamp, no APRS messaging, with comment
+        [InlineData("=4903.50N/07201.75W-Test 001234", "Test 001234", 49.0583, -72.0292, 0, true)] // no timestamp, yes APRS messaging, with comment
+        [InlineData("!49  .  N/072  .  W-", null, 49, -72, 4, false)] // no timestamp, no APRS messaging, location to nearest degree
+        [InlineData("=49  .  N/072  .  W-", null, 49, -72, 4, true)] // no timestamp, yes APRS messaging, location to nearest degree
+        [InlineData("!4903.50N/07201.75W-Test /A=001234", "Test /A=001234", 49.0583, -72.0292, 0, false, Skip = "Issue #68: Packet decode does not handle altitude data")]
         public void DecodeCompleteLatLongPositionReportFormatWithoutTimestamp(
             string informationField,
             string? expectedComment,
             double expectedLatitute,
             double expectedLongitute,
-            int expectedAmbiguity)
+            int expectedAmbiguity,
+            bool expectedHasMessaging)
         {
             PositionInfo pi = new PositionInfo(informationField);
 
-            Assert.Equal(PacketType.PositionWithoutTimestampNoMessaging, pi.Type);
-            Assert.False(pi.HasMessaging);
+            PacketType expectedPacketType = expectedHasMessaging ? PacketType.PositionWithoutTimestampWithMessaging : PacketType.PositionWithoutTimestampNoMessaging;
+            Assert.Equal(expectedPacketType, pi.Type);
+            Assert.Equal(expectedHasMessaging, pi.HasMessaging);
             Assert.Equal(expectedComment, pi.Comment);
 
             Assert.NotNull(pi.Position);
@@ -301,22 +306,27 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// </summary>
         /// <param name="comment">Packet comment.</param>
         /// <param name="ambiguity">Positional ambiguity.</param>
+        /// <param name="hasMessaging">Whether the station supports APRS messaging.</param>
         /// <param name="expectedEncoding">Expected encoding result.</param>
         [Theory]
-        [InlineData("Test 001234", 0, @"!4903.50N/07201.75W-Test 001234")] // With comment, no ambiguity.
-        [InlineData("", 4, "!49  .  N/072  .  W-")] // Without comment, with ambiguity to the nearest degree.
+        [InlineData("Test 001234", 0, false, @"!4903.50N/07201.75W-Test 001234")] // With comment, no ambiguity, no messaging
+        [InlineData("Test 001234", 0, true, @"=4903.50N/07201.75W-Test 001234")] // With comment, no ambiguity, yes messaging
+        [InlineData("", 4, false, "!49  .  N/072  .  W-")] // Without comment, with ambiguity to the nearest degree, no messaging
+        [InlineData("", 4, true, "=49  .  N/072  .  W-")] // Without comment, with ambiguity to the nearest degree, yes messaging
         public void EncodeCompleteLatLongPositionReportFormatWithoutTimestamp(
             string comment,
             int ambiguity,
+            bool hasMessaging,
             string expectedEncoding)
         {
             PositionInfo pi = new PositionInfo(
                 new Position(new GeoCoordinate(49.0583, -72.0292), '/', '-', ambiguity),
-                false,
+                hasMessaging,
                 null,
                 comment);
 
-            Assert.Equal(PacketType.PositionWithoutTimestampNoMessaging, pi.Type);
+            PacketType expectedPacketType = hasMessaging ? PacketType.PositionWithoutTimestampWithMessaging : PacketType.PositionWithoutTimestampNoMessaging;
+            Assert.Equal(expectedPacketType, pi.Type);
 
             Assert.Equal(expectedEncoding, pi.Encode());
         }

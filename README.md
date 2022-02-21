@@ -58,3 +58,14 @@ The resulting binary will be placed in
 `bin\Release\net6.0\win-x86\publish`.
 Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
 output directory.
+
+### Nuget Packages and Release
+
+All packages are versioned together for now via a field in
+`Directory.Build.props`. This means if one package gets a new version, they all
+do. While this is not exactly ideal, this is currently used to manage
+inter-dependencies during early development.
+
+Maintainers should ensure the version has been updated before creating a new
+GitHub release. Creating a release will publish nuget packages to Nuget.org
+list.

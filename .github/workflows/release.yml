@@ -1,4 +1,4 @@
-name: build
+name: release
 
 on:
   release:
@@ -6,10 +6,12 @@ on:
       - created
 
 jobs:
-  build:
-    name: build
+  release:
+    name: release
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
       - name: Clone
@@ -19,8 +21,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
       - name: Restore
         run: dotnet restore

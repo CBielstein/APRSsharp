@@ -73,9 +73,8 @@
         /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
-        /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task Main(string[] args)
+        /// <param name="args"> Parameters to be passed in the console app.</param>
+        public static void Main(string[] args)
         {
             // Create a root command with some options
             var rootCommand = new RootCommand

@@ -1,6 +1,7 @@
 namespace AprsSharpUnitTests.Parsers.Aprs
 {
     using System;
+    using System.Linq;
     using AprsSharp.Parsers.Aprs;
     using GeoCoordinatePortable;
     using Xunit;
@@ -10,6 +11,40 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     /// </summary>
     public class StatusInfoUnitTests
     {
+        /// <summary>
+        /// Verifies decoding and re-encoding a full status packet in TNC2 format.
+        /// </summary>
+        [Fact]
+        public void TestRoundTrip()
+        {
+            string encoded = "N0CALL>WIDE2-2:>IO91SX/G My house";
+            Packet p = new Packet(encoded);
+
+            Assert.Equal("N0CALL", p.Sender);
+            Assert.Equal("WIDE2-2", p.Path.Single());
+            Assert.True((p.ReceivedTime - DateTime.UtcNow) < TimeSpan.FromMinutes(1));
+            Assert.Equal(PacketType.Status, p.InfoField.Type);
+
+            if (p.InfoField is StatusInfo si)
+            {
+                // Coordinates not precise when coming from gridhead
+                double latitude = si?.Position?.Coordinates.Latitude ?? throw new Exception("Latitude should not be null");
+                double longitude = si?.Position?.Coordinates.Longitude ?? throw new Exception("Longitude should not be null");
+                Assert.Equal(51.98, Math.Round(latitude, 2));
+                Assert.Equal(-0.46, Math.Round(longitude, 2));
+                Assert.Equal("IO91SX", si?.Position?.EncodeGridsquare(6, false));
+                Assert.Equal('/', si?.Position?.SymbolTableIdentifier);
+                Assert.Equal('G', si?.Position?.SymbolCode);
+                Assert.Equal("My house", si?.Comment);
+            }
+            else
+            {
+                Assert.IsType<StatusInfo>(p.InfoField);
+            }
+
+            Assert.Equal(encoded, p.Encode());
+        }
+
         /// <summary>
         /// Tests decoding a status report with Maidenhead info field based on the APRS spec.
         /// </summary>

@@ -15,36 +15,21 @@
     public class Program
     {
         /// <summary>
-        /// A function matching the delegate event to print the received message.
+        /// A function matching the delegate event to print the received packet.
         /// </summary>
-        /// <param name="tcpMessage">The received tcp message that needs to be decoded and printed.</param>
-        public static void PrintPacket(string tcpMessage)
+        /// <param name="p">A <see cref="Packet"/> to be printed.</param>
+        public static void PrintPacket(Packet p)
         {
-            Packet p;
-
             Console.WriteLine();
-            Console.WriteLine($"Received: {tcpMessage}");
+            Console.WriteLine($"Received type: {p.InfoField.Type}");
 
-            if (tcpMessage.StartsWith('#'))
-            {
-                Console.WriteLine("    Server message, not decoding.");
-                return;
-            }
-
-            try
-            {
-                p = new Packet(tcpMessage);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"    FAILED: {ex.Message}");
-                return;
-            }
-
+            Console.WriteLine($"    Sender: {p.Sender}");
+            Console.WriteLine($"    Path: {string.Join(',', p.Path)}");
+            Console.WriteLine($"    Received At: {p.ReceivedTime} {p.ReceivedTime?.Kind}");
             Console.WriteLine($"    Type: {p.InfoField.Type}");
 
-            // TODO: Reduce copy/paste below
-            // TODO: Clean up position printing:
+            // TODO Issue #103: Reduce copy/paste below
+            // TODO Issue #103: Clean up position printing:
                 // * Position lat/long encoding uses symbol IDs, not the most user-friendly
                 // * Gridsquare print out should probably print the correct number of characters based on ambiguitiy
             if (p.InfoField is PositionInfo pi)
@@ -53,6 +38,22 @@
                 Console.WriteLine($"    Position: {pi.Position.Encode()} ({pi.Position.EncodeGridsquare(4, false)})");
                 Console.WriteLine($"    Comment: {pi.Comment}");
                 Console.WriteLine($"    Has Messaging: {pi.HasMessaging}");
+
+                if (p.InfoField is WeatherInfo wi)
+                {
+                    Console.WriteLine($"Wind direction (degrees): {wi.WindDirection}");
+                    Console.WriteLine($"Wind speed (one-minute sustained): {wi.WindSpeed}");
+                    Console.WriteLine($"Wind gust (5 minute max, mph): {wi.WindGust}");
+                    Console.WriteLine($"Temperature (F): {wi.Temperature}");
+                    Console.WriteLine($"1-hour rainfall (100th of inch): {wi.Rainfall1Hour}");
+                    Console.WriteLine($"24-hour rainfall (100th of inch): {wi.Rainfall24Hour}");
+                    Console.WriteLine($"Rainfall since midnight (100th of inch): {wi.RainfallSinceMidnight}");
+                    Console.WriteLine($"Humidity: {wi.Humidity}");
+                    Console.WriteLine($"Barometric pressure: {wi.BarometricPressure}");
+                    Console.WriteLine($"Luminosity: {wi.Luminosity}");
+                    Console.WriteLine($"Raw rain: {wi.RainRaw}");
+                    Console.WriteLine($"Snow (inches, last 24 hours): {wi.Snow}");
+                }
             }
             else if (p.InfoField is StatusInfo si)
             {
@@ -65,6 +66,8 @@
                 Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(4, false)}");
                 Console.WriteLine($"    Comment: {mbi.Comment}");
             }
+
+            Console.WriteLine();
         }
 
         /// <summary>
@@ -114,7 +117,7 @@
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
-            n.ReceivedTcpMessage += PrintPacket;
+            n.ReceivedPacket += PrintPacket;
 
             string? input;
 

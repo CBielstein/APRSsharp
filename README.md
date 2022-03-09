@@ -59,13 +59,6 @@ The resulting binary will be placed in
 Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
 output directory.
 
-<<<<<<< HEAD
-### Testing the project/application binary file
-
-To test the generated console application binary, go to the APRSsharp folder
-(`AprsSharp\src\APRSsharp`) and run the command `dotnet run`
-
-=======
 ### Nuget Packages and Release
 
 All packages are versioned together for now via a field in
@@ -76,4 +69,10 @@ inter-dependencies during early development.
 Maintainers should ensure the version has been updated before creating a new
 GitHub release. Creating a release will publish nuget packages to Nuget.org
 list.
->>>>>>> main
+
+### Testing the project/application binary file
+
+To test the generated console application binary, go to the APRSsharp folder
+(`src\AprsSharp\src\APRSsharp`) and run the command `dotnet run` which will access APRS with the default paramters. To pass in the command line arguments in the console application, run the application with the server options with callsign arguments as {--callsign/-c/--cgn}, password as {--password/-p/--pwd/--pass}, server name as {--server/-s/--svr} and filter arguments as {--filter/-f} for example `dotnet run -- -c "arg" --pwd "args" --server "args" -f "args"`. You can either specify the callsign and password, server alone, filter alone or a combination of the arguments in which the application will choose the default arguments when not specified.
+
+

@@ -78,16 +78,14 @@ To test the generated console application binary, go to the APRSsharp folder
 Run the command `dotnet run` which will run AprsSharp with default parameters.
 You can run the console app with command line arguments. Use the following flags with the arguments.
 
-* Callsign arguments as {--callsign/-c/--cgn}.
-* Password as {--password/-p/--pwd/--pass}.
-* Server name a{--server/-s/--svr}.
-* Filter arguments as {--filter/-f}.
+Callsign argument as {`dotnet run -- --callsign` with --callsign/-c/--cgn}.
+Password as {`dotnet run -- --password` with --password/-p/--pwd/--pass}.
+Server name as {`dotnet run -- --server` with --server or -s or --svr}.
+Filter arguments as {`dotnet run -- --filter` and --filter or -f}.
 
 For example `dotnet run -- -c "arg" --pwd "args" --server "args" -f "args"`.
 
-You can specify different combinations of the commandline flags e.g.
-
-* All the flags.
-* Either 0, 1, 2, or 3 combination of flags.
+You can specify different combinations of the commandline flags.
+Either use 0, 1, 2, 3 or all the flags combination of flags.
 
 For missing flags, the console application will use the default arguments.

@@ -26,17 +26,6 @@
         private readonly ITcpConnection tcpConnection;
 
         /// <summary>
-        /// Static class that defines different constants.
-        /// <summary>
-        public static class AprsIsConstants
-        {
-            public const string DefaultCallsign = "N0CALL";
-            public const string DefaultPassword = "-1";
-            public const string DefaultServerName = "rotate.aprs2.net";
-            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
@@ -127,6 +116,32 @@
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Static class that defines different constants.
+        /// </summary>
+        public static class AprsIsConstants
+        {
+            /// <summary>
+            /// Thh.
+            /// </summary>
+            public const string DefaultCallsign = "N0CALL";
+
+            /// <summary>
+            /// thhhe.
+            /// </summary>
+            public const string DefaultPassword = "-1";
+
+            /// <summary>
+            /// thhe.
+            /// </summary>
+            public const string DefaultServerName = "rotate.aprs2.net";
+
+            /// <summary>
+            /// thehee.
+            /// </summary>
+            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
         }
     }
 }

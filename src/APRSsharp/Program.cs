@@ -73,7 +73,7 @@
         /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
-        /// <param name="args"> Parameters to be passed in the console app.</param>
+        /// <param name="args"> Parameters to be passed as commandline arguments.</param>
         public static void Main(string[] args)
         {
             // Create a root command with some options

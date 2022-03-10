@@ -124,22 +124,22 @@
         public static class AprsIsConstants
         {
             /// <summary>
-            /// Thh.
+            /// This defines the default callsign.
             /// </summary>
             public const string DefaultCallsign = "N0CALL";
 
             /// <summary>
-            /// thhhe.
+            /// This defines the default password.
             /// </summary>
             public const string DefaultPassword = "-1";
 
             /// <summary>
-            /// thhe.
+            /// This defines the default server to connect to.
             /// </summary>
             public const string DefaultServerName = "rotate.aprs2.net";
 
             /// <summary>
-            /// thehee.
+            /// This defines the default filter.
             /// </summary>
             public const string DefaultFilter = "filter r/50.5039/4.4699/50";
         }

@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>AprsSharp.AprsParser</PackageId>
+    <Description>Library for encoding and decoding packets in the Automatic Packet Reporting System (APRS)</Description>
+    <PackageTags>ham radio;amateur radio;packet radio;radio;APRS;Automatic Packet Reporting System;</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

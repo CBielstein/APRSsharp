@@ -41,7 +41,7 @@ namespace AprsSharp.Protocols.KISS
         /// </summary>
         /// <param name="serialPortName">The name of the SerialPort to use.</param>
         /// <param name="port">The port on the TNC used for communication.</param>
-        public TNCInterface(string? serialPortName, byte port)
+        public TNCInterface(string? serialPortName = null, byte port = 0)
         {
             if (serialPortName != null)
             {
@@ -51,14 +51,6 @@ namespace AprsSharp.Protocols.KISS
             receivedBuffer = new Queue<byte>();
 
             SetTncPort(port);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TNCInterface"/> class.
-        /// </summary>
-        public TNCInterface()
-            : this(null, 0)
-        {
         }
 
         /// <summary>

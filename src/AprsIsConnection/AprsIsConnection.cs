@@ -1,18 +1,21 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using AprsSharp.Parsers.Aprs;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
     /// </summary>
     /// <param name="tcpMessage">The TCP message.</param>
     public delegate void HandleTcpString(string tcpMessage);
+
+    /// <summary>
+    /// Delegate for handling a decoded APRS packet.
+    /// </summary>
+    /// <param name="packet">Decoded APRS <see cref="Packet"/>.</param>
+    public delegate void HandlePacket(Packet packet);
 
     /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
@@ -51,24 +54,37 @@
         }
 
         /// <summary>
+        /// Event raised when an APRS packet is received and decoded.
+        /// </summary>
+        public event HandlePacket? ReceivedPacket;
+
+        /// <summary>
+        /// Gets a value indicating whether this connection is logged in to the server.
+        /// Note that this is not the same as successful password authentication.
+        /// </summary>
+        public bool LoggedIn { get; private set; } = false;
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
+        /// <param name="server">The APRS-IS server to contact.</param>
+        /// <param name="filter">The APRS-IS filter string for server-side filtering.
+        /// Null sends no filter, which is not recommended for most clients and servers.</param>
         /// <returns>An async task.</returns>
-        public async Task Receive(string? callsign, string? password)
+        public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            callsign = callsign ?? "N0CALL";
-            password = password ?? "-1";
-            string filter = "filter r/50.5039/4.4699/50";
-            string authString = $"user {callsign} pass {password} vers AprsSharp 0.1 {filter}";
-            string server = "rotate.aprs2.net";
-            bool authenticated = false;
+            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1";
+            if (filter != null)
+            {
+                loginMessage += $" filter {filter}";
+            }
 
             // Open connection
             tcpConnection.Connect(server, 14580);
 
-           // Receive
+            // Receive
             await Task.Run(() =>
             {
                 while (stopReceive == false)
@@ -83,17 +99,31 @@
                         {
                             if (received.Contains("logresp"))
                             {
-                                authenticated = true;
+                                LoggedIn = true;
                             }
 
-                            if (!authenticated)
+                            if (!LoggedIn)
                             {
-                                tcpConnection.SendString(authString);
+                                tcpConnection.SendString(loginMessage);
+                            }
+                        }
+                        else if (ReceivedPacket != null)
+                        {
+                            try
+                            {
+                                Packet p = new Packet(received);
+                                ReceivedPacket.Invoke(p);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
                             }
                         }
                     }
-
-                    Thread.Sleep(500);
+                    else
+                    {
+                        Thread.Yield();
+                    }
                 }
             });
             tcpConnection.Disconnect();

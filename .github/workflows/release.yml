@@ -1,0 +1,44 @@
+name: release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  release:
+    name: release
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: DotnetVersion
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+
+      - name: Pack AprsSharp.AprsParser
+        run: dotnet pack src/AprsParser/AprsParser.csproj --configuration Release --no-build
+
+      - name: Pack AprsSharp.AprsIsClient
+        run: dotnet pack src/AprsIsConnection/AprsIsConnection.csproj --configuration Release --no-build
+
+      - name: Publish AprsShar.AprsParser
+        run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+
+      - name: Publish AprsShar.AprsIsClient
+        run: dotnet nuget push src/AprsIsConnection/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

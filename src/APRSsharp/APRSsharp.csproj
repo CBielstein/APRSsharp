@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
- <PropertyGroup>
+  <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AprsParser\AprsParser.csproj" />
-    <ProjectReference Include="..\AprsISLibrary\AprsIsConnection.csproj" />
+    <ProjectReference Include="..\AprsIsConnection\AprsIsConnection.csproj" />
   </ItemGroup>
 
 

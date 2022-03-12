@@ -1,6 +1,9 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
+    using System.IO;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
@@ -70,33 +73,51 @@
         /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
-        /// <param name="args"> The input arguments for the program i.e packets which will be strings.</param>
+        /// <param name="args"> Parameters to be passed as commandline arguments.</param>
+        public static void Main(string[] args)
+        {
+            // Create a root command with some options
+            var rootCommand = new RootCommand
+                {
+                new Option<string>(
+                    aliases: new string[] { "--callsign", "-c", "--cgn" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultCallsign,
+                    description: "A user callsign parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--password", "-p", "--pwd", "--pass" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultPassword,
+                    description: "A user password whose argument is parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--server", "-s", "--svr" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultServerName,
+                    description: "A specified server parsed as a string"),
+                new Option<string>(
+                    aliases: new string[] { "--filter", "-f" },
+                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultFilter,
+                    description: "A user filter parsed as a string"),
+                };
+            rootCommand.Description = "AprsSharp Console App";
+
+            // The parameters of the handler method are matched according to the names of the options
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string, IConsole>(HandleAprsConnection);
+
+            rootCommand.Invoke(args);
+        }
+
+        /// <summary>
+        /// Method that calls command line arguments.
+        /// </summary>
+        /// <param name="callsign"> The user callsign that they should input.</param>
+        /// <param name="password"> The user password.</param>
+        /// <param name="server"> The specified server to connect.</param>
+        /// <param name="filter"> The filter that will be used for receiving the packets.</param>
+        /// <param name="console"> Flexibility in running in different consoles.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task Main(string[] args)
+        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
         {
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
             n.ReceivedPacket += PrintPacket;
-
-            string? input;
-
-            // get input from the user
-            Console.Write("Enter your callsign: ");
-            input = Console.ReadLine();
-            string callsign = !string.IsNullOrWhiteSpace(input) ? input : throw new ArgumentException("Callsign must be provided");
-
-            Console.Write("Enter your password (optional): ");
-            input = Console.ReadLine();
-            string password = !string.IsNullOrWhiteSpace(input) ? input : "-1";
-
-            Console.Write("Enter server (optional): ");
-            input = Console.ReadLine();
-            string server = !string.IsNullOrWhiteSpace(input) ? input : "rotate.aprs2.net";
-
-            Console.Write("Enter your filter (optional): ");
-            input = Console.ReadLine();
-            string filter = !string.IsNullOrWhiteSpace(input) ? input : "r/50.5039/4.4699/50";
-
             await n.Receive(callsign, password, server, filter);
         }
     }

@@ -69,3 +69,24 @@ inter-dependencies during early development.
 Maintainers should ensure the version has been updated before creating a new
 GitHub release. Creating a release will publish nuget packages to Nuget.org
 list.
+
+### Running the project/application binary file
+
+To run the generated console application binary, go to the APRSsharp folder
+(`src\AprsSharp\src\APRSsharp`).
+
+Run the command `dotnet run` which will run AprsSharp with default parameters.
+You can run the console app with command line arguments.
+Examples of flags used with the arguments.
+
+Callsign argument as {`dotnet run -- --callsign` with --callsign/-c/--cgn}.
+Password as {`dotnet run -- --password` with --password/-p/--pwd/--pass}.
+Server name as {`dotnet run -- --server` with --server or -s or --svr}.
+Filter arguments as {`dotnet run -- --filter` and --filter or -f}.
+
+For example `dotnet run -- -c "arg" --pwd "args" --server "args" -f "args"`.
+
+You can specify different combinations of the commandline flags.
+Either use 0, 1, 2, 3 or all the flags combination of flags.
+
+For missing flags, the console application will use the default arguments.

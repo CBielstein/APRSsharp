@@ -21,7 +21,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
             AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object);
 
-            Task receiveTask = connection.Receive(null, null, null, null);
+            Task receiveTask = connection.Receive("callsign", "password", "server", "filter");
 
             // Sleep 0.01 seconds to ensure the connection starts "receiving"
             Thread.Sleep(10);

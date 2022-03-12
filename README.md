@@ -70,9 +70,9 @@ Maintainers should ensure the version has been updated before creating a new
 GitHub release. Creating a release will publish nuget packages to Nuget.org
 list.
 
-### Testing the project/application binary file
+### Running the project/application binary file
 
-To test the generated console application binary, go to the APRSsharp folder
+To run the generated console application binary, go to the APRSsharp folder
 (`src\AprsSharp\src\APRSsharp`).
 
 Run the command `dotnet run` which will run AprsSharp with default parameters.

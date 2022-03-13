@@ -24,7 +24,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
-        private bool stopReceive;
+        private bool receiving = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -61,7 +61,7 @@
         /// </summary>
         public void Disconnect()
         {
-            stopReceive = true;
+            receiving = false;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@
             // Receive
             await Task.Run(() =>
             {
-                while (stopReceive == false)
+                while (receiving)
                 {
                     string? received = tcpConnection.ReceiveString();
                     if (!string.IsNullOrEmpty(received))

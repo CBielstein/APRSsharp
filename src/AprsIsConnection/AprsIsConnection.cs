@@ -90,7 +90,6 @@
                 while (stopReceive == false)
                 {
                     string? received = tcpConnection.ReceiveString();
-
                     if (!string.IsNullOrEmpty(received))
                     {
                         ReceivedTcpMessage?.Invoke(received);
@@ -127,6 +126,32 @@
                 }
             });
             tcpConnection.Disconnect();
+        }
+
+        /// <summary>
+        /// Static class that defines different constants.
+        /// </summary>
+        public static class AprsIsConstants
+        {
+            /// <summary>
+            /// This defines the default callsign.
+            /// </summary>
+            public const string DefaultCallsign = "N0CALL";
+
+            /// <summary>
+            /// This defines the default password.
+            /// </summary>
+            public const string DefaultPassword = "-1";
+
+            /// <summary>
+            /// This defines the default server to connect to.
+            /// </summary>
+            public const string DefaultServerName = "rotate.aprs2.net";
+
+            /// <summary>
+            /// This defines the default filter.
+            /// </summary>
+            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
         }
     }
 }

@@ -18,12 +18,19 @@
     public delegate void HandlePacket(Packet packet);
 
     /// <summary>
+    /// Delegate for handling a state change in an <see cref="AprsIsConnection"/>.
+    /// </summary>
+    /// <param name="state">The new state taken by the <see cref="AprsIsConnection"/>.</param>
+    public delegate void HandleStateChange(ConnectionState state);
+
+    /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+        private ConnectionState state = ConnectionState.NotConnected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -50,10 +57,22 @@
         public event HandlePacket? ReceivedPacket;
 
         /// <summary>
-        /// Gets a value indicating whether this connection is logged in to the server.
-        /// Note that this is not the same as successful password authentication.
+        /// Event raised when the connection changes state.
         /// </summary>
-        public bool LoggedIn { get; private set; } = false;
+        public event HandleStateChange? ChangedState;
+
+        /// <summary>
+        /// Gets the state of this connection.
+        /// </summary>
+        public ConnectionState State
+        {
+            get => state;
+            private set
+            {
+                state = value;
+                ChangedState?.Invoke(value);
+            }
+        }
 
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
@@ -89,10 +108,10 @@
                         {
                             if (received.Contains("logresp"))
                             {
-                                LoggedIn = true;
+                                State = ConnectionState.LoggedIn;
                             }
 
-                            if (!LoggedIn)
+                            if (State != ConnectionState.LoggedIn)
                             {
                                 tcpConnection.SendString(loginMessage);
                             }

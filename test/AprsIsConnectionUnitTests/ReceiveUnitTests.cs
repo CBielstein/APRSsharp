@@ -79,7 +79,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.LoggedIn, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -88,7 +88,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Assert.Contains(loginResponse, tcpMessagesReceived);
 
             // Assert that the login was completed
-            Assert.True(aprsIs.LoggedIn);
+            Assert.Equal(ConnectionState.LoggedIn, aprsIs.State);
 
             // Assert that a connection was started and the login message was sent to the server
             mockTcpConnection.Verify(mock => mock.Connect(

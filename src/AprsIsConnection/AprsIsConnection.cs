@@ -123,6 +123,8 @@
 
         /// <summary>
         /// Uses reflection to get the assembly version as set in the csproj file.
+        /// Currently, this is targeted as the version of AprsSharp.AprsIsClient package, since other projects can use this package.
+        /// This works for now as all the AprsSharp versions are locked together for the time being.
         /// </summary>
         /// <returns>A semver string of the assembly version.</returns>
         private string GetVersion()

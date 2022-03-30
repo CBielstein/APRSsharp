@@ -91,50 +91,58 @@
                 loginMessage += $" filter {filter}";
             }
 
-            // Open connection
-            tcpConnection.Connect(server, 14580);
-
-            // Receive
-            await Task.Run(() =>
+            try
             {
-                while (true)
+                // Open connection
+                tcpConnection.Connect(server, 14580);
+                State = ConnectionState.Connected;
+
+                // Receive
+                await Task.Run(() =>
                 {
-                    string? received = tcpConnection.ReceiveString();
-                    if (!string.IsNullOrEmpty(received))
+                    while (true)
                     {
-                        ReceivedTcpMessage?.Invoke(received);
-
-                        if (received.StartsWith('#'))
+                        string? received = tcpConnection.ReceiveString();
+                        if (!string.IsNullOrEmpty(received))
                         {
-                            if (received.Contains("logresp"))
-                            {
-                                State = ConnectionState.LoggedIn;
-                            }
+                            ReceivedTcpMessage?.Invoke(received);
 
-                            if (State != ConnectionState.LoggedIn)
+                            if (received.StartsWith('#'))
                             {
-                                tcpConnection.SendString(loginMessage);
+                                if (received.Contains("logresp"))
+                                {
+                                    State = ConnectionState.LoggedIn;
+                                }
+
+                                if (State != ConnectionState.LoggedIn)
+                                {
+                                    tcpConnection.SendString(loginMessage);
+                                }
+                            }
+                            else if (ReceivedPacket != null)
+                            {
+                                try
+                                {
+                                    Packet p = new Packet(received);
+                                    ReceivedPacket.Invoke(p);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                                }
                             }
                         }
-                        else if (ReceivedPacket != null)
+                        else
                         {
-                            try
-                            {
-                                Packet p = new Packet(received);
-                                ReceivedPacket.Invoke(p);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
-                            }
+                            Thread.Yield();
                         }
                     }
-                    else
-                    {
-                        Thread.Yield();
-                    }
-                }
-            });
+                });
+            }
+            finally
+            {
+                State = ConnectionState.Disconnected;
+            }
         }
 
         /// <summary>

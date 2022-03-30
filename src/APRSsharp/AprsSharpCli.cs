@@ -2,6 +2,7 @@
 {
     using System;
     using System.CommandLine;
+    using System.Threading;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
 
@@ -34,6 +35,11 @@
             this.server = server;
             this.filter = filter;
             this.console = console;
+            ReInit();
+
+            while (Console.ReadKey().Key != ConsoleKey.Q)
+            {
+            }
         }
 
         /// <inheritdoc/>
@@ -67,6 +73,7 @@
         {
             if (state == ConnectionState.Disconnected)
             {
+                Thread.Sleep(5000);
                 ReInit();
             }
         }

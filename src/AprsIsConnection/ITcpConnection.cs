@@ -1,9 +1,11 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
+    using System;
+
     /// <summary>
     /// Abstracts a TCP connection.
     /// </summary>
-    public interface ITcpConnection
+    public interface ITcpConnection : IDisposable
     {
         /// <summary>
         /// Opens a connection.

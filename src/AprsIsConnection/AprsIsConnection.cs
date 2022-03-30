@@ -21,9 +21,10 @@
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
-    public class AprsIsConnection
+    public sealed class AprsIsConnection : IDisposable
     {
-        private readonly ITcpConnection tcpConnection;
+        private readonly ITcpConnection? tcpConnection;
+        private readonly ITcpConnection? managedTcpConnection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -37,6 +38,14 @@
             }
 
             this.tcpConnection = tcpConnection;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
+        /// </summary>
+        public AprsIsConnection()
+        {
+            managedTcpConnection = new TcpConnection();
         }
 
         /// <summary>
@@ -54,6 +63,8 @@
         /// Note that this is not the same as successful password authentication.
         /// </summary>
         public bool LoggedIn { get; private set; } = false;
+
+        private ITcpConnection Client { get => tcpConnection ?? managedTcpConnection ?? throw new Exception("Both managed and unmanaged TCP connections are null."); }
 
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
@@ -73,14 +84,14 @@
             }
 
             // Open connection
-            tcpConnection.Connect(server, 14580);
+            Client.Connect(server, 14580);
 
             // Receive
             await Task.Run(() =>
             {
                 while (true)
                 {
-                    string? received = tcpConnection.ReceiveString();
+                    string? received = Client.ReceiveString();
                     if (!string.IsNullOrEmpty(received))
                     {
                         ReceivedTcpMessage?.Invoke(received);
@@ -94,7 +105,7 @@
 
                             if (!LoggedIn)
                             {
-                                tcpConnection.SendString(loginMessage);
+                                Client.SendString(loginMessage);
                             }
                         }
                         else if (ReceivedPacket != null)
@@ -116,6 +127,12 @@
                     }
                 }
             });
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            managedTcpConnection?.Dispose();
         }
 
         /// <summary>

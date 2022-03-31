@@ -57,7 +57,7 @@
         public event HandlePacket? ReceivedPacket;
 
         /// <summary>
-        /// Event raised when the connection changes state.
+        /// Event raised when <see cref="State"/> changes.
         /// </summary>
         public event HandleStateChange? ChangedState;
 

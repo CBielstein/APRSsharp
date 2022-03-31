@@ -206,6 +206,46 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
+        /// Tests that full cycle of connection, login, disconnected states on
+        /// <see cref="AprsIsConnection"/> and that the proper events are raised for them.
+        /// </summary>
+        [Fact]
+        public void FailureToReceiveSetsDisconnectedState()
+        {
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
+
+            // Mock underlying TCP connection
+            string firstMessage = "# server first message";
+            string loginResponse = "# logresp N0CALL unverified, server TEST";
+            var mockTcpConnection = new Mock<ITcpConnection>();
+
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
+                .Returns(firstMessage)
+                .Returns(loginResponse)
+                .Throws(new Exception("Something happened to the connection!"));
+
+            // Create connection and register callbacks
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+
+            // Start receiving
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+
+            // Wait to ensure the messages are sent and received
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+
+            // Assert the state change event was triggered with the correct state
+            Assert.Equal(3, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
+            Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[2]);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
+        }
+
+        /// <summary>
         /// Waits for a specified condition or thows an exception if a time limit is reached.
         /// </summary>
         /// <param name="condition">A function returnig bool to check.</param>

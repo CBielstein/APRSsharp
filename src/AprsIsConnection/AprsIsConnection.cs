@@ -139,6 +139,11 @@
                     }
                 });
             }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                throw;
+            }
             finally
             {
                 State = ConnectionState.Disconnected;

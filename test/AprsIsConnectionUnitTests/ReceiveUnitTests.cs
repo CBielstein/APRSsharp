@@ -55,7 +55,10 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public void ReceiveHandlesLogin()
         {
             IList<string> tcpMessagesReceived = new List<string>();
-            bool eventHandled = false;
+            bool tcpMessageEventHandled = false;
+            bool stateChangeEventHandled = false;
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
 
             // Mock underlying TCP connection
@@ -67,13 +70,20 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(firstMessage)
                 .Returns(loginResponse);
 
-            // Create connection and register a callback
+            // Create connection and register callbacks
             var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
-                eventHandled = true;
+                tcpMessageEventHandled = true;
             };
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+                stateChangeEventHandled = true;
+            };
+
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
@@ -81,11 +91,17 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Wait to ensure the messages are sent and received
             WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
 
-            // Assert the callback was triggered and that the expected message was received.
-            Assert.True(eventHandled);
+            // Assert the state change event was triggered with the correct state
+            Assert.True(stateChangeEventHandled);
+            Assert.Equal(2, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
+
+            // Assert the TCP message callbacks were triggered with the correct messages
+            Assert.True(tcpMessageEventHandled);
             Assert.Equal(2, tcpMessagesReceived.Count);
-            Assert.Contains(firstMessage, tcpMessagesReceived);
-            Assert.Contains(loginResponse, tcpMessagesReceived);
+            Assert.Equal(firstMessage, tcpMessagesReceived[0]);
+            Assert.Equal(loginResponse, tcpMessagesReceived[1]);
 
             // Assert that the login was completed
             Assert.Equal(ConnectionState.LoggedIn, aprsIs.State);

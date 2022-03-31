@@ -169,6 +169,43 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
+        /// Validates that an error while connecting to the TCP server
+        /// results in a disconnected event sent by the <see cref="AprsIsConnection"/>.
+        /// </summary>
+        [Fact]
+        public void FailureToConnectSetsDisconnectedState()
+        {
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            // Mock underlying TCP connection
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupSequence(
+                mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()))
+                    .Throws(new Exception("Mock exception connecting!"));
+
+            // Create connection and register callback
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+
+            // Wait to ensure the messages are sent and received
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+
+            // Assert the state change event was triggered with the correct state
+            Assert.Equal(1, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
+
+            // Assert that a connection was started and the login message was sent to the server
+            mockTcpConnection.Verify(mock => mock.Connect(
+                    It.Is<string>(s => s.Equals("example.com", StringComparison.Ordinal)),
+                    It.Is<int>(p => p == 14580)));
+        }
+
+        /// <summary>
         /// Waits for a specified condition or thows an exception if a time limit is reached.
         /// </summary>
         /// <param name="condition">A function returnig bool to check.</param>

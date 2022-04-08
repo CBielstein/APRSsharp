@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
@@ -66,7 +67,9 @@
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1";
+            string version = GetVersion();
+            string loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
+
             if (filter != null)
             {
                 loginMessage += $" filter {filter}";
@@ -116,6 +119,18 @@
                     }
                 }
             });
+        }
+
+        /// <summary>
+        /// Uses reflection to get the assembly version as set in the csproj file.
+        /// Currently, this is targeted as the version of AprsSharp.AprsIsClient package, since other projects can use this package.
+        /// This works for now as all the AprsSharp versions are locked together for the time being.
+        /// </summary>
+        /// <returns>A semver string of the assembly version.</returns>
+        private string GetVersion()
+        {
+            var assemblyInfo = Assembly.GetAssembly(typeof(AprsIsConnection)).GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return assemblyInfo.InformationalVersion;
         }
 
         /// <summary>

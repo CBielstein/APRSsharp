@@ -3,10 +3,10 @@
     using System;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using System.IO;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// The public class that will be called when building the console application.
@@ -116,7 +116,14 @@
         public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
         {
             using TcpConnection tcpConnection = new TcpConnection();
-            AprsIsConnection n = new AprsIsConnection(tcpConnection);
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
+            {
+                config.ClearProviders();
+                config.AddConsole();
+                config.SetMinimumLevel(LogLevel.Warning);
+            });
+
+            AprsIsConnection n = new AprsIsConnection(tcpConnection, loggerFactory.CreateLogger<AprsIsConnection>());
             n.ReceivedPacket += PrintPacket;
             await n.Receive(callsign, password, server, filter);
         }

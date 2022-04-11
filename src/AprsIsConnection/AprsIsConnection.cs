@@ -32,7 +32,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
-        private readonly ILogger<AprsIsConnection>? logger;
+        private readonly ILogger<AprsIsConnection> logger;
         private ConnectionState state = ConnectionState.NotConnected;
 
         /// <summary>
@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
         /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection, ILogger<AprsIsConnection>? logger = null)
+        public AprsIsConnection(ITcpConnection tcpConnection, ILogger<AprsIsConnection> logger)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
             this.logger = logger;
@@ -130,7 +130,7 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger?.LogInformation(ex, "Failed to decode packet {encodedPacked}", received);
+                                    logger.LogInformation(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
                         }
@@ -143,7 +143,7 @@
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex, "Exception encountered during receive.");
+                logger.LogError(ex, "Exception encountered during receive.");
                 throw;
             }
             finally

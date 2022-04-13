@@ -150,6 +150,7 @@
                         }
                 }
             });
+                tcpConnection.Disconnect();
             }
             catch (Exception ex)
             {
@@ -158,7 +159,6 @@
             }
             finally
             {
-                tcpConnection.Disconnect();
                 State = ConnectionState.Disconnected;
             }
         }

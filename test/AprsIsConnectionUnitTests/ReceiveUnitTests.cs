@@ -55,8 +55,11 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public void ReceiveHandlesLogin()
         {
             IList<string> tcpMessagesReceived = new List<string>();
-            bool eventHandled = false;
-            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
+            bool tcpMessageEventHandled = false;
+            bool stateChangeEventHandled = false;
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1.1 filter r/50.5039/4.4699/50";
 
             // Mock underlying TCP connection
             string firstMessage = "# server first message";
@@ -67,28 +70,41 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(firstMessage)
                 .Returns(loginResponse);
 
-            // Create connection and register a callback
+            // Create connection and register callbacks
             var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
-                eventHandled = true;
+                tcpMessageEventHandled = true;
             };
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+                stateChangeEventHandled = true;
+            };
+
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.LoggedIn, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
 
-            // Assert the callback was triggered and that the expected message was received.
-            Assert.True(eventHandled);
+            // Assert the state change event was triggered with the correct state
+            Assert.True(stateChangeEventHandled);
+            Assert.Equal(2, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
+
+            // Assert the TCP message callbacks were triggered with the correct messages
+            Assert.True(tcpMessageEventHandled);
             Assert.Equal(2, tcpMessagesReceived.Count);
-            Assert.Contains(firstMessage, tcpMessagesReceived);
-            Assert.Contains(loginResponse, tcpMessagesReceived);
+            Assert.Equal(firstMessage, tcpMessagesReceived[0]);
+            Assert.Equal(loginResponse, tcpMessagesReceived[1]);
 
             // Assert that the login was completed
-            Assert.True(aprsIs.LoggedIn);
+            Assert.Equal(ConnectionState.LoggedIn, aprsIs.State);
 
             // Assert that a connection was started and the login message was sent to the server
             mockTcpConnection.Verify(mock => mock.Connect(
@@ -150,6 +166,83 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 Assert.Null(si.Timestamp);
                 Assert.Equal("Lighthouse!", si.Comment);
             }
+        }
+
+        /// <summary>
+        /// Validates that an error while connecting to the TCP server
+        /// results in a disconnected event sent by the <see cref="AprsIsConnection"/>.
+        /// </summary>
+        [Fact]
+        public void FailureToConnectSetsDisconnectedState()
+        {
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            // Mock underlying TCP connection
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupSequence(
+                mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()))
+                    .Throws(new Exception("Mock exception connecting!"));
+
+            // Create connection and register callback
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+
+            // Wait to ensure the messages are sent and received
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+
+            // Assert the state change event was triggered with the correct state
+            Assert.Equal(1, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
+
+            // Assert that a connection was started and the login message was sent to the server
+            mockTcpConnection.Verify(mock => mock.Connect(
+                    It.Is<string>(s => s.Equals("example.com", StringComparison.Ordinal)),
+                    It.Is<int>(p => p == 14580)));
+        }
+
+        /// <summary>
+        /// Tests that full cycle of connection, login, disconnected states on
+        /// <see cref="AprsIsConnection"/> and that the proper events are raised for them.
+        /// </summary>
+        [Fact]
+        public void FailureToReceiveSetsDisconnectedState()
+        {
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
+
+            // Mock underlying TCP connection
+            string firstMessage = "# server first message";
+            string loginResponse = "# logresp N0CALL unverified, server TEST";
+            var mockTcpConnection = new Mock<ITcpConnection>();
+
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
+                .Returns(firstMessage)
+                .Returns(loginResponse)
+                .Throws(new Exception("Something happened to the connection!"));
+
+            // Create connection and register callbacks
+            var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+
+            // Start receiving
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+
+            // Wait to ensure the messages are sent and received
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+
+            // Assert the state change event was triggered with the correct state
+            Assert.Equal(3, stateChangesReceived.Count);
+            Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
+            Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
+            Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[2]);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
         }
 
         /// <summary>

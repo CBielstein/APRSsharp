@@ -5,7 +5,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     using System.Threading;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;
@@ -240,26 +239,11 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
 
             // Assert the state change event was triggered with the correct state
-
-            Assert.False(true, "Add assertions around logging. I would expect a log error event to be tossed up.");
             Assert.Equal(3, stateChangesReceived.Count);
             Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
             Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
             Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[2]);
             Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
-        }
-
-        /// <summary>
-        /// Ensures that packets failing decode are successfully logged.
-        /// </summary>
-        /// <param name="logLevel">The <see cref="LogLevel"/> for this test to use.</param>
-        /// <param name="shouldLog">If an event should be logged given the loglevel set.</param>
-        [Theory]
-        [InlineData(LogLevel.Information, true)]
-        [InlineData(LogLevel.Warning, false)]
-        public void LogsFailingDecode(LogLevel logLevel, bool shouldLog)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>

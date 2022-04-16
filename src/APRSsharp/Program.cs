@@ -96,7 +96,7 @@
                     getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultFilter,
                     description: "A user filter parsed as a string"),
                 new Option<LogLevel>(
-                    aliases: new string[] { "--logLevel" },
+                    aliases: new string[] { "--verbosity", "-v" },
                     getDefaultValue: () => LogLevel.Warning,
                     description: "Set the verbosity of console logging."),
                 };
@@ -115,16 +115,16 @@
         /// <param name="password"> The user password.</param>
         /// <param name="server"> The specified server to connect.</param>
         /// <param name="filter"> The filter that will be used for receiving the packets.</param>
-        /// <param name="logLevel">The minimum level for an event to be logged to the console.</param>
+        /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, LogLevel logLevel)
+        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, LogLevel verbosity)
         {
             using TcpConnection tcpConnection = new TcpConnection();
             using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
             {
-                config.ClearProviders();
-                config.AddConsole();
-                config.SetMinimumLevel(logLevel);
+                config.ClearProviders()
+                    .AddConsole()
+                    .SetMinimumLevel(verbosity);
             });
 
             AprsIsConnection n = new AprsIsConnection(tcpConnection, loggerFactory.CreateLogger<AprsIsConnection>());

@@ -130,7 +130,7 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger.LogInformation(ex, "Failed to decode packet {encodedPacked}", received);
+                                    logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
                         }

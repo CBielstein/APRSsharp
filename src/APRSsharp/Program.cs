@@ -116,7 +116,7 @@
         public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
         {
             using TcpConnection tcpConnection = new TcpConnection();
-            AprsIsConnection n = new AprsIsConnection(tcpConnection);
+            using AprsIsConnection n = new AprsIsConnection(tcpConnection);
             n.ReceivedPacket += PrintPacket;
             await n.Receive(callsign, password, server, filter);
         }

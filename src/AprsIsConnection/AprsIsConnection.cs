@@ -28,10 +28,14 @@
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
-    public class AprsIsConnection
+    public sealed class AprsIsConnection : IDisposable
     {
         private readonly ITcpConnection tcpConnection;
+        private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
         private ConnectionState state = ConnectionState.NotConnected;
+        private Timer? timer;
+        private bool disposed;
+        private string loginMessage = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -86,19 +90,14 @@
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            string version = GetVersion();
-            string loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
-
-            if (filter != null)
-            {
-                loginMessage += $" filter {filter}";
-            }
-
             try
             {
                 // Open connection
                 tcpConnection.Connect(server, 14580);
                 State = ConnectionState.Connected;
+
+                timer?.Dispose();
+                timer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
 
                 // Receive
                 await Task.Run(() =>
@@ -119,7 +118,7 @@
 
                                 if (State != ConnectionState.LoggedIn)
                                 {
-                                    tcpConnection.SendString(loginMessage);
+                                    SendLogin(callsign, password, filter);
                                 }
                             }
                             else if (ReceivedPacket != null)
@@ -149,8 +148,43 @@
             }
             finally
             {
+                timer?.Change(Timeout.Infinite, Timeout.Infinite);
                 State = ConnectionState.Disconnected;
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            timer?.Dispose();
+        }
+
+        /// <summary>
+        /// Sends a login message to the server.
+        /// </summary>
+        /// <param name="callsign">The users callsign string.</param>
+        /// <param name="password">The users password string.</param>
+        /// <param name="filter">The APRS-IS filter string for server-side filtering.
+        /// Null sends no filter, which is not recommended for most clients and servers.</param>
+        private void SendLogin(string callsign, string password, string? filter)
+        {
+            Console.WriteLine("Logging in to server...");
+
+            string version = GetVersion();
+            var loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
+
+            if (filter != null)
+            {
+                loginMessage += $" filter {filter}";
+            }
+
+            tcpConnection.SendString(loginMessage);
         }
 
         /// <summary>

@@ -162,6 +162,8 @@
             }
 
             disposed = true;
+
+            timer?.Change(Timeout.Infinite, Timeout.Infinite);
             timer?.Dispose();
         }
 

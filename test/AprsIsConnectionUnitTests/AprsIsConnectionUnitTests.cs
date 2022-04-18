@@ -29,7 +29,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             connection.Disconnect();
 
             // Wait for the task, but no more than 2 seconds.
-            Assert.True(Task.WaitAll(new Task[] { receiveTask }, 2000), "Task timed out while waiting for disconnection.");
+            Assert.True(Task.WaitAll(new Task[] { receiveTask }, 10000), "Task timed out while waiting for disconnection.");
 
             Assert.True(receiveTask.IsCompletedSuccessfully, "Task did not complete successfully.");
             mockTcpConnection.Verify(mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()), Times.Once());

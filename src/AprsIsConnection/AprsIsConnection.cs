@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
     using System;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
@@ -18,6 +19,12 @@
     public delegate void HandlePacket(Packet packet);
 
     /// <summary>
+    /// Delegate for handling a state change in an <see cref="AprsIsConnection"/>.
+    /// </summary>
+    /// <param name="state">The new state taken by the <see cref="AprsIsConnection"/>.</param>
+    public delegate void HandleStateChange(ConnectionState state);
+
+    /// <summary>
     /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
     /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
     /// </summary>
@@ -25,6 +32,7 @@
     {
         private readonly ITcpConnection tcpConnection;
         private readonly bool disposeITcpConnection;
+        private ConnectionState state = ConnectionState.NotConnected;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
@@ -57,10 +65,22 @@
         public event HandlePacket? ReceivedPacket;
 
         /// <summary>
-        /// Gets a value indicating whether this connection is logged in to the server.
-        /// Note that this is not the same as successful password authentication.
+        /// Event raised when <see cref="State"/> changes.
         /// </summary>
-        public bool LoggedIn { get; private set; } = false;
+        public event HandleStateChange? ChangedState;
+
+        /// <summary>
+        /// Gets the state of this connection.
+        /// </summary>
+        public ConnectionState State
+        {
+            get => state;
+            private set
+            {
+                state = value;
+                ChangedState?.Invoke(value);
+            }
+        }
 
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
@@ -73,56 +93,71 @@
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            string loginMessage = $"user {callsign} pass {password} vers AprsSharp 0.1";
+            string version = GetVersion();
+            string loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
+
             if (filter != null)
             {
                 loginMessage += $" filter {filter}";
             }
 
-            // Open connection
-            tcpConnection.Connect(server, 14580);
-
-            // Receive
-            await Task.Run(() =>
+            try
             {
-                while (true)
+                // Open connection
+                tcpConnection.Connect(server, 14580);
+                State = ConnectionState.Connected;
+
+                // Receive
+                await Task.Run(() =>
                 {
-                    string? received = tcpConnection.ReceiveString();
-                    if (!string.IsNullOrEmpty(received))
+                    while (true)
                     {
-                        ReceivedTcpMessage?.Invoke(received);
-
-                        if (received.StartsWith('#'))
+                        string? received = tcpConnection.ReceiveString();
+                        if (!string.IsNullOrEmpty(received))
                         {
-                            if (received.Contains("logresp"))
-                            {
-                                LoggedIn = true;
-                            }
+                            ReceivedTcpMessage?.Invoke(received);
 
-                            if (!LoggedIn)
+                            if (received.StartsWith('#'))
                             {
-                                tcpConnection.SendString(loginMessage);
+                                if (received.Contains("logresp"))
+                                {
+                                    State = ConnectionState.LoggedIn;
+                                }
+
+                                if (State != ConnectionState.LoggedIn)
+                                {
+                                    tcpConnection.SendString(loginMessage);
+                                }
+                            }
+                            else if (ReceivedPacket != null)
+                            {
+                                try
+                                {
+                                    Packet p = new Packet(received);
+                                    ReceivedPacket.Invoke(p);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                                }
                             }
                         }
-                        else if (ReceivedPacket != null)
+                        else
                         {
-                            try
-                            {
-                                Packet p = new Packet(received);
-                                ReceivedPacket.Invoke(p);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
-                            }
+                            Thread.Yield();
                         }
                     }
-                    else
-                    {
-                        Thread.Yield();
-                    }
-                }
-            });
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                throw;
+            }
+            finally
+            {
+                State = ConnectionState.Disconnected;
+            }
         }
 
         /// <inheritdoc/>
@@ -133,6 +168,18 @@
             {
                 tcpConnection.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Uses reflection to get the assembly version as set in the csproj file.
+        /// Currently, this is targeted as the version of AprsSharp.AprsIsClient package, since other projects can use this package.
+        /// This works for now as all the AprsSharp versions are locked together for the time being.
+        /// </summary>
+        /// <returns>A semver string of the assembly version.</returns>
+        private string GetVersion()
+        {
+            var assemblyInfo = Assembly.GetAssembly(typeof(AprsIsConnection)).GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return assemblyInfo.InformationalVersion;
         }
 
         /// <summary>

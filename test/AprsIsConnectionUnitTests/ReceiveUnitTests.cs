@@ -70,7 +70,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(firstMessage)
                 .Returns(loginResponse);
 
-            // Create connection and register a callback
+            // Create connection and register callbacks
             using var aprsIs = new AprsIsConnection(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {

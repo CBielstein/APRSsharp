@@ -23,29 +23,27 @@
     /// </summary>
     public sealed class AprsIsConnection : IDisposable
     {
-        private readonly ITcpConnection? tcpConnection;
-        private readonly ITcpConnection? managedTcpConnection;
+        private readonly ITcpConnection tcpConnection;
+        private readonly bool disposeITcpConnection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection)
+        /// <param name="disposeConnection">`true` if the <see cref="ITcpConnection"/> should be disposed by <see cref="Dispose"/>,
+        ///     `false` if you intend to reuse the <see cref="ITcpConnection"/>.</param>
+        public AprsIsConnection(ITcpConnection tcpConnection, bool disposeConnection = true)
         {
-            if (tcpConnection == null)
-            {
-                throw new ArgumentNullException(nameof(tcpConnection));
-            }
-
-            this.tcpConnection = tcpConnection;
+            this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
+            disposeITcpConnection = disposeConnection;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         public AprsIsConnection()
+            : this(new TcpConnection(), true)
         {
-            managedTcpConnection = new TcpConnection();
         }
 
         /// <summary>
@@ -63,8 +61,6 @@
         /// Note that this is not the same as successful password authentication.
         /// </summary>
         public bool LoggedIn { get; private set; } = false;
-
-        private ITcpConnection Client { get => tcpConnection ?? managedTcpConnection ?? throw new Exception("Both managed and unmanaged TCP connections are null."); }
 
         /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
@@ -84,14 +80,14 @@
             }
 
             // Open connection
-            Client.Connect(server, 14580);
+            tcpConnection.Connect(server, 14580);
 
             // Receive
             await Task.Run(() =>
             {
                 while (true)
                 {
-                    string? received = Client.ReceiveString();
+                    string? received = tcpConnection.ReceiveString();
                     if (!string.IsNullOrEmpty(received))
                     {
                         ReceivedTcpMessage?.Invoke(received);
@@ -105,7 +101,7 @@
 
                             if (!LoggedIn)
                             {
-                                Client.SendString(loginMessage);
+                                tcpConnection.SendString(loginMessage);
                             }
                         }
                         else if (ReceivedPacket != null)
@@ -130,9 +126,13 @@
         }
 
         /// <inheritdoc/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP007", Justification = "Guarding with boolean flag passed by injector.")]
         public void Dispose()
         {
-            managedTcpConnection?.Dispose();
+            if (disposeITcpConnection)
+            {
+                tcpConnection.Dispose();
+            }
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
@@ -31,6 +32,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+        private readonly ILogger<AprsIsConnection> logger;
         private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
 
@@ -38,14 +40,11 @@
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection)
+        /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
+        public AprsIsConnection(ITcpConnection tcpConnection, ILogger<AprsIsConnection> logger)
         {
-            if (tcpConnection == null)
-            {
-                throw new ArgumentNullException(nameof(tcpConnection));
-            }
-
-            this.tcpConnection = tcpConnection;
+            this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
+            this.logger = logger;
         }
 
         /// <summary>
@@ -140,7 +139,7 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                                    logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
                         }
@@ -153,7 +152,7 @@
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex);
+                logger.LogError(ex, "Exception encountered during receive.");
                 throw;
             }
             finally

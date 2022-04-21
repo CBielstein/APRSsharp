@@ -2,6 +2,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 {
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
+    using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;
 
@@ -18,7 +19,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async void TestDisconnect()
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
-            AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object);
+            AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
 
             Task receiveTask = connection.Receive("callsign", "password", "server", "filter");
 

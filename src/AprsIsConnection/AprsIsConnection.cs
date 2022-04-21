@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
@@ -32,6 +33,8 @@
     {
         private readonly ITcpConnection tcpConnection;
         private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
+        private readonly ILogger<AprsIsConnection> logger;
+        private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
         private Timer? timer;
         private bool disposed;
@@ -41,14 +44,11 @@
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection)
+        /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
+        public AprsIsConnection(ITcpConnection tcpConnection, ILogger<AprsIsConnection> logger)
         {
-            if (tcpConnection == null)
-            {
-                throw new ArgumentNullException(nameof(tcpConnection));
-            }
-
-            this.tcpConnection = tcpConnection;
+            this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
+            this.logger = logger;
         }
 
         /// <summary>
@@ -80,6 +80,14 @@
         }
 
         /// <summary>
+        /// Method to cancel the receipt of packets.
+        /// </summary>
+        public void Disconnect()
+        {
+            receiving = false;
+        }
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
@@ -102,7 +110,7 @@
                 // Receive
                 await Task.Run(() =>
                 {
-                    while (true)
+                    while (receiving)
                     {
                         string? received = tcpConnection.ReceiveString();
                         if (!string.IsNullOrEmpty(received))
@@ -130,7 +138,7 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                                    logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
                         }
@@ -138,17 +146,18 @@
                         {
                             Thread.Yield();
                         }
-                    }
-                });
+                }
+            });
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex);
+                logger.LogError(ex, "Exception encountered during receive.");
                 throw;
             }
             finally
             {
                 timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                tcpConnection.Disconnect();
                 State = ConnectionState.Disconnected;
             }
         }
@@ -176,7 +185,7 @@
         /// Null sends no filter, which is not recommended for most clients and servers.</param>
         private void SendLogin(string callsign, string password, string? filter)
         {
-            Console.WriteLine("Logging in to server...");
+            logger.LogInformation("Logging in to server.");
 
             string version = GetVersion();
             var loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";

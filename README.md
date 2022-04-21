@@ -90,3 +90,8 @@ You can specify different combinations of the commandline flags.
 Either use 0, 1, 2, 3 or all the flags combination of flags.
 
 For missing flags, the console application will use the default arguments.
+
+To gracefully terminate the application, press the command `Q` or `q`.
+This will exit the application after the last packet is received.
+
+To force terminate the application, press the command `Ctrl + c`

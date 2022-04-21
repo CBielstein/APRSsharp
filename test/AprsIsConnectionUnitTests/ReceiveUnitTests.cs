@@ -235,7 +235,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 5000);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);

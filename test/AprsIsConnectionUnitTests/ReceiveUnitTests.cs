@@ -30,7 +30,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString()).Returns(testMessage).Returns(string.Empty);
 
             // Create connection and register a callback
-            var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
+            using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -41,7 +41,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 750);
+            WaitForCondition(() => eventHandled, 2000);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -72,7 +72,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(loginResponse);
 
             // Create connection and register callbacks
-            var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
+            using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -133,7 +133,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(encodedPacket);
 
             // Create connection and register a callback
-            var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
+            using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
             aprsIs.ReceivedPacket += (Packet p) =>
             {
                 receivedPacket = p;
@@ -185,7 +185,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                     .Throws(new Exception("Mock exception connecting!"));
 
             // Create connection and register callback
-            var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
+            using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
             aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
             Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
@@ -228,7 +228,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Throws(new Exception("Something happened to the connection!"));
 
             // Create connection and register callbacks
-            var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
+            using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
             aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
 
             // Start receiving

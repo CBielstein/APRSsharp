@@ -127,7 +127,7 @@
                     .SetMinimumLevel(verbosity);
             });
 
-            AprsIsConnection n = new AprsIsConnection(tcpConnection, loggerFactory.CreateLogger<AprsIsConnection>());
+            using AprsIsConnection n = new AprsIsConnection(tcpConnection, loggerFactory.CreateLogger<AprsIsConnection>());
             n.ReceivedPacket += PrintPacket;
 
             Task receive = n.Receive(callsign, password, server, filter);

@@ -129,7 +129,20 @@
 
             AprsIsConnection n = new AprsIsConnection(tcpConnection, loggerFactory.CreateLogger<AprsIsConnection>());
             n.ReceivedPacket += PrintPacket;
-            await n.Receive(callsign, password, server, filter);
+
+            Task receive = n.Receive(callsign, password, server, filter);
+
+            while (true)
+            {
+                ConsoleKeyInfo input = Console.ReadKey();
+
+                if (input.Key == ConsoleKey.Q)
+                {
+                    n.Disconnect();
+                    await receive;
+                    break;
+                }
+            }
         }
     }
 }

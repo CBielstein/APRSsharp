@@ -41,7 +41,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 750);
+            WaitForCondition(() => eventHandled, 2000);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);

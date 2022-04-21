@@ -4,6 +4,7 @@
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
@@ -118,7 +119,20 @@
             using TcpConnection tcpConnection = new TcpConnection();
             AprsIsConnection n = new AprsIsConnection(tcpConnection);
             n.ReceivedPacket += PrintPacket;
-            await n.Receive(callsign, password, server, filter);
+
+            Task receive = n.Receive(callsign, password, server, filter);
+
+            while (true)
+            {
+                ConsoleKeyInfo input = Console.ReadKey();
+
+                if (input.Key == ConsoleKey.Q)
+                {
+                    n.Disconnect();
+                    await receive;
+                    break;
+                }
+            }
         }
     }
 }

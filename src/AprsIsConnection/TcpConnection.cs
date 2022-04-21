@@ -60,5 +60,12 @@
 
             writer.WriteLine(message);
         }
+
+        /// <inheritdoc/>
+        public void Disconnect()
+        {
+            stream?.Close();
+            tcpClient.Close();
+      }
     }
 }

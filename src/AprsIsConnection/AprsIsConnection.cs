@@ -31,6 +31,7 @@
     public class AprsIsConnection
     {
         private readonly ITcpConnection tcpConnection;
+        private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
 
         /// <summary>
@@ -76,6 +77,14 @@
         }
 
         /// <summary>
+        /// Method to cancel the receipt of packets.
+        /// </summary>
+        public void Disconnect()
+        {
+            receiving = false;
+        }
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
@@ -103,7 +112,7 @@
                 // Receive
                 await Task.Run(() =>
                 {
-                    while (true)
+                    while (receiving)
                     {
                         string? received = tcpConnection.ReceiveString();
                         if (!string.IsNullOrEmpty(received))
@@ -139,8 +148,8 @@
                         {
                             Thread.Yield();
                         }
-                    }
-                });
+                }
+            });
             }
             catch (Exception ex)
             {
@@ -149,6 +158,7 @@
             }
             finally
             {
+                tcpConnection.Disconnect();
                 State = ConnectionState.Disconnected;
             }
         }

@@ -1,6 +1,5 @@
 namespace AprsSharpUnitTests.Connections.AprsIs
 {
-    using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using Moq;
@@ -16,7 +15,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// succesfully stops receiving and the Receive() Task returns.
         /// </summary>
         [Fact]
-        public void TestDisconnect()
+        public async void TestDisconnect()
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
             AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object);
@@ -24,12 +23,12 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Task receiveTask = connection.Receive("callsign", "password", "server", "filter");
 
             // Sleep 0.01 seconds to ensure the connection starts "receiving"
-            Thread.Sleep(10);
+            await Task.Delay(10);
 
             connection.Disconnect();
 
-            // Wait for the task, but no more than 2 seconds.
-            Assert.True(Task.WaitAll(new Task[] { receiveTask }, 10000), "Task timed out while waiting for disconnection.");
+            // TODO Issue 125: Add a timeout for this test, if disconnect fails we could be here a while...
+            await receiveTask;
 
             Assert.True(receiveTask.IsCompletedSuccessfully, "Task did not complete successfully.");
             mockTcpConnection.Verify(mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()), Times.Once());

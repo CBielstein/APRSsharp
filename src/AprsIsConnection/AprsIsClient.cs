@@ -20,20 +20,20 @@
     public delegate void HandlePacket(Packet packet);
 
     /// <summary>
-    /// Delegate for handling a state change in an <see cref="AprsIsConnection"/>.
+    /// Delegate for handling a state change in an <see cref="AprsIsClient"/>.
     /// </summary>
-    /// <param name="state">The new state taken by the <see cref="AprsIsConnection"/>.</param>
+    /// <param name="state">The new state taken by the <see cref="AprsIsClient"/>.</param>
     public delegate void HandleStateChange(ConnectionState state);
 
     /// <summary>
-    /// This class initiates connections and performs authentication to the APRS internet service for receiving packets.
-    /// It gives a user an option to use default credentials, filter and server or login with their specified user information.
+    /// This class initiates connections and performs authentication
+    /// to the APRS internet service for receiving packets.
     /// </summary>
-    public sealed class AprsIsConnection : IDisposable
+    public sealed class AprsIsClient : IDisposable
     {
         private readonly ITcpConnection tcpConnection;
         private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
-        private readonly ILogger<AprsIsConnection> logger;
+        private readonly ILogger<AprsIsClient> logger;
         private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
         private Timer? timer;
@@ -41,11 +41,11 @@
         private string loginMessage = string.Empty;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
+        /// Initializes a new instance of the <see cref="AprsIsClient"/> class.
         /// </summary>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
-        /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection, ILogger<AprsIsConnection> logger)
+        /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
+        public AprsIsClient(ITcpConnection tcpConnection, ILogger<AprsIsClient> logger)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
             this.logger = logger;
@@ -206,7 +206,7 @@
         /// <returns>A semver string of the assembly version.</returns>
         private string GetVersion()
         {
-            var assemblyInfo = Assembly.GetAssembly(typeof(AprsIsConnection)).GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            var assemblyInfo = Assembly.GetAssembly(typeof(AprsIsClient)).GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return assemblyInfo.InformationalVersion;
         }
 

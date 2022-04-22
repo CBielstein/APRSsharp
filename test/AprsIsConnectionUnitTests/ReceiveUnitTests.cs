@@ -28,6 +28,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             string testMessage = "This is a test message";
             var mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString()).Returns(testMessage).Returns(string.Empty);
+            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
 
             // Create connection and register a callback
             using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
@@ -66,6 +67,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             string firstMessage = "# server first message";
             string loginResponse = "# logresp N0CALL unverified, server TEST";
             var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
 
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
                 .Returns(firstMessage)
@@ -131,6 +133,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             string encodedPacket = @"N0CALL>igate,T2serv:>CN76wv\L Lighthouse!";
             var mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.Setup(mock => mock.ReceiveString()).Returns(encodedPacket);
+            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
 
             // Create connection and register a callback
             using var aprsIs = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
@@ -221,6 +224,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             string firstMessage = "# server first message";
             string loginResponse = "# logresp N0CALL unverified, server TEST";
             var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
 
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
                 .Returns(firstMessage)

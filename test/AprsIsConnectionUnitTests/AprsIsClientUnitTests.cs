@@ -7,12 +7,12 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     using Xunit;
 
     /// <summary>
-    /// Tests AprsIsConnection.
+    /// Tests <see cref="AprsIsClient"/>.
     /// </summary>
-    public class AprsIsConnectionUnitTests
+    public class AprsIsClientUnitTests
     {
         /// <summary>
-        /// Tests that the Disconnect() method on AprsIsConnection
+        /// Tests that the Disconnect() method on <see cref="AprsIsClient"/>
         /// succesfully stops receiving and the Receive() Task returns.
         /// </summary>
         [Fact]

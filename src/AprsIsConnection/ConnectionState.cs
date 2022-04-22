@@ -1,7 +1,7 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
     /// <summary>
-    /// Tracks the state of an <see cref="AprsIsConnection"/>.
+    /// Tracks the state of an <see cref="AprsIsClient"/>.
     /// </summary>
     public enum ConnectionState
     {

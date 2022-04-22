@@ -19,7 +19,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async void TestDisconnect()
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
-            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
+            mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
             using AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object, NullLogger<AprsIsConnection>.Instance);
 
             Task receiveTask = connection.Receive("callsign", "password", "server", "filter");

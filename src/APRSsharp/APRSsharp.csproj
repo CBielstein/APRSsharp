@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AprsParser\AprsParser.csproj" />
-    <ProjectReference Include="..\AprsIsConnection\AprsIsConnection.csproj" />
+    <ProjectReference Include="..\AprsIsClient\AprsIsClient.csproj" />
   </ItemGroup>
 
   <ItemGroup>

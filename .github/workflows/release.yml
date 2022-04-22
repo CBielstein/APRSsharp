@@ -35,10 +35,10 @@ jobs:
         run: dotnet pack src/AprsParser/AprsParser.csproj --configuration Release --no-build
 
       - name: Pack AprsSharp.AprsIsClient
-        run: dotnet pack src/AprsIsConnection/AprsIsConnection.csproj --configuration Release --no-build
+        run: dotnet pack src/AprsIsClient/AprsIsClient.csproj --configuration Release --no-build
 
       - name: Publish AprsShar.AprsParser
         run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
 
       - name: Publish AprsShar.AprsIsClient
-        run: dotnet nuget push src/AprsIsConnection/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push src/AprsIsClient/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

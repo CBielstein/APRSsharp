@@ -1,10 +1,7 @@
 namespace AprsSharpUnitTests.Connections.AprsIs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
     using AprsSharp.Connections.AprsIs;
-    using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;
 
@@ -26,7 +23,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         {
             var mockTcpConnection = new Mock<ITcpConnection>();
 
-            using (AprsIsConnection connection = new AprsIsConnection(mockTcpConnection.Object, connectionShouldDispose))
+            using (AprsIsConnection connection = new AprsIsConnection(NullLogger<AprsIsConnection>.Instance, mockTcpConnection.Object, connectionShouldDispose))
             {
             }
 

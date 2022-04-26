@@ -3,10 +3,10 @@
     using System;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using System.IO;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// The public class that will be called when building the console application.
@@ -95,11 +95,15 @@
                     aliases: new string[] { "--filter", "-f" },
                     getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultFilter,
                     description: "A user filter parsed as a string"),
+                new Option<LogLevel>(
+                    aliases: new string[] { "--verbosity", "-v" },
+                    getDefaultValue: () => LogLevel.Warning,
+                    description: "Set the verbosity of console logging."),
                 };
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<string, string, string, string, IConsole>(HandleAprsConnection);
+            rootCommand.Handler = CommandHandler.Create<string, string, string, string, LogLevel>(HandleAprsConnection);
 
             rootCommand.Invoke(args);
         }
@@ -111,13 +115,33 @@
         /// <param name="password"> The user password.</param>
         /// <param name="server"> The specified server to connect.</param>
         /// <param name="filter"> The filter that will be used for receiving the packets.</param>
-        /// <param name="console"> Flexibility in running in different consoles.</param>
+        /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, IConsole console)
+        public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, LogLevel verbosity)
         {
-            using AprsIsConnection n = new AprsIsConnection();
+            using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
+            {
+                config.ClearProviders()
+                    .AddConsole()
+                    .SetMinimumLevel(verbosity);
+            });
+
+            using AprsIsConnection n = new AprsIsConnection(loggerFactory.CreateLogger<AprsIsConnection>());
             n.ReceivedPacket += PrintPacket;
-            await n.Receive(callsign, password, server, filter);
+
+            Task receive = n.Receive(callsign, password, server, filter);
+
+            while (true)
+            {
+                ConsoleKeyInfo input = Console.ReadKey();
+
+                if (input.Key == ConsoleKey.Q)
+                {
+                    n.Disconnect();
+                    await receive;
+                    break;
+                }
+            }
         }
     }
 }

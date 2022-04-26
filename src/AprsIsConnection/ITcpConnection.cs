@@ -25,5 +25,10 @@
         /// </summary>
         /// <param name="message">Message to send.</param>
         void SendString(string message);
+
+        /// <summary>
+        /// The function to stop the receipt/cancel tcp packets.
+        /// </summary>
+        void Disconnect();
     }
 }

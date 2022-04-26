@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
@@ -32,25 +33,34 @@
     {
         private readonly ITcpConnection tcpConnection;
         private readonly bool disposeITcpConnection;
+        private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
+        private readonly ILogger<AprsIsConnection> logger;
+        private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
+        private Timer? timer;
+        private bool disposed;
+        private string loginMessage = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
+        /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
         /// <param name="disposeConnection">`true` if the <see cref="ITcpConnection"/> should be disposed by <see cref="Dispose"/>,
         ///     `false` if you intend to reuse the <see cref="ITcpConnection"/>.</param>
-        public AprsIsConnection(ITcpConnection tcpConnection, bool disposeConnection = true)
+        public AprsIsConnection(ILogger<AprsIsConnection> logger, ITcpConnection tcpConnection, bool disposeConnection = true)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
             disposeITcpConnection = disposeConnection;
+            this.logger = logger;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsConnection"/> class.
         /// </summary>
-        public AprsIsConnection()
-            : this(new TcpConnection(), true)
+        /// <param name="logger">An <see cref="ILogger{AprsIsConnection}"/> for error/debug logging.</param>
+        public AprsIsConnection(ILogger<AprsIsConnection> logger)
+            : this(logger, new TcpConnection(), true)
         {
         }
 
@@ -83,6 +93,14 @@
         }
 
         /// <summary>
+        /// Method to cancel the receipt of packets.
+        /// </summary>
+        public void Disconnect()
+        {
+            receiving = false;
+        }
+
+        /// <summary>
         /// The method to implement the authentication and receipt of APRS packets from APRS IS server.
         /// </summary>
         /// <param name="callsign">The users callsign string.</param>
@@ -93,24 +111,19 @@
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
-            string version = GetVersion();
-            string loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
-
-            if (filter != null)
-            {
-                loginMessage += $" filter {filter}";
-            }
-
             try
             {
                 // Open connection
                 tcpConnection.Connect(server, 14580);
                 State = ConnectionState.Connected;
 
+                timer?.Dispose();
+                timer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
+
                 // Receive
                 await Task.Run(() =>
                 {
-                    while (true)
+                    while (receiving)
                     {
                         string? received = tcpConnection.ReceiveString();
                         if (!string.IsNullOrEmpty(received))
@@ -126,7 +139,7 @@
 
                                 if (State != ConnectionState.LoggedIn)
                                 {
-                                    tcpConnection.SendString(loginMessage);
+                                    SendLogin(callsign, password, filter);
                                 }
                             }
                             else if (ReceivedPacket != null)
@@ -138,7 +151,7 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    Console.Error.WriteLine($"Failed to decode packet {received} with error {ex}");
+                                    logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
                         }
@@ -146,16 +159,18 @@
                         {
                             Thread.Yield();
                         }
-                    }
-                });
+                }
+            });
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex);
+                logger.LogError(ex, "Exception encountered during receive.");
                 throw;
             }
             finally
             {
+                timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                tcpConnection.Disconnect();
                 State = ConnectionState.Disconnected;
             }
         }
@@ -164,10 +179,42 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP007", Justification = "Guarding with boolean flag passed by injector.")]
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
             if (disposeITcpConnection)
             {
                 tcpConnection.Dispose();
             }
+
+            timer?.Change(Timeout.Infinite, Timeout.Infinite);
+            timer?.Dispose();
+        }
+
+        /// <summary>
+        /// Sends a login message to the server.
+        /// </summary>
+        /// <param name="callsign">The users callsign string.</param>
+        /// <param name="password">The users password string.</param>
+        /// <param name="filter">The APRS-IS filter string for server-side filtering.
+        /// Null sends no filter, which is not recommended for most clients and servers.</param>
+        private void SendLogin(string callsign, string password, string? filter)
+        {
+            logger.LogInformation("Logging in to server.");
+
+            string version = GetVersion();
+            var loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
+
+            if (filter != null)
+            {
+                loginMessage += $" filter {filter}";
+            }
+
+            tcpConnection.SendString(loginMessage);
         }
 
         /// <summary>

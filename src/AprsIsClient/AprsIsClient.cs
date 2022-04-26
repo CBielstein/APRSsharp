@@ -32,6 +32,7 @@
     public sealed class AprsIsClient : IDisposable
     {
         private readonly ITcpConnection tcpConnection;
+        private readonly bool disposeITcpConnection;
         private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
         private readonly ILogger<AprsIsClient> logger;
         private bool receiving = true;
@@ -43,12 +44,24 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsClient"/> class.
         /// </summary>
-        /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
         /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
-        public AprsIsClient(ITcpConnection tcpConnection, ILogger<AprsIsClient> logger)
+        /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
+        /// <param name="disposeConnection">`true` if the <see cref="ITcpConnection"/> should be disposed by <see cref="Dispose"/>,
+        ///     `false` if you intend to reuse the <see cref="ITcpConnection"/>.</param>
+        public AprsIsClient(ILogger<AprsIsClient> logger, ITcpConnection tcpConnection, bool disposeConnection = true)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
+            disposeITcpConnection = disposeConnection;
             this.logger = logger;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AprsIsClient"/> class.
+        /// </summary>
+        /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
+        public AprsIsClient(ILogger<AprsIsClient> logger)
+            : this(logger, new TcpConnection(), true)
+        {
         }
 
         /// <summary>
@@ -110,7 +123,7 @@
                 // Receive
                 await Task.Run(() =>
                 {
-                    while (receiving)
+                    while (receiving && tcpConnection.Connected)
                     {
                         string? received = tcpConnection.ReceiveString();
                         if (!string.IsNullOrEmpty(received))
@@ -163,6 +176,7 @@
         }
 
         /// <inheritdoc/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP007", Justification = "Guarding with boolean flag passed to constructor.")]
         public void Dispose()
         {
             if (disposed)
@@ -171,6 +185,11 @@
             }
 
             disposed = true;
+
+            if (disposeITcpConnection)
+            {
+                tcpConnection.Dispose();
+            }
 
             timer?.Change(Timeout.Infinite, Timeout.Infinite);
             timer?.Dispose();

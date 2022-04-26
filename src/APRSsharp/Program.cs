@@ -119,7 +119,6 @@
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public static async Task HandleAprsConnection(string callsign, string password, string server, string filter, LogLevel verbosity)
         {
-            using TcpConnection tcpConnection = new TcpConnection();
             using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
             {
                 config.ClearProviders()
@@ -127,7 +126,7 @@
                     .SetMinimumLevel(verbosity);
             });
 
-            using AprsIsClient n = new AprsIsClient(tcpConnection, loggerFactory.CreateLogger<AprsIsClient>());
+            using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
             n.ReceivedPacket += PrintPacket;
 
             Task receive = n.Receive(callsign, password, server, filter);

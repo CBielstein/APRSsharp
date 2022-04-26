@@ -1,10 +1,18 @@
 ﻿namespace AprsSharp.Connections.AprsIs
 {
+    using System;
+
     /// <summary>
     /// Abstracts a TCP connection.
     /// </summary>
-    public interface ITcpConnection
+    public interface ITcpConnection : IDisposable
     {
+        /// <summary>
+        /// Gets a value indicating whether this connection
+        /// is currently connected to a server.
+        /// </summary>
+        public bool Connected { get; }
+
         /// <summary>
         /// Opens a connection.
         /// </summary>

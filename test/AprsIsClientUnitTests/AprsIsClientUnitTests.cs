@@ -19,14 +19,15 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async void TestDisconnect()
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
-            using AprsIsClient connection = new AprsIsClient(mockTcpConnection.Object, NullLogger<AprsIsClient>.Instance);
+            mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
+            using AprsIsClient client = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
 
-            Task receiveTask = connection.Receive("callsign", "password", "server", "filter");
+            Task receiveTask = client.Receive("callsign", "password", "server", "filter");
 
             // Sleep 0.01 seconds to ensure the connection starts "receiving"
             await Task.Delay(10);
 
-            connection.Disconnect();
+            client.Disconnect();
 
             // TODO Issue 125: Add a timeout for this test, if disconnect fails we could be here a while...
             await receiveTask;

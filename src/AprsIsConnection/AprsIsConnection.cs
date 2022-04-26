@@ -123,7 +123,7 @@
                 // Receive
                 await Task.Run(() =>
                 {
-                    while (receiving)
+                    while (receiving && tcpConnection.Connected)
                     {
                         string? received = tcpConnection.ReceiveString();
                         if (!string.IsNullOrEmpty(received))

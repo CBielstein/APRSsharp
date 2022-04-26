@@ -8,6 +8,12 @@
     public interface ITcpConnection : IDisposable
     {
         /// <summary>
+        /// Gets a value indicating whether this connection
+        /// is currently connected to a server.
+        /// </summary>
+        public bool Connected { get; }
+
+        /// <summary>
         /// Opens a connection.
         /// </summary>
         /// <param name="server">Server.</param>

@@ -15,6 +15,9 @@
         private StreamReader? reader;
 
         /// <inheritdoc/>
+        public bool Connected => tcpClient.Connected;
+
+        /// <inheritdoc/>
         public void Connect(string server, int port)
         {
             tcpClient.Connect(server, port);
@@ -66,6 +69,6 @@
         {
             stream?.Close();
             tcpClient.Close();
-      }
+        }
     }
 }

@@ -7,7 +7,7 @@
     /// <summary>
     /// Represents a TcpConnection.
     /// </summary>
-    public sealed class TcpConnection : ITcpConnection, IDisposable
+    public sealed class TcpConnection : ITcpConnection
     {
         private readonly TcpClient tcpClient = new TcpClient();
         private NetworkStream? stream;

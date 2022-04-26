@@ -8,6 +8,11 @@
     <Version>0.1.1</Version>
     <Authors>Cameron Bielstein</Authors>
     <Company>Cameron Bielstein</Company>
+    <PackageProjectUrl>https://github.com/CBielstein/APRSsharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CBielstein/APRSsharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Cameron Bielstein 2020</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration.ToLower())' == 'release'">

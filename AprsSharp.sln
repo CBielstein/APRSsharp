@@ -17,9 +17,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprsParser", "src\AprsParse
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APRSsharp", "src\APRSsharp\APRSsharp.csproj", "{82CC0961-D17F-4D44-BD68-29DDEBB320C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprsIsConnection", "src\AprsIsConnection\AprsIsConnection.csproj", "{1C712E13-FF17-4965-AFF5-336FD5B88DFB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprsIsClient", "src\AprsIsClient\AprsIsClient.csproj", "{1C712E13-FF17-4965-AFF5-336FD5B88DFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprsIsConnectionUnitTests", "test\AprsIsConnectionUnitTests\AprsIsConnectionUnitTests.csproj", "{639E762F-D46A-4A09-ADEA-6CFC6943F46A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AprsIsClientUnitTests", "test\AprsIsClientUnitTests\AprsIsClientUnitTests.csproj", "{639E762F-D46A-4A09-ADEA-6CFC6943F46A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

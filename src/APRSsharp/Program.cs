@@ -81,19 +81,19 @@
                 {
                 new Option<string>(
                     aliases: new string[] { "--callsign", "-c", "--cgn" },
-                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultCallsign,
+                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultCallsign,
                     description: "A user callsign parsed as a string"),
                 new Option<string>(
                     aliases: new string[] { "--password", "-p", "--pwd", "--pass" },
-                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultPassword,
+                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultPassword,
                     description: "A user password whose argument is parsed as a string"),
                 new Option<string>(
                     aliases: new string[] { "--server", "-s", "--svr" },
-                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultServerName,
+                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultServerName,
                     description: "A specified server parsed as a string"),
                 new Option<string>(
                     aliases: new string[] { "--filter", "-f" },
-                    getDefaultValue: () => AprsIsConnection.AprsIsConstants.DefaultFilter,
+                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
                     description: "A user filter parsed as a string"),
                 new Option<LogLevel>(
                     aliases: new string[] { "--verbosity", "-v" },
@@ -126,7 +126,7 @@
                     .SetMinimumLevel(verbosity);
             });
 
-            using AprsIsConnection n = new AprsIsConnection(loggerFactory.CreateLogger<AprsIsConnection>());
+            using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
             n.ReceivedPacket += PrintPacket;
 
             Task receive = n.Receive(callsign, password, server, filter);

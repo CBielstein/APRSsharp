@@ -7,12 +7,12 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     using Xunit;
 
     /// <summary>
-    /// Tests AprsIsConnection.
+    /// Tests <see cref="AprsIsClient"/>.
     /// </summary>
-    public class AprsIsConnectionUnitTests
+    public class AprsIsClientUnitTests
     {
         /// <summary>
-        /// Tests that the Disconnect() method on AprsIsConnection
+        /// Tests that the Disconnect() method on <see cref="AprsIsClient"/>
         /// succesfully stops receiving and the Receive() Task returns.
         /// </summary>
         [Fact]
@@ -20,14 +20,14 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
-            using AprsIsConnection connection = new AprsIsConnection(NullLogger<AprsIsConnection>.Instance, mockTcpConnection.Object);
+            using AprsIsClient client = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
 
-            Task receiveTask = connection.Receive("callsign", "password", "server", "filter");
+            Task receiveTask = client.Receive("callsign", "password", "server", "filter");
 
             // Sleep 0.01 seconds to ensure the connection starts "receiving"
             await Task.Delay(10);
 
-            connection.Disconnect();
+            client.Disconnect();
 
             // TODO Issue 125: Add a timeout for this test, if disconnect fails we could be here a while...
             await receiveTask;

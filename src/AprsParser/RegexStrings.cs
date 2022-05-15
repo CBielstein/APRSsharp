@@ -32,7 +32,7 @@ namespace AprsSharp.Parsers.Aprs
         ///     Longitude
         ///     Symbol Code.
         /// </summary>
-        public const string PositionLatLongWithSymbols = @"([0-9 \.NW]{8})(.)([0-9 \.EW]{9})(.)";
+        public const string PositionLatLongWithSymbols = @"([0-9 \.NS]{8})(.)([0-9 \.EW]{9})(.)";
 
         /// <summary>
         /// Same as <see cref="MaidenheadGridWithOptionalSymbols"/> but forces full line match.

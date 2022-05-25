@@ -119,6 +119,51 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
+        /// Tests that <see cref="AprsIsClient.Receive(string, string, string, string?)"/> returns the correct server name in the ConnectedServer property.
+        /// </summary>
+        /// <param name="loginResponse">The test login response string returned from the APRS server.</param>
+        /// <param name="expected">The server name expected to be set in ConnectedServer.</param>
+        [Theory]
+        [InlineData("# logresp N0CALL unverified, server T2ONTARIO", "T2ONTARIO")]
+        [InlineData("# logresp N0CALL unverified, server T2BRAZIL", "T2BRAZIL")]
+        [InlineData("# logresp N0CALL unverified, server", null)]
+        [InlineData("# logresp", null)]
+        public void ReceiveSetConnectedServerProperty(string loginResponse, string? expected)
+        {
+            IList<string> tcpMessagesReceived = new List<string>();
+            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+
+            // Mock underlying TCP connection
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
+
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
+                .Returns(loginResponse);
+
+            // Create connection and register callbacks
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ReceivedTcpMessage += (string message) =>
+            {
+                tcpMessagesReceived.Add(message);
+            };
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+            };
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+
+            // Wait to ensure the messages are sent and received
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
+
+            // Assert the ConnectedServer property was set to the correct server or null as appropriate.
+            Assert.Equal(expected, aprsIs.ConnectedServer);
+
+            aprsIs.Disconnect();
+        }
+
+        /// <summary>
         /// Verifies that the <see cref="AprsIsClient.ReceivedPacket"/> event is raised when
         /// a packet is decoded in <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
         /// </summary>

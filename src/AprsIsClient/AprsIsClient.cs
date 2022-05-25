@@ -93,6 +93,11 @@
         }
 
         /// <summary>
+        /// Gets the name of the currently logged in server.
+        /// </summary>
+        public string? ConnectedServer { get; private set; } = null;
+
+        /// <summary>
         /// Method to cancel the receipt of packets.
         /// </summary>
         public void Disconnect()
@@ -135,7 +140,8 @@
                                 if (received.Contains("logresp"))
                                 {
                                     State = ConnectionState.LoggedIn;
-                                }
+                                    SetConnectedServer(received);
+                                 }
 
                                 if (State != ConnectionState.LoggedIn)
                                 {
@@ -159,8 +165,8 @@
                         {
                             Thread.Yield();
                         }
-                }
-            });
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -227,6 +233,39 @@
         {
             var assemblyInfo = Assembly.GetAssembly(typeof(AprsIsClient)).GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             return assemblyInfo.InformationalVersion;
+        }
+
+        /// <summary>
+        /// Sets the ConnectedServer property to the connected server; null if server name cannot be parsed.
+        /// </summary>
+        /// <param name="loginResponse">The login response string from the APRS server.</param>
+        private void SetConnectedServer(string? loginResponse)
+        {
+            try
+            {
+                ConnectedServer = null;
+
+                if (!string.IsNullOrWhiteSpace(loginResponse) && loginResponse.Contains("server"))
+                {
+                    // The server name should be the next word after "server" in the login response string.
+                    ConnectedServer = loginResponse.Substring(loginResponse.IndexOf("server")).Split(" ")[1].Trim();
+                }
+
+                // If ConnectedServer returns with an empty or blank string for some reason, we want to return null.
+                if (string.IsNullOrWhiteSpace(ConnectedServer))
+                {
+                    ConnectedServer = null;
+                }
+
+                logger.LogInformation("Connected to server {0}.", ConnectedServer ?? "N/A");
+            }
+
+            // Swallow the exception here and set ConnectedServer to null.
+            catch (Exception ex)
+            {
+                ConnectedServer = null;
+                logger.LogDebug(ex, "Failed to get logged in server name with parameter: {0}.", loginResponse ?? "<Parameter was null>");
+            }
         }
 
         /// <summary>

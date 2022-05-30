@@ -1,8 +1,5 @@
 namespace AprsSharpUnitTests.Connections.AprsIs
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using Microsoft.Extensions.Logging.Abstractions;

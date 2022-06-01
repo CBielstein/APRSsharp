@@ -139,8 +139,8 @@
                             {
                                 if (received.Contains("logresp"))
                                 {
-                                    State = ConnectionState.LoggedIn;
                                     SetConnectedServer(received);
+                                    State = ConnectionState.LoggedIn;
                                  }
 
                                 if (State != ConnectionState.LoggedIn)

@@ -130,9 +130,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         [InlineData("# logresp", null)]
         public void ReceiveSetConnectedServerProperty(string loginResponse, string? expected)
         {
-            IList<string> tcpMessagesReceived = new List<string>();
-            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
-
             // Mock underlying TCP connection
             var mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupGet(m => m.Connected).Returns(true);
@@ -142,14 +139,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Create connection and register callbacks
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            aprsIs.ReceivedTcpMessage += (string message) =>
-            {
-                tcpMessagesReceived.Add(message);
-            };
-            aprsIs.ChangedState += (ConnectionState newState) =>
-            {
-                stateChangesReceived.Add(newState);
-            };
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
@@ -159,8 +148,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Assert the ConnectedServer property was set to the correct server or null as appropriate.
             Assert.Equal(expected, aprsIs.ConnectedServer);
-
-            aprsIs.Disconnect();
         }
 
         /// <summary>

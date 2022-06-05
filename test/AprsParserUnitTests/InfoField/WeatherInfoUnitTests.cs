@@ -47,7 +47,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData(
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW",
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900wRSW",
-            "220/004g005t077r000p000P000h50b09900wRSW",
+            "wRSW",
             220,
             4,
             5,
@@ -61,7 +61,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData( // Luminosity 10
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900L010wRSW",
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900L010wRSW",
-            "220/004g005t077r000p000P000h50b09900L010wRSW",
+            "wRSW",
             220,
             4,
             5,
@@ -75,7 +75,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData( // Luminosity 1010
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900l010wRSW",
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b09900l010wRSW",
-            "220/004g005t077r000p000P000h50b09900l010wRSW",
+            "wRSW",
             220,
             4,
             5,
@@ -89,7 +89,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData(
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW",
             "!4903.50N/07201.75W_220/004g005t077r000p000P000h50b.....wRSW",
-            "220/004g005t077r000p000P000h50b.....wRSW",
+            "wRSW",
             220,
             4,
             5,
@@ -103,7 +103,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData(
             "@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW",
             "@092345z4903.50N/07201.75W_220/004g005t-07r000p000P000h50b09900wRSW",
-            "220/004g005t-07r000p000P000h50b09900wRSW",
+            "wRSW",
             220,
             4,
             5,
@@ -117,7 +117,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         [InlineData(
             "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUII",
             "@092345z4903.50N/07201.75W_090/000g000t066r000p000P...h..b.....dUII",
-            "090/000g000t066r000p000...dUII",
+            "...dUII",
             90,
             0,
             0,
@@ -127,6 +127,38 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             null,
             null,
             "dUII",
+            PacketType.PositionWithTimestampWithMessaging)]
+
+        // Tests if there is a measurement in the comment.  We preserve it in the comment and treat as a measurement.
+        [InlineData(
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000...dUIIL878",
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000P...h..b.....L878...dUIIL878",
+            "...dUIIL878",
+            90,
+            0,
+            0,
+            66,
+            null,
+            null,
+            null,
+            878,
+            "...dUIIL878",
+            PacketType.PositionWithTimestampWithMessaging)]
+
+        // Tests if the measurement is in the data AND in the comment.  Assumes first occurrence is the measurement.
+        [InlineData(
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000L555dUIIL878",
+            "@092345z4903.50N/07201.75W_090/000g000t066r000p000P...h..b.....L555dUIIL878",
+            "dUIIL878",
+            90,
+            0,
+            0,
+            66,
+            null,
+            null,
+            null,
+            555,
+            "dUIIL878",
             PacketType.PositionWithTimestampWithMessaging)]
         public void TestCompleteWeatherReport(
             string encodedInfoField,
@@ -219,7 +251,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
 
             AssertWeatherInfo(
                 p.InfoField as WeatherInfo,
-                "180/010g015t068r001p011P010h99b09901l010#010s050 Testing WX packet.",
+                " Testing WX packet.",
                 false,
                 testTimestamp,
                 testPosition,

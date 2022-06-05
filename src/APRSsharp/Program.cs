@@ -53,6 +53,7 @@
                     Console.WriteLine($"Luminosity: {wi.Luminosity}");
                     Console.WriteLine($"Raw rain: {wi.RainRaw}");
                     Console.WriteLine($"Snow (inches, last 24 hours): {wi.Snow}");
+                    Console.WriteLine($"Weather Comment: {wi.Comment}");
                 }
             }
             else if (p.InfoField is StatusInfo si)

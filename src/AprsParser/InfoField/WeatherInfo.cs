@@ -1,7 +1,9 @@
 namespace AprsSharp.Parsers.Aprs
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
     using AprsSharp.Parsers.Aprs.Extensions;
@@ -51,6 +53,7 @@ namespace AprsSharp.Parsers.Aprs
             Luminosity = GetWeatherMeasurement('L') ?? GetWeatherMeasurement('l') + 1000;
             RainRaw = GetWeatherMeasurement('#');
             Snow = GetWeatherMeasurement('s');
+            Comment = $"{EncodeWeatherInfo()}{GetUserComment()}";
         }
 
         /// <summary>
@@ -103,8 +106,7 @@ namespace AprsSharp.Parsers.Aprs
             Luminosity = luminosity;
             RainRaw = rainRaw;
             Snow = snow;
-
-            Comment = $"{EncodeWeatherInfo()}{comment}";
+            base.Comment = $"{EncodeWeatherInfo()}{comment}";
         }
 
         /// <summary>
@@ -168,6 +170,15 @@ namespace AprsSharp.Parsers.Aprs
         public int? Snow { get; }
 
         /// <summary>
+        /// Gets user comment within weather data.
+        /// </summary>
+        public new string? Comment
+        {
+            get { return GetUserComment(); }
+            private set { }
+        }
+
+        /// <summary>
         /// Retrieves an APRS weather measurement from the comment string.
         /// </summary>
         /// <param name="measurementKey">The weather element to fetch, as defined by the key the ARPS specification.</param>
@@ -177,9 +188,91 @@ namespace AprsSharp.Parsers.Aprs
         {
             // Regex below looks for the measurement key followed by either `length` numbers
             // or a negative number of `length - 1` digits (to allow for the negative sign)
-            var match = Regex.Match(Comment, $"{measurementKey}(([0-9]{{{length}}})|(-[0-9]{{{length - 1}}}))");
+            var match = Regex.Match(base.Comment, $"{measurementKey}(([0-9]{{{length}}})|(-[0-9]{{{length - 1}}}))");
             return match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : null;
         }
+
+        private string? GetUserComment()
+        {
+            if (string.IsNullOrEmpty(base.Comment))
+            {
+                return null;
+            }
+
+            StringBuilder s = new ();
+
+            // Create dictionary of measurement symbols and their lengths
+            Dictionary<char, int> wxKeys = new ()
+            {
+                { '/', 3 },
+                { 'g', 3 },
+                { 't', 3 },
+                { 'r', 3 },
+                { 'p', 3 },
+                { 'P', 3 },
+                { 'h', 2 },
+                { 'b', 5 },
+                { 'L', 3 },
+                { 'l', 3 },
+                { 's', 3 },
+                { '#', 3 },
+            };
+
+            // Holds the measurement and its position in the comment string for each provided measurement.
+            List<WXKeyBuilder> wxKeyBuilders = new ();
+
+            // Capture each measurement and add it to the wxKeyBuilders list.
+            foreach (KeyValuePair<char, int> l in wxKeys)
+                {
+                    Match match = Regex.Match(base.Comment, $"{l.Key}(([0-9. ]{{{l.Value}}})|(-[0-9. ]{{{l.Value - 1}}}))");
+                    if (match.Success)
+                    {
+                        wxKeyBuilders.Add(new WXKeyBuilder
+                        {
+                            WXKey = l.Key,
+                            WXKeyLength = l.Value + 1,
+                            WXKeyIndex = match.Groups[1].Index,
+                            WXMeasurement = l.Key + base.Comment.Substring(match.Groups[1].Index, l.Value),
+                        });
+                    }
+                }
+
+                /*
+                Now that we know which measurement keys were provided and where they are in the comment string, we rebuild the string.  This rebuilt string is what will be removed from the original comment.
+                We could have removed each measurement in the foreach loop above, but if for some reason the user comment has text that matches a measurement (i.e., "MyComment is s123"),
+                we don't want to remove it.
+
+                Once the weather measurements are no longer consecutive in the original comment, i.e., index plus its length should be where the next wx key begins, we know we are in the user comment.
+                */
+
+            if (wxKeyBuilders.Count > 0)
+                {
+                    // Line up weather data into the order it was in the original comment.
+                    wxKeyBuilders = (List<WXKeyBuilder>)wxKeyBuilders.OrderBy(x => x.WXKeyIndex).ToList();
+                    int nextIndex = wxKeyBuilders[0].WXKeyIndex;
+
+                    foreach (WXKeyBuilder w in wxKeyBuilders)
+                    {
+                        if (w.WXKeyIndex == nextIndex)
+                        {
+                            s.Append(w.WXMeasurement);
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                        nextIndex += w.WXKeyLength;
+                    }
+
+                    // Remove the weather measurements from the original comment and trim off the first three characters (wind direction).  What's left is the weather comment.
+                    return base.Comment.Replace(s.ToString(), string.Empty, StringComparison.Ordinal).Remove(0, 3);
+                }
+                else
+                {
+                    return null;
+                }
+          }
 
         /// <summary>
         /// Encodes weather information to be placed in the comment field.
@@ -217,6 +310,14 @@ namespace AprsSharp.Parsers.Aprs
             }
 
             return sb.ToString();
+        }
+
+        private struct WXKeyBuilder
+        {
+            internal char WXKey;
+            internal int WXKeyLength;
+            internal int WXKeyIndex;
+            internal string WXMeasurement;
         }
     }
 }

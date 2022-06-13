@@ -9,6 +9,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     /// <summary>
     /// Tests <see cref="AprsIsClient"/>.
     /// </summary>
+    [Collection(nameof(TimedTestCollection))]
     public class AprsIsClientUnitTests
     {
         /// <summary>

@@ -2,7 +2,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
     using Microsoft.Extensions.Logging.Abstractions;
@@ -12,13 +11,14 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     /// <summary>
     /// Unit tests for <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
     /// </summary>
+    [Collection(nameof(TimedTestCollection))]
     public class ReceiveUnitTests
     {
         /// <summary>
         /// Verifies that the <see cref="AprsIsClient.ReceivedTcpMessage"/> event is raised when
         /// a TCP message is received in <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void ReceivedTcpMessageEvent()
         {
             IList<string> tcpMessagesReceived = new List<string>();
@@ -42,7 +42,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 500);
+            WaitForCondition(() => false);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -53,7 +53,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// <summary>
         /// Tests that <see cref="AprsIsClient.Receive(string, string, string, string?)"/> handles server login.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void ReceiveHandlesLogin()
         {
             IList<string> tcpMessagesReceived = new List<string>();
@@ -92,7 +92,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn);
 
             // Assert the state change event was triggered with the correct state
             Assert.True(stateChangeEventHandled);
@@ -123,7 +123,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// </summary>
         /// <param name="loginResponse">The test login response string returned from the APRS server.</param>
         /// <param name="expected">The server name expected to be set in ConnectedServer.</param>
-        [Theory]
+        [Theory(Timeout = 500)]
         [InlineData("# logresp N0CALL unverified, server T2ONTARIO", "T2ONTARIO")]
         [InlineData("# logresp N0CALL unverified, server T2BRAZIL", "T2BRAZIL")]
         [InlineData("# logresp N0CALL unverified, server", null)]
@@ -144,7 +144,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn);
 
             // Assert the ConnectedServer property was set to the correct server or null as appropriate.
             Assert.Equal(expected, aprsIs.ConnectedServer);
@@ -154,7 +154,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Verifies that the <see cref="AprsIsClient.ReceivedPacket"/> event is raised when
         /// a packet is decoded in <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void ReceivedPacketEvent()
         {
             IList<string> tcpMessagesReceived = new List<string>();
@@ -179,7 +179,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 500);
+            WaitForCondition(() => eventHandled);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -208,7 +208,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Validates that an error while connecting to the TCP server
         /// results in a disconnected event sent by the <see cref="AprsIsClient"/>.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void FailureToConnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
@@ -228,7 +228,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(1, stateChangesReceived.Count);
@@ -245,7 +245,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Tests that full cycle of connection, login, disconnected states on
         /// <see cref="AprsIsClient"/> and that the proper events are raised for them.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void FailureToReceiveSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
@@ -272,7 +272,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);
@@ -285,7 +285,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// <summary>
         /// Tests that a server disconnection will set a disconnected state.
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 500)]
         public void ServerDisconnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
@@ -323,7 +323,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);
@@ -338,26 +338,17 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         }
 
         /// <summary>
-        /// Waits for a specified condition or thows an exception if a time limit is reached.
+        /// Waits for a specified condition. If using this, consider setting a timeout on your test.
         /// </summary>
         /// <param name="condition">A function returnig bool to check.</param>
-        /// <param name="timeoutMs">Timeout in milliseconds.</param>
-        /// <returns>True, if the condition is met before the timeout. Otherwise, throws an exception.</returns>
-        private static bool WaitForCondition(Func<bool> condition, int timeoutMs)
+        /// <returns>True when the condition is met.</returns>
+        private static bool WaitForCondition(Func<bool> condition)
         {
-            DateTime start = DateTime.UtcNow;
-
-            while ((DateTime.UtcNow - start).TotalMilliseconds <= timeoutMs)
+            while (!condition())
             {
-                if (condition())
-                {
-                    return true;
-                }
-
-                Thread.Yield();
             }
 
-            throw new TimeoutException();
+            return true;
         }
     }
 }

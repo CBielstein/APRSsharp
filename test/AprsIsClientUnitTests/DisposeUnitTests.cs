@@ -8,6 +8,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     /// <summary>
     /// Unit tests for <see cref="AprsIsClient.Dispose()"/>.
     /// </summary>
+    [Collection(nameof(TimedTestCollection))]
     public class DisposeUnitTests
     {
         /// <summary>

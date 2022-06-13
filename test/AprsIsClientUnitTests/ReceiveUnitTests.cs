@@ -42,7 +42,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 2000);
+            WaitForCondition(() => eventHandled, 500);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -92,7 +92,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 500);
 
             // Assert the state change event was triggered with the correct state
             Assert.True(stateChangeEventHandled);
@@ -144,7 +144,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn, 500);
 
             // Assert the ConnectedServer property was set to the correct server or null as appropriate.
             Assert.Equal(expected, aprsIs.ConnectedServer);
@@ -179,7 +179,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            WaitForCondition(() => eventHandled, 1250);
+            WaitForCondition(() => eventHandled, 500);
 
             // Assert the callback was triggered and that the expected message was received.
             Assert.True(eventHandled);
@@ -228,7 +228,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 1500);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(1, stateChangesReceived.Count);
@@ -272,7 +272,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 5000);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);
@@ -323,7 +323,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 5000);
+            WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected, 500);
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);

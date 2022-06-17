@@ -24,7 +24,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async Task ReceivedTcpMessageEvent()
         {
             IList<string> tcpMessagesReceived = new List<string>();
-            bool eventHandled = false;
+            TaskCompletionSource eventHandled = new TaskCompletionSource();
 
             // Mock underlying TCP connection
             string testMessage = "This is a test message";
@@ -37,17 +37,16 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
-                eventHandled = true;
+                eventHandled.SetResult();
             };
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            await WaitForCondition(() => eventHandled);
+            await eventHandled.Task;
 
             // Assert the callback was triggered and that the expected message was received.
-            Assert.True(eventHandled);
             Assert.Equal(1, tcpMessagesReceived.Count);
             Assert.Contains(testMessage, tcpMessagesReceived);
         }
@@ -60,9 +59,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async Task ReceiveHandlesLogin()
         {
             IList<string> tcpMessagesReceived = new List<string>();
-            bool tcpMessageEventHandled = false;
-            bool stateChangeEventHandled = false;
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            TaskCompletionSource loggedIn = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.2.1 filter r/50.5039/4.4699/50";
 
@@ -81,12 +79,15 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
-                tcpMessageEventHandled = true;
             };
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
-                stateChangeEventHandled = true;
+
+                if (newState == ConnectionState.LoggedIn)
+                {
+                    loggedIn.SetResult();
+                }
             };
 
             Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
@@ -95,16 +96,14 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            await WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn);
+            await loggedIn.Task;
 
             // Assert the state change event was triggered with the correct state
-            Assert.True(stateChangeEventHandled);
             Assert.Equal(2, stateChangesReceived.Count);
             Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
             Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
 
             // Assert the TCP message callbacks were triggered with the correct messages
-            Assert.True(tcpMessageEventHandled);
             Assert.Equal(2, tcpMessagesReceived.Count);
             Assert.Equal(firstMessage, tcpMessagesReceived[0]);
             Assert.Equal(loginResponse, tcpMessagesReceived[1]);
@@ -141,14 +140,23 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
                 .Returns(loginResponse);
 
+            TaskCompletionSource loggedIn = new TaskCompletionSource();
+
             // Create connection and register callbacks
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                if (newState == ConnectionState.LoggedIn)
+                {
+                    loggedIn.SetResult();
+                }
+            };
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            await WaitForCondition(() => aprsIs.State == ConnectionState.LoggedIn);
+            await loggedIn.Task;
 
             // Assert the ConnectedServer property was set to the correct server or null as appropriate.
             Assert.Equal(expected, aprsIs.ConnectedServer);
@@ -163,7 +171,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async Task ReceivedPacketEvent()
         {
             IList<string> tcpMessagesReceived = new List<string>();
-            bool eventHandled = false;
+            TaskCompletionSource eventHandled = new TaskCompletionSource();
             Packet? receivedPacket = null;
 
             // Mock underlying TCP connection
@@ -177,18 +185,16 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             aprsIs.ReceivedPacket += (Packet p) =>
             {
                 receivedPacket = p;
-                eventHandled = true;
+                eventHandled.SetResult();
             };
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
-            await WaitForCondition(() => eventHandled);
+            await eventHandled.Task;
 
             // Assert the callback was triggered and that the expected message was received.
-            Assert.True(eventHandled);
-
             if (receivedPacket == null)
             {
                 Assert.NotNull(receivedPacket);
@@ -218,6 +224,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async Task FailureToConnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            TaskCompletionSource disconnected = new TaskCompletionSource();
 
             // Mock underlying TCP connection
             var mockTcpConnection = new Mock<ITcpConnection>();
@@ -227,14 +234,21 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Create connection and register callback
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+                if (newState == ConnectionState.Disconnected)
+                {
+                    disconnected.SetResult();
+                }
+            };
             Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            await WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
+            await disconnected.Task;
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(1, stateChangesReceived.Count);
@@ -256,6 +270,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         public async Task FailureToReceiveSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            TaskCompletionSource disconnected = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
 
@@ -272,14 +287,21 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Create connection and register callbacks
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+                if (newState == ConnectionState.Disconnected)
+                {
+                    disconnected.SetResult();
+                }
+            };
 
             // Start receiving
             Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            await WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
+            await disconnected.Task;
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);
@@ -293,10 +315,11 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Tests that a server disconnection will set a disconnected state.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Timeout = 500)]
+        [Fact(Timeout = 2000)]
         public async Task ServerDisconnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            TaskCompletionSource disconnected = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
 
@@ -324,14 +347,22 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 
             // Create connection and register callbacks
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            aprsIs.ChangedState += (ConnectionState newState) => stateChangesReceived.Add(newState);
+            aprsIs.ChangedState += (ConnectionState newState) =>
+            {
+                stateChangesReceived.Add(newState);
+
+                if (newState == ConnectionState.Disconnected)
+                {
+                    disconnected.SetResult();
+                }
+            };
 
             // Start receiving
             Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
-            await WaitForCondition(() => aprsIs.State == ConnectionState.Disconnected);
+            await disconnected.Task;
 
             // Assert the state change event was triggered with the correct state
             Assert.Equal(3, stateChangesReceived.Count);
@@ -343,21 +374,6 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Assert we only checked connection and receive the correct number of times
             mockTcpConnection.VerifyGet(mock => mock.Connected, Times.Exactly(5));
             mockTcpConnection.Verify(mock => mock.ReceiveString(), Times.Exactly(4));
-        }
-
-        /// <summary>
-        /// Waits for a specified condition. If using this, consider setting a timeout on your test.
-        /// </summary>
-        /// <param name="condition">A function returnig bool to check.</param>
-        /// <returns>True when the condition is met.</returns>
-        private static async Task<bool> WaitForCondition(Func<bool> condition)
-        {
-            while (!condition())
-            {
-                await Task.Delay(1);
-            }
-
-            return true;
         }
     }
 }

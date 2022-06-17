@@ -1,4 +1,4 @@
-namespace AprsSharpUnitTests
+namespace AprsSharpUnitTests.Connections.AprsIs
 {
     using Xunit;
 

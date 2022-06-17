@@ -126,8 +126,10 @@
                 timer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
 
                 // Receive
-                await Task.Run(() =>
+                await Task.Run(async () =>
                 {
+                    await Task.Yield();
+
                     while (receiving && tcpConnection.Connected)
                     {
                         string? received = tcpConnection.ReceiveString();
@@ -141,7 +143,7 @@
                                 {
                                     SetConnectedServer(received);
                                     State = ConnectionState.LoggedIn;
-                                 }
+                                }
 
                                 if (State != ConnectionState.LoggedIn)
                                 {
@@ -160,10 +162,6 @@
                                     logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
-                        }
-                        else
-                        {
-                            Thread.Yield();
                         }
                     }
                 });

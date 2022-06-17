@@ -126,10 +126,8 @@
                 timer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
 
                 // Receive
-                await Task.Run(async () =>
+                await Task.Run(() =>
                 {
-                    await Task.Yield();
-
                     while (receiving && tcpConnection.Connected)
                     {
                         string? received = tcpConnection.ReceiveString();

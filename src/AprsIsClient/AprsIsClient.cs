@@ -141,7 +141,7 @@
                                 {
                                     SetConnectedServer(received);
                                     State = ConnectionState.LoggedIn;
-                                 }
+                                }
 
                                 if (State != ConnectionState.LoggedIn)
                                 {
@@ -160,10 +160,6 @@
                                     logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
                                 }
                             }
-                        }
-                        else
-                        {
-                            Thread.Yield();
                         }
                     }
                 });
@@ -191,6 +187,8 @@
             }
 
             disposed = true;
+
+            Disconnect();
 
             if (disposeITcpConnection)
             {

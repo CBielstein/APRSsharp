@@ -188,6 +188,8 @@
 
             disposed = true;
 
+            Disconnect();
+
             if (disposeITcpConnection)
             {
                 tcpConnection.Dispose();

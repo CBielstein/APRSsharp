@@ -315,7 +315,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
         /// Tests that a server disconnection will set a disconnected state.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Timeout = 2000)]
+        [Fact(Timeout = 500)]
         public async Task ServerDisconnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();

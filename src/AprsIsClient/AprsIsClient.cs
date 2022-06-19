@@ -187,8 +187,7 @@
             }
 
             disposed = true;
-
-            Disconnect();
+            receiving = false;
 
             if (disposeITcpConnection)
             {

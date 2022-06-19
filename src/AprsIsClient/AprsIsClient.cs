@@ -187,7 +187,6 @@
             }
 
             disposed = true;
-            receiving = false;
 
             if (disposeITcpConnection)
             {

@@ -13,24 +13,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
     /// Unit tests for <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
     /// </summary>
     [Collection(nameof(TimedTestCollection))]
-    public sealed class ReceiveUnitTests : IDisposable
+    public class ReceiveUnitTests
     {
-        /// <summary>
-        /// The <see cref="AprsIsClient"/> for testing.
-        /// Reference via <see cref="AprsIs"/> to get the
-        /// free dispose on assignment.
-        /// </summary>
-        private AprsIsClient? aprsIsClient;
-        private AprsIsClient? AprsIs
-        {
-            get => aprsIsClient;
-            set
-            {
-                aprsIsClient?.Dispose();
-                aprsIsClient = value;
-            }
-        }
-
         /// <summary>
         /// Verifies that the <see cref="AprsIsClient.ReceivedTcpMessage"/> event is raised when
         /// a TCP message is received in <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
@@ -49,15 +33,15 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ReceivedTcpMessage += (string message) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
                 eventHandled.SetResult();
             };
 
             // Receive some packets from it.
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", null);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
             await eventHandled.Task;
@@ -91,12 +75,12 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(loginResponse);
 
             // Create connection and register callbacks
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ReceivedTcpMessage += (string message) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
             };
-            AprsIs.ChangedState += (ConnectionState newState) =>
+            aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
 
@@ -106,10 +90,10 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 }
             };
 
-            Assert.Equal(ConnectionState.NotConnected, AprsIs.State);
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
             // Receive some packets from it.
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             await loggedIn.Task;
@@ -125,7 +109,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Assert.Equal(loginResponse, tcpMessagesReceived[1]);
 
             // Assert that the login was completed
-            Assert.Equal(ConnectionState.LoggedIn, AprsIs.State);
+            Assert.Equal(ConnectionState.LoggedIn, aprsIs.State);
 
             // Assert that a connection was started and the login message was sent to the server
             mockTcpConnection.Verify(mock => mock.Connect(
@@ -159,8 +143,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             TaskCompletionSource loggedIn = new TaskCompletionSource();
 
             // Create connection and register callbacks
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ChangedState += (ConnectionState newState) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 if (newState == ConnectionState.LoggedIn)
                 {
@@ -169,13 +153,13 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Receive some packets from it.
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             await loggedIn.Task;
 
             // Assert the ConnectedServer property was set to the correct server or null as appropriate.
-            Assert.Equal(expected, AprsIs.ConnectedServer);
+            Assert.Equal(expected, aprsIs.ConnectedServer);
         }
 
         /// <summary>
@@ -197,15 +181,15 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ReceivedPacket += (Packet p) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ReceivedPacket += (Packet p) =>
             {
                 receivedPacket = p;
                 eventHandled.SetResult();
             };
 
             // Receive some packets from it.
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", null);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 
             // Wait to ensure the message is received
             await eventHandled.Task;
@@ -249,8 +233,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                     .Throws(new Exception("Mock exception connecting!"));
 
             // Create connection and register callback
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ChangedState += (ConnectionState newState) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
                 if (newState == ConnectionState.Disconnected)
@@ -258,10 +242,10 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                     disconnected.SetResult();
                 }
             };
-            Assert.Equal(ConnectionState.NotConnected, AprsIs.State);
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
 
             // Receive some packets from it.
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             await disconnected.Task;
@@ -269,7 +253,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             // Assert the state change event was triggered with the correct state
             Assert.Equal(1, stateChangesReceived.Count);
             Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[0]);
-            Assert.Equal(ConnectionState.Disconnected, AprsIs.State);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
 
             // Assert that a connection was started and the login message was sent to the server
             mockTcpConnection.Verify(mock => mock.Connect(
@@ -302,8 +286,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Throws(new Exception("Something happened to the connection!"));
 
             // Create connection and register callbacks
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ChangedState += (ConnectionState newState) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
                 if (newState == ConnectionState.Disconnected)
@@ -313,8 +297,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Start receiving
-            Assert.Equal(ConnectionState.NotConnected, AprsIs.State);
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             await disconnected.Task;
@@ -324,14 +308,14 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
             Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
             Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[2]);
-            Assert.Equal(ConnectionState.Disconnected, AprsIs.State);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
         }
 
         /// <summary>
         /// Tests that a server disconnection will set a disconnected state.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Timeout = 500)]
+        [Fact(Timeout = 2000)]
         public async Task ServerDisconnectSetsDisconnectedState()
         {
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
@@ -362,8 +346,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
                 .Returns(false);
 
             // Create connection and register callbacks
-            AprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
-            AprsIs.ChangedState += (ConnectionState newState) =>
+            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
 
@@ -374,8 +358,8 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             };
 
             // Start receiving
-            Assert.Equal(ConnectionState.NotConnected, AprsIs.State);
-            _ = AprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
+            Assert.Equal(ConnectionState.NotConnected, aprsIs.State);
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", "r/50.5039/4.4699/50");
 
             // Wait to ensure the messages are sent and received
             await disconnected.Task;
@@ -385,17 +369,11 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             Assert.Equal(ConnectionState.Connected, stateChangesReceived[0]);
             Assert.Equal(ConnectionState.LoggedIn, stateChangesReceived[1]);
             Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[2]);
-            Assert.Equal(ConnectionState.Disconnected, AprsIs.State);
+            Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
 
             // Assert we only checked connection and receive the correct number of times
             mockTcpConnection.VerifyGet(mock => mock.Connected, Times.Exactly(5));
             mockTcpConnection.Verify(mock => mock.ReceiveString(), Times.Exactly(4));
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            aprsIsClient?.Dispose();
         }
     }
 }

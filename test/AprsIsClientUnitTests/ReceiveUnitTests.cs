@@ -62,7 +62,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
             IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
             TaskCompletionSource loggedIn = new TaskCompletionSource();
 
-            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.2.1 filter r/50.5039/4.4699/50";
+            string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.2.2 filter r/50.5039/4.4699/50";
 
             // Mock underlying TCP connection
             string firstMessage = "# server first message";

@@ -67,6 +67,12 @@
                 Console.WriteLine($"    Position: {mbi.Position.EncodeGridsquare(4, false)}");
                 Console.WriteLine($"    Comment: {mbi.Comment}");
             }
+            else if (p.InfoField is Message m)
+            {
+                Console.WriteLine($"    To: {m.Addressee}");
+                Console.WriteLine($"    Message: {m.Content}");
+                Console.WriteLine($"    ID: {m.MessageId}");
+            }
 
             Console.WriteLine();
         }

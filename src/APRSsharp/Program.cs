@@ -3,13 +3,13 @@
     using System;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
-    using Microsoft.Extensions.Logging;
-    using System.Linq;
-    using System.Text;
     using AprsSharp.Protocols.KISS;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// The public class that will be called when building the console application.
@@ -143,7 +143,7 @@
         }
 
         /// <summary>
-        /// Executes functionality using the provided command line arguments
+        /// Executes functionality using the provided command line arguments.
         /// </summary>
         /// <param name="mode">The mode of operation for this invocation of the program.</param>
         /// <param name="callsign">The user callsign that they should input.</param>
@@ -174,6 +174,7 @@
                 case Mode.APRSIS:
                 {
                     Console.WriteLine($"Connecting to APRS-IS server: {server}");
+
                     using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
                     n.ReceivedPacket += PrintPacket;
 
@@ -196,7 +197,6 @@
 
                 case Mode.TCPTNC:
                 {
-
                     Console.WriteLine($"Connecting to TNC via TCP: {server}:{port}");
 
                     using TNCInterface tnc = new TcpTnc(server, port, 0);

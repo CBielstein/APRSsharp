@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\AprsIsClient\AprsIsClient.csproj" />
+    <ProjectReference Include="..\..\src\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

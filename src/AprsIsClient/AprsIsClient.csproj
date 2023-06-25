@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AprsParser\AprsParser.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

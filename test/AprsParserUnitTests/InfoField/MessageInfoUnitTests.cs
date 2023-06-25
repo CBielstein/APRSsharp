@@ -12,34 +12,28 @@ namespace AprsSharpUnitTests.Parsers.Aprs
     public class MessageInfoUnitTests
     {
         /// <summary>
-        /// Verifies decoding and re-encoding a full status packet in TNC2 format.
+        /// Verifies decoding and re-encoding a full message packet.
         /// </summary>
         [Fact]
         public void TestRoundTrip()
         {
-            string encoded = "N0CALL>WIDE2-2:>IO91SX/G My house";
+            string encoded = "N0CALL>WIDE2-2::Test     :Test Message{123ab";
             Packet p = new Packet(encoded);
 
             Assert.Equal("N0CALL", p.Sender);
             Assert.Equal("WIDE2-2", p.Path.Single());
             Assert.True((p.ReceivedTime - DateTime.UtcNow) < TimeSpan.FromMinutes(1));
-            Assert.Equal(PacketType.Status, p.InfoField.Type);
+            Assert.Equal(PacketType.Message, p.InfoField.Type);
 
-            if (p.InfoField is StatusInfo si)
+            if (p.InfoField is MessageInfo mi)
             {
-                // Coordinates not precise when coming from gridhead
-                double latitude = si?.Position?.Coordinates.Latitude ?? throw new Exception("Latitude should not be null");
-                double longitude = si?.Position?.Coordinates.Longitude ?? throw new Exception("Longitude should not be null");
-                Assert.Equal(51.98, Math.Round(latitude, 2));
-                Assert.Equal(-0.46, Math.Round(longitude, 2));
-                Assert.Equal("IO91SX", si?.Position?.EncodeGridsquare(6, false));
-                Assert.Equal('/', si?.Position?.SymbolTableIdentifier);
-                Assert.Equal('G', si?.Position?.SymbolCode);
-                Assert.Equal("My house", si?.Comment);
+                Assert.Equal("Test", mi.Addressee);
+                Assert.Equal("Test Message", mi.Content);
+                Assert.Equal("123ab", mi.Id);
             }
             else
             {
-                Assert.IsType<StatusInfo>(p.InfoField);
+                Assert.IsType<MessageInfo>(p.InfoField);
             }
 
             Assert.Equal(encoded, p.Encode());

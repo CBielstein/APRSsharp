@@ -83,6 +83,9 @@
                 case PacketType.MaidenheadGridLocatorBeacon:
                     return new MaidenheadBeaconInfo(encodedInfoField);
 
+                case PacketType.Message:
+                    return new MessageInfo(encodedInfoField);
+
                 default:
                     throw new NotImplementedException($"FromString not implemented for info field type {type}");
             }

@@ -67,7 +67,7 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         /// <param name="timestamp">An optional timestamp.</param>
         /// <param name="comment">An optional comment.</param>
-        public StatusInfo(Timestamp timestamp, string? comment)
+        public StatusInfo(Timestamp? timestamp, string? comment)
             : this(timestamp, null, comment)
         {
         }

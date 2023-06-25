@@ -53,9 +53,10 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// <param name="expectedContent">Expected decoded content.</param>
         /// <param name="expectedId">Expected decoded message ID.</param>
         [Theory]
-        [InlineData(":WU2Z     :Testing", "WU2Z", "Testing", null)]
-        [InlineData(":WU2Z     :Testing{003", "WU2Z", "Testing", "003")]
-        [InlineData(":EMAIL    :msproul@ap.org Test email", "EMAIL", "msproul@ap.org Test email", null)]
+        [InlineData(":WU2Z     :Testing", "WU2Z", "Testing", null)] // From APRS 1.01
+        [InlineData(":WU2Z     :Testing{003", "WU2Z", "Testing", "003")] // From APRS 1.01
+        [InlineData(":EMAIL    :msproul@ap.org Test email", "EMAIL", "msproul@ap.org Test email", null)] // From APRS 1.01
+        [InlineData(":Testing12:{3", "Testing12", null, "3")] // No content
         public void DecodeMessageFormat(
             string informationField,
             string expectedAddressee,
@@ -77,17 +78,42 @@ namespace AprsSharpUnitTests.Parsers.Aprs
         /// <param name="id">Expected decoded message ID.</param>
         /// <param name="expectedEncoding">Information field for decode.</param>
         [Theory]
-        [InlineData("WU2Z", "Testing", null, ":WU2Z     :Testing")]
-        [InlineData("WU2Z", "Testing", "003", ":WU2Z     :Testing{003")]
-        [InlineData("EMAIL", "msproul@ap.org Test email", null, ":EMAIL    :msproul@ap.org Test email")]
+        [InlineData("WU2Z", "Testing", null, ":WU2Z     :Testing")] // From APRS 1.01
+        [InlineData("WU2Z", "Testing", "003", ":WU2Z     :Testing{003")] // From APRS 1.01
+        [InlineData("EMAIL", "msproul@ap.org Test email", null, ":EMAIL    :msproul@ap.org Test email")] // From APRS 1.01
+        [InlineData("Testing12", null, "3", ":Testing12:{3")] // No content
         public void EncodeMessageFormat(
             string addressee,
-            string content,
+            string? content,
             string? id,
             string expectedEncoding)
         {
             MessageInfo mi = new MessageInfo(addressee, content, id);
             Assert.Equal(expectedEncoding, mi.Encode());
+        }
+
+        /// <summary>
+        /// Validates that message ID must be alphanumeric.
+        /// </summary>
+        [Fact]
+        public void NonAlphanumericIdRejected()
+        {
+            var exception = Assert.Throws<ArgumentException>(() => new MessageInfo("test", "test", "!@#$%"));
+            Assert.Equal("If provided, ID must be only alphanumeric (Parameter 'messageId')", exception.Message);
+        }
+
+        /// <summary>
+        /// Validates that disallowed characters in content result in exception.
+        /// </summary>
+        /// <param name="content">Content to test.</param>
+        [Theory]
+        [InlineData("Test{")]
+        [InlineData("Test~")]
+        [InlineData("Test|")]
+        public void DisallowedContentCharactersRejected(string content)
+        {
+            var exception = Assert.Throws<ArgumentException>(() => new MessageInfo("test", content, null));
+            Assert.Equal("Message content may not include `|`, `~`, or `{` (Parameter 'content')", exception.Message);
         }
     }
 }

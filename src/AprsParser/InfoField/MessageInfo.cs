@@ -79,7 +79,7 @@ namespace AprsSharp.Parsers.Aprs
                 {
                     throw new ArgumentException("If provided, ID must be of length (0,5]", nameof(messageId));
                 }
-                else if (!Regex.IsMatch(content, RegexStrings.Alphanumeric))
+                else if (!Regex.IsMatch(messageId, RegexStrings.Alphanumeric))
                 {
                     throw new ArgumentException("If provided, ID must be only alphanumeric", nameof(messageId));
                 }

@@ -32,8 +32,9 @@ namespace AprsSharp.Parsers.Aprs
                 throw new ArgumentException($"Packet encoding not of type {nameof(PacketType.Status)}. Type was {Type}", nameof(encodedInfoField));
             }
 
+            // First look with maidenhead
             Match match = Regex.Match(encodedInfoField, RegexStrings.StatusWithMaidenheadAndComment);
-            if (match.Success)
+            if (match.Success && Position.IsValidMaidenhead(match.Groups[1].Value))
             {
                 match.AssertSuccess(PacketType.Status, nameof(encodedInfoField));
 
@@ -44,12 +45,30 @@ namespace AprsSharp.Parsers.Aprs
                 {
                     Comment = match.Groups[4].Value;
                 }
+
+                return;
             }
-            else
+
+            // Next try without maidenhead
+            match = Regex.Match(encodedInfoField, RegexStrings.StatusWithOptionalTimestampAndComment);
+            if (match.Success)
             {
-                // TODO Issue #88
-                throw new NotImplementedException("Status report without maidenhead not yet implemented.Tracked by issue #88.");
+                match.AssertSuccess(PacketType.Status, nameof(encodedInfoField));
+
+                if (match.Groups[1].Success)
+                {
+                    Timestamp = new Timestamp(match.Groups[1].Value);
+                }
+
+                if (match.Groups[2].Success)
+                {
+                    Comment = match.Groups[2].Value;
+                }
+
+                return;
             }
+
+            throw new ArgumentException("Packet did not match any implemented versions of status info.");
         }
 
         /// <summary>
@@ -67,7 +86,7 @@ namespace AprsSharp.Parsers.Aprs
         /// </summary>
         /// <param name="timestamp">An optional timestamp.</param>
         /// <param name="comment">An optional comment.</param>
-        public StatusInfo(Timestamp timestamp, string? comment)
+        public StatusInfo(Timestamp? timestamp, string? comment)
             : this(timestamp, null, comment)
         {
         }
@@ -144,6 +163,8 @@ namespace AprsSharp.Parsers.Aprs
         {
             StringBuilder encoded = new StringBuilder();
 
+            encoded.Append(Type.ToChar());
+
             if (Position != null)
             {
                 if (Timestamp != null)
@@ -151,7 +172,6 @@ namespace AprsSharp.Parsers.Aprs
                     throw new ArgumentException($"{nameof(Timestamp)} may not be specified if a position is given.");
                 }
 
-                encoded.Append(Type.ToChar());
                 encoded.Append(Position.EncodeGridsquare(6, true));
 
                 if (!string.IsNullOrEmpty(Comment))
@@ -161,8 +181,15 @@ namespace AprsSharp.Parsers.Aprs
             }
             else
             {
-                // TODO Issue #88
-                throw new NotImplementedException("Status report without maidenhead not yet implemented.Tracked by issue #88.");
+                if (Timestamp != null)
+                {
+                    encoded.Append(Timestamp.Encode(TimestampType.DHMz));
+                }
+
+                if (!string.IsNullOrEmpty(Comment))
+                {
+                    encoded.Append(Comment);
+                }
             }
 
             return encoded.ToString();

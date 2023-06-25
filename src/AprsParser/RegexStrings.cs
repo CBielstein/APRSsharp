@@ -53,6 +53,15 @@ namespace AprsSharp.Parsers.Aprs
         public const string StatusWithMaidenheadAndComment = $@"^>({MaidenheadGridWithSymbols}) ?(.+)?$";
 
         /// <summary>
+        /// Matches a Status info field without Maidenhead grid. Allows optional timestamp and comment.
+        /// Three matches:
+        ///     Full
+        ///     Timestamp
+        ///     Comment.
+        /// </summary>
+        public const string StatusWithOptionalTimestampAndComment = @"^>([0-9]{6}z)?(([^|~\n])+)?$";
+
+        /// <summary>
         /// Matches a PositionWithoutTimestamp info field.
         /// Seven mathces:
         ///     Full

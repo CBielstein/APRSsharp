@@ -101,5 +101,56 @@ namespace AprsSharpUnitTests.Parsers.Aprs
             StatusInfo si = new StatusInfo(p, comment);
             Assert.Equal(expectedEncoding, si.Encode());
         }
+
+        /// <summary>
+        /// Tests decoding a status report without Maidenhead info field based on the APRS spec.
+        /// </summary>
+        /// <param name="informationField">Information field for decode.</param>
+        /// <param name="expectedTime">Expected decoded timestamp.</param>
+        /// <param name="expectedComment">Expected decoded comment.</param>
+        [Theory]
+        [InlineData(">Net Control Center", null, "Net Control Center")]
+        [InlineData(">092345zNet Control Center", "092345z", "Net Control Center")]
+        public void DecodeStatusReportFormatWithoutMaidenhead(
+            string informationField,
+            string? expectedTime,
+            string? expectedComment)
+        {
+            StatusInfo si = new StatusInfo(informationField);
+
+            Assert.Null(si.Position);
+            Assert.Equal(expectedComment, si.Comment);
+
+            if (expectedTime != null)
+            {
+                var expectedTimestamp = new Timestamp(expectedTime);
+                Assert.NotNull(si.Timestamp);
+                Assert.Equal(expectedTimestamp.DecodedType, si.Timestamp!.DecodedType);
+                Assert.Equal(expectedTimestamp.DateTime, si.Timestamp!.DateTime);
+            }
+            else
+            {
+                Assert.Null(si.Timestamp);
+            }
+        }
+
+        /// <summary>
+        /// Tests encoding a status report without Maidenhead info field based on the APRS spec.
+        /// </summary>
+        /// <param name="time">Time to encode.</param>
+        /// <param name="comment">Comment to encode.</param>
+        /// <param name="expectedEncoding">Expected encoding.</param>
+        [Theory]
+        [InlineData(null, "Net Control Center", ">Net Control Center")]
+        [InlineData("092345z", "Net Control Center", ">092345zNet Control Center")]
+        public void EncodeStatusReportFormatWithoutMaidenhead(
+            string? time,
+            string comment,
+            string expectedEncoding)
+        {
+            Timestamp? timestamp = time == null ? null : new Timestamp(time);
+            StatusInfo si = new StatusInfo(timestamp, comment);
+            Assert.Equal(expectedEncoding, si.Encode());
+        }
     }
 }

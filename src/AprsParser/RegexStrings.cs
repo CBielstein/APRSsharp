@@ -89,5 +89,21 @@ namespace AprsSharp.Parsers.Aprs
         ///     Info field.
         /// </summary>
         public const string Tnc2Packet = @"^([^>]+)>([^:]+):(.+)$";
+
+        /// <summary>
+        /// Validates that a given string is only alphanumeric characters in a single line.
+        /// </summary>
+        public const string Alphanumeric = @"^[a-zA-Z0-9]+$";
+
+        /// <summary>
+        /// Matches a Message info field.
+        /// N matches:
+        ///     Full
+        ///     Addressee
+        ///     Content (optional)
+        ///     MessageIdTag (includes `{`)
+        ///     MessageId (excludes `{`).
+        /// </summary>
+        public const string MessageWithId = @"^:(.{9}):([^:~{]+)?({([a-zA-Z0-9]{1,5}))?$";
     }
 }

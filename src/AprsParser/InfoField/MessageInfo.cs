@@ -8,7 +8,7 @@ namespace AprsSharp.Parsers.Aprs
     /// <summary>
     /// Represents an info field for packet type <see cref="PacketType.Message"/>.
     /// </summary>
-    public class Message : InfoField
+    public class MessageInfo : InfoField
     {
         /// <summary>
         /// The list of characters which may not be used in the message content.
@@ -16,10 +16,10 @@ namespace AprsSharp.Parsers.Aprs
         private static readonly char[] ContentDisallowedChars = { '|', '~', '{' };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Message"/> class.
+        /// Initializes a new instance of the <see cref="MessageInfo"/> class.
         /// </summary>
-        /// <param name="encodedInfoField">A string encoding of a <see cref="Message"/>.</param>
-        public Message(string encodedInfoField)
+        /// <param name="encodedInfoField">A string encoding of a <see cref="MessageInfo"/>.</param>
+        public MessageInfo(string encodedInfoField)
             : base(encodedInfoField)
         {
             if (string.IsNullOrWhiteSpace(encodedInfoField))
@@ -46,7 +46,7 @@ namespace AprsSharp.Parsers.Aprs
 
                 if (match.Groups[4].Success)
                 {
-                    MessageId = match.Groups[3].Value;
+                    Id = match.Groups[3].Value;
                 }
             }
             else
@@ -56,12 +56,12 @@ namespace AprsSharp.Parsers.Aprs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Message"/> class.
+        /// Initializes a new instance of the <see cref="MessageInfo"/> class.
         /// </summary>
         /// <param name="addressee">The station to which this message is addressed.</param>
         /// <param name="content">The content of the message, optional.</param>
         /// <param name="messageId">An ID for the message, optional. If supplied, this requests acknowledgement.</param>
-        public Message(string addressee, string? content, string? messageId)
+        public MessageInfo(string addressee, string? content, string? messageId)
             : base(PacketType.Message)
         {
             if (string.IsNullOrEmpty(addressee))
@@ -99,7 +99,7 @@ namespace AprsSharp.Parsers.Aprs
 
             Addressee = addressee;
             Content = content;
-            MessageId = messageId;
+            Id = messageId;
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace AprsSharp.Parsers.Aprs
         /// Gets the message ID, which uniquely identifies a message
         /// between a sender and a receiver.
         /// </summary>
-        public string? MessageId { get; }
+        public string? Id { get; }
 
         /// <inheritdoc/>
         public override string Encode()
@@ -138,12 +138,12 @@ namespace AprsSharp.Parsers.Aprs
 
             encoded.Append(':');
 
-            encoded.Append(Content ?? String.Empty);
+            encoded.Append(Content ?? string.Empty);
 
-            if (MessageId != null)
+            if (Id != null)
             {
                 encoded.Append('{');
-                encoded.Append(MessageId);
+                encoded.Append(Id);
             }
 
             return encoded.ToString();

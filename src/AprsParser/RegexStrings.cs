@@ -102,7 +102,7 @@ namespace AprsSharp.Parsers.Aprs
         ///     Addressee
         ///     Content (optional)
         ///     MessageIdTag (includes `{`)
-        ///     MessageId (excludes `{`)
+        ///     MessageId (excludes `{`).
         /// </summary>
         public const string MessageWithId = @"^:(.{9}):([^:~{]+)({([a-zA-Z0-9]{1,5}))?$";
     }

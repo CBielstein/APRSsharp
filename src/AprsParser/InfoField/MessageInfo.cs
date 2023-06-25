@@ -46,7 +46,7 @@ namespace AprsSharp.Parsers.Aprs
 
                 if (match.Groups[4].Success)
                 {
-                    Id = match.Groups[3].Value;
+                    Id = match.Groups[4].Value;
                 }
             }
             else

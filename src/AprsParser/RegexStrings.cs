@@ -89,5 +89,10 @@ namespace AprsSharp.Parsers.Aprs
         ///     Info field.
         /// </summary>
         public const string Tnc2Packet = @"^([^>]+)>([^:]+):(.+)$";
+
+        /// <summary>
+        /// Validates that a given string is only alphanumeric characters in a single line.
+        /// </summary>
+        public const string Alphanumeric = @"^[a-zA-Z0-9]+$";
     }
 }

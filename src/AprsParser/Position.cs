@@ -138,6 +138,25 @@
         }
 
         /// <summary>
+        /// Returns true if a given string is a valid maidenhead gridsquare format.
+        /// </summary>
+        /// <param name="gridsquare">A gridsquare string to test.</param>
+        /// <returns>True if it can be decoded, else false.</returns>
+        public static bool IsValidMaidenhead(string gridsquare)
+        {
+            try
+            {
+                var position = new Position();
+                position.DecodeMaidenhead(gridsquare);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Takes an encoded APRS coordinate string and uses it to initialize to <see cref="GeoCoordinate"/>.
         /// </summary>
         /// <param name="coords">A string of APRS encoded coordinates.</param>

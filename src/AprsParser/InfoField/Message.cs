@@ -32,10 +32,10 @@ namespace AprsSharp.Parsers.Aprs
                 throw new ArgumentException($"Packet encoding not of type {nameof(PacketType.Message)}. Type was {Type}", nameof(encodedInfoField));
             }
 
-            Match match = Regex.Match(encodedInfoField, RegexStrings.Message);
+            Match match = Regex.Match(encodedInfoField, RegexStrings.MessageWithId);
             if (match.Success)
             {
-                match.AssertSuccess(PacketType.Status, nameof(encodedInfoField));
+                match.AssertSuccess(PacketType.Message, nameof(encodedInfoField));
 
                 Addressee = match.Groups[1].Value.TrimEnd();
 
@@ -44,7 +44,7 @@ namespace AprsSharp.Parsers.Aprs
                     Content = match.Groups[2].Value;
                 }
 
-                if (match.Groups[3].Success)
+                if (match.Groups[4].Success)
                 {
                     MessageId = match.Groups[3].Value;
                 }
@@ -56,7 +56,7 @@ namespace AprsSharp.Parsers.Aprs
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatusInfo"/> class.
+        /// Initializes a new instance of the <see cref="Message"/> class.
         /// </summary>
         /// <param name="addressee">The station to which this message is addressed.</param>
         /// <param name="content">The content of the message, optional.</param>

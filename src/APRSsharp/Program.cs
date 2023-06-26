@@ -199,7 +199,7 @@
                 {
                     Console.WriteLine($"Connecting to TNC via TCP: {server}:{port}");
 
-                    using TNCInterface tnc = new TcpTnc(server, port, 0);
+                    using TNCInterface tnc = new TcpTNC(server, port, 0);
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();

@@ -54,6 +54,7 @@ namespace AprsSharp.Protocols.KISS
         /// </summary>
         public event FrameReceivedEventHandler? FrameReceivedEvent;
 
+        #pragma warning disable CA1063
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -66,6 +67,7 @@ namespace AprsSharp.Protocols.KISS
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+        #pragma warning restore CA1063
 
         /// <summary>
         /// Sets the port on the TNC to usefor transmission.

@@ -11,36 +11,34 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// The serial port to which the TNC is connected.
         /// </summary>
-        private readonly SerialPort serialPort;
+        private readonly ISerialConnection serialPort;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SerialTNC"/> class.
         /// </summary>
-        /// <param name="serialPortName">The name of the SerialPort to use.</param>
+        /// <param name="serialPort">The SerialPort to use for connection to the TNC.</param>
         /// <param name="tncPort">The port on the TNC used for communication.</param>
-        public SerialTNC(string serialPortName, byte tncPort)
+        public SerialTNC(ISerialConnection serialPort, byte tncPort)
             : base(tncPort)
         {
-            if (serialPortName == null)
+            if (serialPort == null)
             {
-                throw new ArgumentNullException(nameof(serialPortName));
+                throw new ArgumentNullException(nameof(serialPort));
+            }
+            else if (serialPort.IsOpen)
+            {
+                throw new ArgumentException("Port should not yet be opened", nameof(serialPort));
             }
 
-            serialPort = new SerialPort(serialPortName);
-            serialPort.Open();
-
-            serialPort.DataReceived += new SerialDataReceivedEventHandler(HandleDataFromSerialPort);
+            this.serialPort = serialPort;
+            this.serialPort.Open();
+            this.serialPort.DataReceived += new SerialDataReceivedEventHandler(HandleDataFromSerialPort);
         }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-
-            if (disposing)
-            {
-                serialPort.Dispose();
-            }
         }
 
         /// <inheritdoc/>

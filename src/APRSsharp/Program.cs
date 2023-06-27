@@ -122,7 +122,7 @@
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultServerName,
                     description: "A specified server parsed as a string, used for APRS-IS or TCP TNCs"),
                 new Option<int>(
-                    aliases: new string[] { "--port", "-p" },
+                    aliases: new string[] { "--port" },
                     getDefaultValue: () => 8001,
                     description: "A TCP port for use with TCP TNCs"),
                 new Option<string>(

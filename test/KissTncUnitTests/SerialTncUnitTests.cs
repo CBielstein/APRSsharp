@@ -22,6 +22,7 @@ namespace AprsSharpUnitTests.Protocols
         {
             var mockPort = GetMockSerialPort();
             using SerialTNC tnc = new SerialTNC(mockPort.Object, 0);
+            tnc.SetTncPort(0);
 
             string message = "TEST";
 

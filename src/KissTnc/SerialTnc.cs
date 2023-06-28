@@ -38,6 +38,11 @@ namespace AprsSharp.Protocols.KISS
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                serialPort.Dispose();
+            }
+
             base.Dispose(disposing);
         }
 

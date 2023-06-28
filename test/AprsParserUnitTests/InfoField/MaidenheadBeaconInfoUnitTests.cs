@@ -47,7 +47,7 @@
                 Assert.IsType<MaidenheadBeaconInfo>(p.InfoField);
             }
 
-            Assert.Equal(encoded, p.Encode());
+            Assert.Equal(encoded, p.Encode(Packet.Format.TNC2));
         }
 
         /// <summary>

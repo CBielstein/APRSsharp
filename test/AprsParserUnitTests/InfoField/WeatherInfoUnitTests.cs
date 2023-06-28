@@ -290,8 +290,8 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                     10,
                     50));
 
-            Assert.Equal(encodedPacket, p.Encode());
-            Assert.Equal(encodedPacket, packetToEncode.Encode());
+            Assert.Equal(encodedPacket, p.Encode(Packet.Format.TNC2));
+            Assert.Equal(encodedPacket, packetToEncode.Encode(Packet.Format.TNC2));
         }
 
         /// <summary>

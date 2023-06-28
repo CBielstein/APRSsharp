@@ -42,7 +42,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 Assert.IsType<StatusInfo>(p.InfoField);
             }
 
-            Assert.Equal(encoded, p.Encode());
+            Assert.Equal(encoded, p.Encode(Packet.Format.TNC2));
         }
 
         /// <summary>

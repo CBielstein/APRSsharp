@@ -45,6 +45,22 @@
         }
 
         /// <summary>
+        /// Specifies different formats for a <see cref="Packet"/>.
+        /// </summary>
+        public enum Format
+        {
+            /// <summary>
+            /// The TNC2 format.
+            /// </summary>
+            TNC2,
+
+            /// <summary>
+            /// The AX.25 packet format.
+            /// </summary>
+            AX25,
+        }
+
+        /// <summary>
         /// Gets the sender's callsign.
         /// </summary>
         public string Sender { get; }
@@ -68,10 +84,21 @@
         /// <summary>
         /// Encodes an APRS packet to a string.
         /// </summary>
+        /// <param name="format">The format to use for encoding.</param>
         /// <returns>String representation of the packet.</returns>
-        public virtual string Encode()
+        public virtual string Encode(Format format)
         {
-            return $"{Sender}>{string.Join(',', Path)}:{InfoField.Encode()}";
+            switch (format)
+            {
+                case Format.TNC2:
+                    return $"{Sender}>{string.Join(',', Path)}:{InfoField.Encode()}";
+
+                case Format.AX25:
+                    throw new NotImplementedException($"Encoding not implemented for {nameof(Format.AX25)}");
+
+                default:
+                    throw new ArgumentException("Unsupported encoding format.", nameof(format));
+            }
         }
     }
 }

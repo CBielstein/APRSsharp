@@ -158,6 +158,12 @@
             throw new NotImplementedException($"Encoding not implemented for {nameof(Format.AX25)}");
         }
 
+        /// <summary>
+        /// Attempts to get a callsign from an encoded <see cref="Format.AX25"/> packet.
+        /// </summary>
+        /// <param name="encodedPacket">The bytes of the encoded packet.</param>
+        /// <param name="callsignNumber">The number of the callsign (in order in the packet encoding) to attempt to fetch.</param>
+        /// <returns>A callsign string if successful, else null.</returns>
         private static string? GetCallsignFromAx25(IEnumerable<byte> encodedPacket, int callsignNumber)
         {
             int callsignStart = 1 + (callsignNumber * 7);
@@ -169,7 +175,10 @@
                     return null;
                 }
 
-            return $"{Encoding.UTF8.GetString(encodedPacket.Skip(callsignStart).Take(6).ToArray())}-{encodedPacket.ElementAt(callsignStart + 6)}";
+            var callsign = Encoding.UTF8.GetString(encodedPacket.Skip(callsignStart).Take(6).ToArray());
+            var ssid = encodedPacket.ElementAt(callsignStart + 6);
+
+            return ssid == 0x0 ? callsign : $"{callsign}-{ssid}";
         }
     }
 }

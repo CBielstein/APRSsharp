@@ -2,6 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
     using System.Text.RegularExpressions;
     using AprsSharp.Parsers.Aprs.Extensions;
 
@@ -21,13 +23,44 @@
                 throw new ArgumentNullException(nameof(encodedPacket));
             }
 
-            Match match = Regex.Match(encodedPacket, RegexStrings.Tnc2Packet);
-            match.AssertSuccess("Full TNC2 Packet", nameof(encodedPacket));
-
-            Sender = match.Groups[1].Value;
-            Path = match.Groups[2].Value.Split(',');
             ReceivedTime = DateTime.UtcNow;
-            InfoField = InfoField.FromString(match.Groups[3].Value);
+
+            // Attempt to decode TNC2 format
+            Match match = Regex.Match(encodedPacket, RegexStrings.Tnc2Packet);
+            if (match.Success)
+            {
+                match.AssertSuccess("Full TNC2 Packet", nameof(encodedPacket));
+                Sender = match.Groups[1].Value;
+                Path = match.Groups[2].Value.Split(',');
+                InfoField = InfoField.FromString(match.Groups[3].Value);
+                return;
+            }
+
+            // Next attempt to decode AX.25 format
+            var packetBytes = Encoding.UTF8.GetBytes(encodedPacket);
+            if (packetBytes.First() == (byte)Ax25Control.FLAG && packetBytes.Last() == (byte)Ax25Control.FLAG)
+            {
+                Sender = Packet.GetCallsignFromAx25(packetBytes, 0) ?? throw new ArgumentException("Missing sender");
+                Destination = Packet.GetCallsignFromAx25(packetBytes, 1) ?? throw new ArgumentException("Missing destination");
+                Path = new List<string>();
+
+                for (var i = 2; i < 10; ++i)
+                {
+                    var pathEntry = Packet.GetCallsignFromAx25(packetBytes, i);
+                    if (pathEntry == null)
+                    {
+                        break;
+                    }
+
+                    Path.Add(pathEntry);
+                }
+
+                var infoBytes = packetBytes.Skip(1 + ((Path.Count + 2) * 7) + 2).SkipLast(3);
+                InfoField = InfoField.FromString(Encoding.UTF8.GetString(infoBytes.ToArray()));
+                return;
+            }
+
+            throw new ArgumentException("Packet does not appear to be in supported format");
         }
 
         /// <summary>
@@ -61,6 +94,27 @@
         }
 
         /// <summary>
+        /// Special values used in <see cref="Format.AX25"/> encoding.
+        /// </summary>
+        private enum Ax25Control : byte
+        {
+            /// <summary>
+            /// Flag value used to mark start and end of frames.
+            /// </summary>
+            FLAG = 0x7e,
+
+            /// <summary>
+            /// Control field value to denote UI-frame.
+            /// </summary>
+            UI_FRAME = 0x03,
+
+            /// <summary>
+            /// Protocol ID value to specify no layer three.
+            /// </summary>
+            NO_LAYER_THREE_PROTOCOL = 0xf0,
+        }
+
+        /// <summary>
         /// Gets the sender's callsign.
         /// </summary>
         public string Sender { get; }
@@ -69,6 +123,11 @@
         /// Gets the APRS digipath of the packet.
         /// </summary>
         public IList<string> Path { get; }
+
+        /// <summary>
+        /// Gets the destination callsign.
+        /// </summary>
+        public string? Destination { get; }
 
         /// <summary>
         /// Gets the time this packet was decoded.
@@ -97,6 +156,20 @@
         public byte[] EncodeAx25()
         {
             throw new NotImplementedException($"Encoding not implemented for {nameof(Format.AX25)}");
+        }
+
+        private static string? GetCallsignFromAx25(IEnumerable<byte> encodedPacket, int callsignNumber)
+        {
+            int callsignStart = 1 + (callsignNumber * 7);
+
+            if (callsignStart + 7 >= encodedPacket.Count() ||
+                (encodedPacket.ElementAt(callsignStart) == (byte)Ax25Control.UI_FRAME &&
+                    encodedPacket.ElementAt(callsignStart + 1) == (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL))
+                {
+                    return null;
+                }
+
+            return $"{Encoding.UTF8.GetString(encodedPacket.Skip(callsignStart).Take(6).ToArray())}-{encodedPacket.ElementAt(callsignStart + 6)}";
         }
     }
 }

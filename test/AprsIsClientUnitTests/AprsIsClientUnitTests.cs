@@ -2,6 +2,7 @@ namespace AprsSharpUnitTests.Connections.AprsIs
 {
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
+    using AprsSharp.Shared;
     using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;

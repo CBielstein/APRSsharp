@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.Parsers.Aprs;
+    using AprsSharp.Shared;
     using Microsoft.Extensions.Logging;
 
     /// <summary>

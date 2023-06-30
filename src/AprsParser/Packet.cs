@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -147,13 +148,43 @@
         /// <returns>String representation of the packet.</returns>
         public string Encode(Format format)
         {
+            var encodedInfoField = InfoField.Encode();
+
             switch (format)
             {
                 case Format.TNC2:
-                    return $"{Sender}>{string.Join(',', Path)}:{InfoField.Encode()}";
+                    return $"{Sender}>{string.Join(',', Path)}:{encodedInfoField}";
 
                 case Format.AX25:
-                    throw new NotImplementedException($"Encoding not implemented for {nameof(Format.AX25)}");
+                    // Length is Flag (1)
+                    // + Sender address (7) + Destination address (7)
+                    // + Path (7*N)
+                    // + Control Field (1) + Protocol ID (1)
+                    // + Info field (N)
+                    // + FCS (2) + Flag (1)
+                    var numBytes = 20 + (Path.Count * 7) + encodedInfoField.Length;
+                    var encodedBytes = new byte[numBytes];
+                    encodedBytes[0] = (byte)Ax25Control.FLAG;
+
+                    Packet.EncodeCallsignBytes(Sender).CopyTo(encodedBytes, 1);
+                    Packet.EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 8);
+                    for (var i = 0; i < Path.Count; ++i)
+                    {
+                        Packet.EncodeCallsignBytes(Path[i]).CopyTo(encodedBytes, 15 + (7 * i));
+                    }
+
+                    encodedBytes[15 + (7 * Path.Count)] = (byte)Ax25Control.UI_FRAME;
+                    encodedBytes[15 + (7 * Path.Count) + 1] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
+
+                    Encoding.UTF8.GetBytes(encodedInfoField).CopyTo(encodedBytes, 15 + (7 * Path.Count) + 2);
+
+                    // TODO: Calculate real FCS
+                    encodedBytes[numBytes - 3] = (byte)0;
+                    encodedBytes[numBytes - 2] = (byte)0;
+
+                    encodedBytes[numBytes - 1] = (byte)Ax25Control.FLAG;
+
+                    return Encoding.UTF8.GetString(encodedBytes);
 
                 default:
                     throw new ArgumentException("Unsupported encoding format.", nameof(format));
@@ -181,6 +212,36 @@
             var ssid = encodedPacket.ElementAt(callsignStart + 6);
 
             return ssid == 0x0 ? callsign : $"{callsign}-{ssid}";
+        }
+
+        /// <summary>
+        /// Encodes a callsign in to the appropriate bytes for AX.25.
+        /// This includes: 6 bytes of callsign (padded spaces left)
+        /// 1 byte of SSID as a byte value (not ASCII numbers).
+        /// If callsign is null, return all spaces and SSID 0.
+        /// </summary>
+        /// <param name="callsign">Callsign to encode.</param>
+        /// <returns>Encoded bytes of callsign. Shoudl always be 7 bits.</returns>
+        private static byte[] EncodeCallsignBytes(string? callsign)
+        {
+            if (callsign == null)
+            {
+                return Encoding.UTF8.GetBytes(new string(' ', 6)).Append((byte)0).ToArray();
+            }
+
+            var matches = Regex.Match(callsign, RegexStrings.CallsignWithOptionalSsid);
+            matches.AssertSuccess(nameof(RegexStrings.CallsignWithOptionalSsid), nameof(callsign));
+
+            var call = matches.Groups[1].Value;
+
+            if (call.Length < 6)
+            {
+                call = new string(' ', 6 - call.Length) + call;
+            }
+
+            var ssid = matches.Groups[3].Value;
+
+            return Encoding.UTF8.GetBytes(call).Append(byte.Parse(ssid, NumberStyles.Integer, CultureInfo.InvariantCulture)).ToArray();
         }
     }
 }

@@ -41,13 +41,13 @@
             var packetBytes = Encoding.UTF8.GetBytes(encodedPacket);
             if (packetBytes.First() == (byte)Ax25Control.FLAG && packetBytes.Last() == (byte)Ax25Control.FLAG)
             {
-                Sender = Packet.GetCallsignFromAx25(packetBytes, 0) ?? throw new ArgumentException("Missing sender");
-                Destination = Packet.GetCallsignFromAx25(packetBytes, 1) ?? throw new ArgumentException("Missing destination");
+                Destination = GetCallsignFromAx25(packetBytes, 0) ?? throw new ArgumentException("Missing sender");
+                Sender = GetCallsignFromAx25(packetBytes, 1) ?? throw new ArgumentException("Missing destination");
                 Path = new List<string>();
 
                 for (var i = 2; i < 10; ++i)
                 {
-                    var pathEntry = Packet.GetCallsignFromAx25(packetBytes, i);
+                    var pathEntry = GetCallsignFromAx25(packetBytes, i);
                     if (pathEntry == null)
                     {
                         break;
@@ -206,7 +206,9 @@
                     return null;
                 }
 
-            var callsign = Encoding.UTF8.GetString(encodedPacket.Skip(callsignStart).Take(6).ToArray());
+            var raw = encodedPacket.Skip(callsignStart).Take(6);
+            var shifted = raw.Select(r => (byte)(r >> 1)).ToArray();
+            var callsign = Encoding.UTF8.GetString(shifted);
             var ssid = encodedPacket.ElementAt(callsignStart + 6);
 
             return ssid == 0x0 ? callsign : $"{callsign}-{ssid}";
@@ -238,8 +240,9 @@
             }
 
             var ssid = matches.Groups[3].Value;
+            var shiftedBytes = Encoding.UTF8.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
 
-            return Encoding.UTF8.GetBytes(call).Append(byte.Parse(ssid, NumberStyles.Integer, CultureInfo.InvariantCulture)).ToArray();
+            return shiftedBytes.Append(byte.Parse(ssid, NumberStyles.Integer, CultureInfo.InvariantCulture)).ToArray();
         }
     }
 }

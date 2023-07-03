@@ -43,6 +43,7 @@
             Console.WriteLine($"Received type: {p.InfoField.Type}");
 
             Console.WriteLine($"    Sender: {p.Sender}");
+            Console.WriteLine($"    Destination: {p.Destination}");
             Console.WriteLine($"    Path: {string.Join(',', p.Path)}");
             Console.WriteLine($"    Received At: {p.ReceivedTime} {p.ReceivedTime?.Kind}");
             Console.WriteLine($"    Type: {p.InfoField.Type}");
@@ -91,6 +92,10 @@
                 Console.WriteLine($"    To: {mi.Addressee}");
                 Console.WriteLine($"    Message: {mi.Content}");
                 Console.WriteLine($"    ID: {mi.Id}");
+            }
+            else if (p.InfoField is UnsupportedInfo ui)
+            {
+                Console.WriteLine($"   Content: {ui.Content}");
             }
 
             Console.WriteLine();
@@ -203,7 +208,10 @@
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();
-                        Console.WriteLine(Encoding.UTF8.GetString(byteArray));
+                        var encodedPacket = Encoding.UTF8.GetString(byteArray);
+                        Console.WriteLine(encodedPacket);
+                        var packet = new Packet(encodedPacket);
+                        PrintPacket(packet);
                     };
 
                     Console.WriteLine("Press Q to quit");

@@ -196,7 +196,7 @@
 
             var raw = encodedPacket.Skip(callsignStart).Take(6);
             var shifted = raw.Select(r => (byte)(r >> 1)).ToArray();
-            var callsign = Encoding.UTF8.GetString(shifted).Trim();
+            var callsign = Encoding.ASCII.GetString(shifted).Trim();
 
             var ssid = encodedPacket.ElementAt(callsignStart + 6);
 
@@ -222,7 +222,7 @@
         {
             if (callsign == null)
             {
-                return Encoding.UTF8.GetBytes(new string(' ', 6)).Append((byte)0).ToArray();
+                return Encoding.ASCII.GetBytes(new string(' ', 6)).Append((byte)0).ToArray();
             }
 
             var matches = Regex.Match(callsign, RegexStrings.CallsignWithOptionalSsid);
@@ -246,7 +246,7 @@
                 ssidByte |= 0x1;
             }
 
-            var shiftedBytes = Encoding.UTF8.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
+            var shiftedBytes = Encoding.ASCII.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
             return shiftedBytes.Append(ssidByte).ToArray();
         }
     }

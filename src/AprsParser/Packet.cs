@@ -16,10 +16,10 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Packet"/> class.
         /// </summary>
-        /// <param name="encodedPacket">The string encoding of the APRS packet.</param>
-        public Packet(string encodedPacket)
+        /// <param name="encodedPacket">The encoded APRS packet.</param>
+        public Packet(byte[] encodedPacket)
         {
-            if (string.IsNullOrWhiteSpace(encodedPacket))
+            if (encodedPacket == null || encodedPacket.Length == 0)
             {
                 throw new ArgumentNullException(nameof(encodedPacket));
             }
@@ -27,7 +27,7 @@
             ReceivedTime = DateTime.UtcNow;
 
             // Attempt to decode TNC2 format
-            Match match = Regex.Match(encodedPacket, RegexStrings.Tnc2Packet);
+            Match match = Regex.Match(Encoding.ASCII.GetString(encodedPacket), RegexStrings.Tnc2Packet);
             if (match.Success)
             {
                 match.AssertSuccess("Full TNC2 Packet", nameof(encodedPacket));
@@ -39,19 +39,27 @@
 
             // Next attempt to decode AX.25 format
             var isFinalAddress = false;
-            var packetBytes = Encoding.UTF8.GetBytes(encodedPacket);
-            Destination = GetCallsignFromAx25(packetBytes, 0, out _);
-            Sender = GetCallsignFromAx25(packetBytes, 1, out isFinalAddress);
+            Destination = GetCallsignFromAx25(encodedPacket, 0, out _);
+            Sender = GetCallsignFromAx25(encodedPacket, 1, out isFinalAddress);
             Path = new List<string>();
 
             for (var i = 2; !isFinalAddress && i < 10; ++i)
             {
-                var pathEntry = GetCallsignFromAx25(packetBytes, i, out isFinalAddress);
+                var pathEntry = GetCallsignFromAx25(encodedPacket, i, out isFinalAddress);
                 Path.Add(pathEntry);
             }
 
-            var infoBytes = packetBytes.Skip(((Path.Count + 2) * 7) + 2);
-            InfoField = InfoField.FromString(Encoding.UTF8.GetString(infoBytes.ToArray()));
+            var infoBytes = encodedPacket.Skip(((Path.Count + 2) * 7) + 2);
+            InfoField = InfoField.FromString(Encoding.ASCII.GetString(infoBytes.ToArray()));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Packet"/> class.
+        /// </summary>
+        /// <param name="encodedPacket">A string representation of an encoded packet.</param>
+        public Packet(string encodedPacket)
+            : this(Encoding.ASCII.GetBytes(encodedPacket))
+        {
         }
 
         /// <summary>

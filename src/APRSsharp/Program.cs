@@ -208,9 +208,7 @@
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();
-                        var encodedPacket = Encoding.UTF8.GetString(byteArray);
-                        Console.WriteLine(encodedPacket);
-                        var packet = new Packet(encodedPacket);
+                        var packet = new Packet(byteArray);
                         PrintPacket(packet);
                     };
 

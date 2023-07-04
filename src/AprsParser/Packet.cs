@@ -39,29 +39,18 @@
 
             // Next attempt to decode AX.25 format
             var packetBytes = Encoding.UTF8.GetBytes(encodedPacket);
-            if (packetBytes.First() == (byte)Ax25Control.FLAG && packetBytes.Last() == (byte)Ax25Control.FLAG)
+            Destination = GetCallsignFromAx25(packetBytes, 0, out _);
+            Sender = GetCallsignFromAx25(packetBytes, 1, out bool isFinalAddress);
+            Path = new List<string>();
+
+            for (var i = 2; !isFinalAddress && i < 10; ++i)
             {
-                Destination = GetCallsignFromAx25(packetBytes, 0) ?? throw new ArgumentException("Missing sender");
-                Sender = GetCallsignFromAx25(packetBytes, 1) ?? throw new ArgumentException("Missing destination");
-                Path = new List<string>();
-
-                for (var i = 2; i < 10; ++i)
-                {
-                    var pathEntry = GetCallsignFromAx25(packetBytes, i);
-                    if (pathEntry == null)
-                    {
-                        break;
-                    }
-
-                    Path.Add(pathEntry);
-                }
-
-                var infoBytes = packetBytes.Skip(1 + ((Path.Count + 2) * 7) + 2).SkipLast(3);
-                InfoField = InfoField.FromString(Encoding.UTF8.GetString(infoBytes.ToArray()));
-                return;
+                var pathEntry = GetCallsignFromAx25(packetBytes, i, out isFinalAddress);
+                Path.Add(pathEntry);
             }
 
-            throw new ArgumentException("Packet does not appear to be in supported format");
+            var infoBytes = packetBytes.Skip(((Path.Count + 2) * 7) + 2);
+            InfoField = InfoField.FromString(Encoding.UTF8.GetString(infoBytes.ToArray()));
         }
 
         /// <summary>
@@ -158,33 +147,31 @@
         {
             var encodedInfoField = InfoField.Encode();
 
-            // Length is Flag (1)
-            // + Sender address (7) + Destination address (7)
+            // Length
+            // Sender address (7) + Destination address (7)
             // + Path (7*N)
             // + Control Field (1) + Protocol ID (1)
             // + Info field (N)
-            // + FCS (2) + Flag (1)
-            var numBytes = 20 + (Path.Count * 7) + encodedInfoField.Length;
+            var numBytes = 16 + (Path.Count * 7) + encodedInfoField.Length;
             var encodedBytes = new byte[numBytes];
-            encodedBytes[0] = (byte)Ax25Control.FLAG;
 
-            Packet.EncodeCallsignBytes(Sender).CopyTo(encodedBytes, 1);
-            Packet.EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 8);
+            EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 8);
+            EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 1);
+
+            if (Path.Count > 8)
+            {
+                throw new ArgumentException("Path must not have more than 8 entries");
+            }
+
             for (var i = 0; i < Path.Count; ++i)
             {
-                Packet.EncodeCallsignBytes(Path[i]).CopyTo(encodedBytes, 15 + (7 * i));
+                EncodeCallsignBytes(Path[i], i == (Path.Count - 1)).CopyTo(encodedBytes, 15 + (7 * i));
             }
 
             encodedBytes[15 + (7 * Path.Count)] = (byte)Ax25Control.UI_FRAME;
             encodedBytes[15 + (7 * Path.Count) + 1] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
 
             Encoding.UTF8.GetBytes(encodedInfoField).CopyTo(encodedBytes, 15 + (7 * Path.Count) + 2);
-
-            // TODO: Calculate real FCS
-            encodedBytes[numBytes - 3] = (byte)0;
-            encodedBytes[numBytes - 2] = (byte)0;
-
-            encodedBytes[numBytes - 1] = (byte)Ax25Control.FLAG;
 
             return encodedBytes;
         }
@@ -194,22 +181,22 @@
         /// </summary>
         /// <param name="encodedPacket">The bytes of the encoded packet.</param>
         /// <param name="callsignNumber">The number of the callsign (in order in the packet encoding) to attempt to fetch.</param>
-        /// <returns>A callsign string if successful, else null.</returns>
-        private static string? GetCallsignFromAx25(IEnumerable<byte> encodedPacket, int callsignNumber)
+        /// <param name="isFinal">True if this is flagged as the final address in the frame.</param>
+        /// <returns>A callsign string.</returns>
+        private static string GetCallsignFromAx25(IEnumerable<byte> encodedPacket, int callsignNumber, out bool isFinal)
         {
-            int callsignStart = 1 + (callsignNumber * 7);
-
-            if (callsignStart + 7 >= encodedPacket.Count() ||
-                (encodedPacket.ElementAt(callsignStart) == (byte)Ax25Control.UI_FRAME &&
-                    encodedPacket.ElementAt(callsignStart + 1) == (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL))
-                {
-                    return null;
-                }
+            int callsignStart = callsignNumber * 7;
 
             var raw = encodedPacket.Skip(callsignStart).Take(6);
             var shifted = raw.Select(r => (byte)(r >> 1)).ToArray();
-            var callsign = Encoding.UTF8.GetString(shifted);
+            var callsign = Encoding.UTF8.GetString(shifted).Trim();
+
             var ssid = encodedPacket.ElementAt(callsignStart + 6);
+
+            isFinal = (ssid & 0b1) == 1;
+
+            ssid >>= 1;
+            ssid &= 0b1111;
 
             return ssid == 0x0 ? callsign : $"{callsign}-{ssid}";
         }
@@ -221,8 +208,10 @@
         /// If callsign is null, return all spaces and SSID 0.
         /// </summary>
         /// <param name="callsign">Callsign to encode.</param>
-        /// <returns>Encoded bytes of callsign. Shoudl always be 7 bits.</returns>
-        private static byte[] EncodeCallsignBytes(string? callsign)
+        /// <param name="isFinal">Boolean value indicating if this is the final callsign in the address list.
+        ///     If so, a flag is set according to AX.25 spec.</param>
+        /// <returns>Encoded bytes of callsign. Should always be 7 bytes.</returns>
+        private static byte[] EncodeCallsignBytes(string? callsign, bool isFinal = false)
         {
             if (callsign == null)
             {
@@ -232,17 +221,23 @@
             var matches = Regex.Match(callsign, RegexStrings.CallsignWithOptionalSsid);
             matches.AssertSuccess(nameof(RegexStrings.CallsignWithOptionalSsid), nameof(callsign));
 
-            var call = matches.Groups[1].Value;
-
-            if (call.Length < 6)
+            var call = matches.Groups[1].Value.PadRight(6, ' ');
+            var ssid = int.Parse(matches.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            if (ssid > 15 || ssid < 0)
             {
-                call = new string(' ', 6 - call.Length) + call;
+                throw new ArgumentException("SSID must be in range [0,15]", nameof(callsign));
             }
 
-            var ssid = matches.Groups[3].Value;
-            var shiftedBytes = Encoding.UTF8.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
+            var ssidByte = (byte)(0b1110000 | (ssid & 0b1111));
+            ssidByte <<= 1;
 
-            return shiftedBytes.Append(byte.Parse(ssid, NumberStyles.Integer, CultureInfo.InvariantCulture)).ToArray();
+            if (isFinal)
+            {
+                ssidByte |= 0x1;
+            }
+
+            var shiftedBytes = Encoding.UTF8.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
+            return shiftedBytes.Append(ssidByte).ToArray();
         }
     }
 }

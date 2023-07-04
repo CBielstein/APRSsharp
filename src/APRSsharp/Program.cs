@@ -95,7 +95,7 @@
             }
             else if (p.InfoField is UnsupportedInfo ui)
             {
-                Console.WriteLine($"   Content: {ui.Content}");
+                Console.WriteLine($"    Content: {ui.Content}");
             }
 
             Console.WriteLine();

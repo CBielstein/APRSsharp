@@ -2,7 +2,8 @@
   "profiles": {
     "APRSsharp": {
       "commandName": "Project",
-      "commandLineArgs": "--mode TCPTNC --server localhost --port 8001"
+      "commandLineArgs": "--mode TCPTNC --server localhost --port 8001 --callsign KG5GHQ",
+      "nativeDebugging": true
     }
   }
 }

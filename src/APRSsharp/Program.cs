@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.Linq;
@@ -212,14 +213,20 @@
                         PrintPacket(packet);
                     };
 
-                    Console.WriteLine("Press Q to quit");
-                    ConsoleKey key;
+                    Console.WriteLine("Enter status to send, else q to quit");
 
                     do
                     {
-                        key = Console.ReadKey().Key;
+                        var input = Console.ReadLine();
+                        if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
+                        {
+                            break;
+                        }
+
+                        var packet = new Packet(callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
+                        tnc.SendData(packet.Encode(Packet.Format.AX25));
                     }
-                    while (key != ConsoleKey.Q);
+                    while (true);
 
                     break;
                 }

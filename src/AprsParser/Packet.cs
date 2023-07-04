@@ -140,18 +140,19 @@
         public InfoField InfoField { get; }
 
         /// <summary>
-        /// Encodes an APRS packet to a string.
+        /// Encodes an APRS packet to bytes.
         /// </summary>
         /// <param name="format">The format to use for encoding.</param>
-        /// <returns>String representation of the packet.</returns>
-        public string Encode(Format format)
+        /// <returns>Encoded bytes of the packet.</returns>
+        public byte[] Encode(Format format)
         {
             var encodedInfoField = InfoField.Encode();
 
             switch (format)
             {
                 case Format.TNC2:
-                    return $"{Sender}>{string.Join(',', Path)}:{encodedInfoField}";
+                    var encodedString = $"{Sender}>{string.Join(',', Path)}:{encodedInfoField}";
+                    return Encoding.ASCII.GetBytes(encodedString);
 
                 case Format.AX25:
                     // Length
@@ -162,8 +163,8 @@
                     var numBytes = 16 + (Path.Count * 7) + encodedInfoField.Length;
                     var encodedBytes = new byte[numBytes];
 
-                    EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 8);
-                    EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 1);
+                    EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 0);
+                    EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 8);
 
                     if (Path.Count > 8)
                     {
@@ -178,13 +179,20 @@
                     encodedBytes[15 + (7 * Path.Count)] = (byte)Ax25Control.UI_FRAME;
                     encodedBytes[15 + (7 * Path.Count) + 1] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
 
-                    Encoding.UTF8.GetBytes(encodedInfoField).CopyTo(encodedBytes, 15 + (7 * Path.Count) + 2);
-                    return Encoding.UTF8.GetString(encodedBytes);
+                    Encoding.ASCII.GetBytes(encodedInfoField).CopyTo(encodedBytes, 14 + (7 * Path.Count) + 2);
+                    return encodedBytes;
 
                 default:
                     throw new ArgumentException("Unsupported encoding format.", nameof(format));
             }
         }
+
+        /// <summary>
+        /// Encodes an APRS packet to string.
+        /// </summary>
+        /// <param name="format">The format to use for encoding.</param>
+        /// <returns>String encoding of the packet.</returns>
+        public string EncodeString(Format format) => Encoding.ASCII.GetString(Encode(format));
 
         /// <summary>
         /// Attempts to get a callsign from an encoded <see cref="Format.AX25"/> packet.
@@ -232,7 +240,10 @@
             matches.AssertSuccess(nameof(RegexStrings.CallsignWithOptionalSsid), nameof(callsign));
 
             var call = matches.Groups[1].Value.PadRight(6, ' ');
-            var ssid = int.Parse(matches.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            int ssid = int.TryParse(matches.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int inputSsid) ?
+                   inputSsid :
+                   0;
+
             if (ssid > 15 || ssid < 0)
             {
                 throw new ArgumentException("SSID must be in range [0,15]", nameof(callsign));

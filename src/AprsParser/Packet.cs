@@ -163,8 +163,8 @@
             var numBytes = 16 + (Path.Count * 7) + encodedInfoField.Length;
             var encodedBytes = new byte[numBytes];
 
-            EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 8);
-            EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 1);
+            EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 0);
+            EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 8);
 
             if (Path.Count > 8)
             {
@@ -179,8 +179,7 @@
             encodedBytes[15 + (7 * Path.Count)] = (byte)Ax25Control.UI_FRAME;
             encodedBytes[15 + (7 * Path.Count) + 1] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
 
-            Encoding.UTF8.GetBytes(encodedInfoField).CopyTo(encodedBytes, 15 + (7 * Path.Count) + 2);
-
+            Encoding.ASCII.GetBytes(encodedInfoField).CopyTo(encodedBytes, 14 + (7 * Path.Count) + 2);
             return encodedBytes;
         }
 
@@ -230,7 +229,10 @@
             matches.AssertSuccess(nameof(RegexStrings.CallsignWithOptionalSsid), nameof(callsign));
 
             var call = matches.Groups[1].Value.PadRight(6, ' ');
-            var ssid = int.Parse(matches.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture);
+            int ssid = int.TryParse(matches.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int inputSsid) ?
+                   inputSsid :
+                   0;
+
             if (ssid > 15 || ssid < 0)
             {
                 throw new ArgumentException("SSID must be in range [0,15]", nameof(callsign));

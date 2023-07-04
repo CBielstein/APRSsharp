@@ -44,7 +44,7 @@ namespace AprsSharp.Protocols.KISS
                 throw new ArgumentNullException(nameof(bytes));
             }
 
-            var message = Encoding.UTF8.GetString(bytes);
+            var message = Encoding.ASCII.GetString(bytes);
             tcpConnection.SendString(message);
         }
     }

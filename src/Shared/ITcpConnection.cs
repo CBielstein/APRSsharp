@@ -39,6 +39,12 @@
         void SendString(string message);
 
         /// <summary>
+        /// Sends the contents of a byte array.
+        /// </summary>
+        /// <param name="bytes">Bytes to be sent.</param>
+        void SendBytes(byte[] bytes);
+
+        /// <summary>
         /// The function to stop the receipt/cancel tcp packets.
         /// </summary>
         void Disconnect();

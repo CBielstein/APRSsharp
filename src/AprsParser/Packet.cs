@@ -69,8 +69,21 @@
         /// <param name="path">The digipath for the packet.</param>
         /// <param name="infoField">An <see cref="InfoField"/> or extending class to send.</param>
         public Packet(string sender, IList<string> path, InfoField infoField)
+            : this(sender, null, path, infoField)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Packet"/> class.
+        /// </summary>
+        /// <param name="sender">The callsign of the sender.</param>
+        /// <param name="destination">The callsign of the destination.</param>
+        /// <param name="path">The digipath for the packet.</param>
+        /// <param name="infoField">An <see cref="InfoField"/> or extending class to send.</param>
+        public Packet(string sender, string? destination, IList<string> path, InfoField infoField)
         {
             Sender = sender;
+            Destination = destination;
             Path = path;
             InfoField = infoField;
             ReceivedTime = null;
@@ -163,8 +176,13 @@
                     var numBytes = 16 + (Path.Count * 7) + encodedInfoField.Length;
                     var encodedBytes = new byte[numBytes];
 
-                    EncodeCallsignBytes(Destination).CopyTo(encodedBytes, 0);
-                    EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, 8);
+                    var offset = 0;
+
+                    EncodeCallsignBytes(Destination).CopyTo(encodedBytes, offset);
+                    offset += 7;
+
+                    EncodeCallsignBytes(Sender, Path.Count == 0).CopyTo(encodedBytes, offset);
+                    offset += 7;
 
                     if (Path.Count > 8)
                     {
@@ -173,13 +191,18 @@
 
                     for (var i = 0; i < Path.Count; ++i)
                     {
-                        EncodeCallsignBytes(Path[i], i == (Path.Count - 1)).CopyTo(encodedBytes, 15 + (7 * i));
+                        EncodeCallsignBytes(Path[i], i == (Path.Count - 1)).CopyTo(encodedBytes, offset);
+                        offset += 7;
                     }
 
-                    encodedBytes[15 + (7 * Path.Count)] = (byte)Ax25Control.UI_FRAME;
-                    encodedBytes[15 + (7 * Path.Count) + 1] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
+                    encodedBytes[offset] = (byte)Ax25Control.UI_FRAME;
+                    offset += 1;
 
-                    Encoding.ASCII.GetBytes(encodedInfoField).CopyTo(encodedBytes, 14 + (7 * Path.Count) + 2);
+                    encodedBytes[offset] = (byte)Ax25Control.NO_LAYER_THREE_PROTOCOL;
+                    offset += 1;
+
+                    Encoding.ASCII.GetBytes(encodedInfoField).CopyTo(encodedBytes, offset);
+
                     return encodedBytes;
 
                 default:

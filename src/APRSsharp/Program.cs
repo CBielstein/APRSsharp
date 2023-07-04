@@ -213,6 +213,9 @@
                         PrintPacket(packet);
                     };
 
+                    tnc.SetTxDelay(50);
+                    tnc.SetTxTail(50);
+
                     Console.WriteLine("Enter status to send, else q to quit");
 
                     do
@@ -223,7 +226,7 @@
                             break;
                         }
 
-                        var packet = new Packet(callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
+                        var packet = new Packet(callsign, callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
                         tnc.SendData(packet.Encode(Packet.Format.AX25));
                     }
                     while (true);

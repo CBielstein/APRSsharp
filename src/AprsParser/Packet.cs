@@ -66,10 +66,10 @@
         public InfoField InfoField { get; }
 
         /// <summary>
-        /// Encodes an APRS packet to a string.
+        /// Encodes an APRS packet as a string in TNC2 format.
         /// </summary>
-        /// <returns>String representation of the packet.</returns>
-        public virtual string Encode()
+        /// <returns>String of packet in TNC2 format.</returns>
+        public string EncodeTnc2()
         {
             return $"{Sender}>{string.Join(',', Path)}:{InfoField.Encode()}";
         }

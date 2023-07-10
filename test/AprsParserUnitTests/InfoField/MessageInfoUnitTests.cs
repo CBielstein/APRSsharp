@@ -36,7 +36,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 Assert.IsType<MessageInfo>(p.InfoField);
             }
 
-            Assert.Equal(encoded, p.Encode());
+            Assert.Equal(encoded, p.EncodeTnc2());
         }
 
         /// <summary>

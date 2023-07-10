@@ -48,7 +48,7 @@ namespace AprsSharpUnitTests.Parsers.Aprs
                 Assert.IsType<PositionInfo>(p.InfoField);
             }
 
-            Assert.Equal(encoded, p.Encode());
+            Assert.Equal(encoded, p.EncodeTnc2());
         }
 
         /// <summary>

@@ -1,5 +1,7 @@
 namespace AprsSharp.Parsers.Aprs;
 
+using System;
+
 /// <summary>
 /// Represents an info field that is not supported by APRS#.
 /// </summary>
@@ -20,6 +22,14 @@ public class UnsupportedInfo : InfoField
     /// </summary>
     public string Content { get; }
 
-    /// <inheritdoc/>
-    public override string Encode() => Content;
+    /// <summary>
+    /// Not implemented. <see cref="UnsupportedInfo"/> is to help fill the gap on receive
+    /// and should not be used for transmissions. We do not want to send non-standard packets
+    /// and crowd the APRS airwaves. If you'd like to transmit a packet type that is not yet
+    /// supported in APRS#, consider opening/commenting on an issue or sending a PR to
+    /// implement the type.
+    /// </summary>
+    /// <throws><see cref="NotImplementedException"/>.</throws>
+    /// <returns>Nothing, not implemented.</returns>
+    public override string Encode() => throw new NotImplementedException($"{nameof(UnsupportedInfo)} should not be used to encode packets for transmission. Please use a supported type.");
 }

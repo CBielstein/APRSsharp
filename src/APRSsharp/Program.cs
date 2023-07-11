@@ -148,14 +148,16 @@
                     getDefaultValue: () => LogLevel.Warning,
                     description: "Set the verbosity of console logging."),
                 new Option<bool>(
-                    aliases: new string[] { "--decode-unsupported" },
+                    aliases: new string[] { "--display-unsupported" },
                     getDefaultValue: () => false,
                     description: "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed."),
                 };
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<Mode, string, string, string, int, string, LogLevel, bool>(Execute);
+            rootCommand.Handler = CommandHandler
+                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, LogLevel verbosity, bool displayUnsuported)
+                        => await Execute(mode, callsign, password, server, port, filter, verbosity, displayUnsuported));
 
             rootCommand.Invoke(args);
         }

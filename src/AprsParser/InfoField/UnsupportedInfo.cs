@@ -31,5 +31,5 @@ public class UnsupportedInfo : InfoField
     /// </summary>
     /// <throws><see cref="NotImplementedException"/>.</throws>
     /// <returns>Nothing, not implemented.</returns>
-    public override string Encode() => throw new NotImplementedException($"{nameof(UnsupportedInfo)} should not be used to encode packets for transmission. Please use a supported type.");
+    public override string Encode() => throw new NotSupportedException($"{nameof(UnsupportedInfo)} should not be used to encode packets for transmission. Please use a supported type.");
 }

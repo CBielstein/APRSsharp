@@ -79,6 +79,6 @@ public class UnsupportedInfoUnitTests
     {
         UnsupportedInfo ui = new UnsupportedInfo("Some data");
         Packet p = new Packet("N0CALL", Array.Empty<string>(), ui);
-        Assert.Throws<NotSupportedException>(() => p.Encode());
+        Assert.Throws<NotSupportedException>(() => p.EncodeTnc2());
     }
 }

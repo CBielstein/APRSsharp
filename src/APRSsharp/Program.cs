@@ -18,6 +18,11 @@
     public class Program
     {
         /// <summary>
+        /// If true, display unsupported <see cref="InfoField"/> types as raw encoding.
+        /// </summary>
+        private static bool displayUnsupported = false;
+
+        /// <summary>
         /// The modes in which this program can operate.
         /// </summary>
         public enum Mode
@@ -39,6 +44,11 @@
         /// <param name="p">A <see cref="Packet"/> to be printed.</param>
         public static void PrintPacket(Packet p)
         {
+            if (!Program.displayUnsupported && p.InfoField is UnsupportedInfo)
+            {
+                return;
+            }
+
             Console.WriteLine();
             Console.WriteLine($"Received type: {p.InfoField.Type}");
 
@@ -92,6 +102,10 @@
                 Console.WriteLine($"    Message: {mi.Content}");
                 Console.WriteLine($"    ID: {mi.Id}");
             }
+            else if (p.InfoField is UnsupportedInfo ui)
+            {
+                Console.WriteLine($"    Content: {ui.Content}");
+            }
 
             Console.WriteLine();
         }
@@ -133,11 +147,16 @@
                     aliases: new string[] { "--verbosity", "-v" },
                     getDefaultValue: () => LogLevel.Warning,
                     description: "Set the verbosity of console logging."),
+                new Option(
+                    aliases: new string[] { "--display-unsupported" },
+                    description: "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed."),
                 };
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler.Create<Mode, string, string, string, int, string, LogLevel>(Execute);
+            rootCommand.Handler = CommandHandler
+                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, LogLevel verbosity, bool displayUnsupported)
+                        => await Execute(mode, callsign, password, server, port, filter, verbosity, displayUnsupported));
 
             rootCommand.Invoke(args);
         }
@@ -152,6 +171,7 @@
         /// <param name="port">A port to use for connection in TCP TNC.</param>
         /// <param name="filter">The filter that will be used for receiving the packets.</param>
         /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
+        /// <param name="displayUnsupported">If true, display packets with unsupported info field types. If false, such packets are not displayed.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public static async Task Execute(
             Mode mode,
@@ -160,7 +180,8 @@
             string server,
             int port,
             string filter,
-            LogLevel verbosity)
+            LogLevel verbosity,
+            bool displayUnsupported)
         {
             using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
             {
@@ -168,6 +189,8 @@
                     .AddConsole()
                     .SetMinimumLevel(verbosity);
             });
+
+            Program.displayUnsupported = displayUnsupported;
 
             switch (mode)
             {

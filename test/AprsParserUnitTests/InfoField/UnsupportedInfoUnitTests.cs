@@ -3,7 +3,6 @@ namespace AprsSharpUnitTests.Parsers.Aprs;
 using System;
 using System.Linq;
 using AprsSharp.Parsers.Aprs;
-using GeoCoordinatePortable;
 using Xunit;
 
 /// <summary>

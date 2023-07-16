@@ -23,13 +23,13 @@ public class UnsupportedInfo : InfoField
     public string Content { get; }
 
     /// <summary>
-    /// Not implemented. <see cref="UnsupportedInfo"/> is to help fill the gap on receive
+    /// Not supported. <see cref="UnsupportedInfo"/> is to help fill the gap on receive
     /// and should not be used for transmissions. We do not want to send non-standard packets
     /// and crowd the APRS airwaves. If you'd like to transmit a packet type that is not yet
     /// supported in APRS#, consider opening/commenting on an issue or sending a PR to
     /// implement the type.
     /// </summary>
-    /// <throws><see cref="NotImplementedException"/>.</throws>
-    /// <returns>Nothing, not implemented.</returns>
+    /// <throws><see cref="NotSupportedException"/>.</throws>
+    /// <returns>Nothing, not supported.</returns>
     public override string Encode() => throw new NotSupportedException($"{nameof(UnsupportedInfo)} should not be used to encode packets for transmission. Please use a supported type.");
 }

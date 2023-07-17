@@ -3,6 +3,7 @@
     using System;
     using System.IO;
     using System.Net.Sockets;
+    using System.Text;
 
     /// <summary>
     /// Represents a TcpConnection.
@@ -56,12 +57,19 @@
         /// <inheritdoc/>
         public void SendString(string message)
         {
+            var bytes = Encoding.ASCII.GetBytes(message);
+            SendBytes(bytes);
+        }
+
+        /// <inheritdoc/>
+        public void SendBytes(byte[] bytes)
+        {
             if (writer == null)
             {
                 throw new Exception();
             }
 
-            writer.WriteLine(message);
+            writer.BaseStream.Write(bytes);
         }
 
         /// <inheritdoc/>

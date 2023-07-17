@@ -1,7 +1,6 @@
 namespace AprsSharp.Protocols.KISS
 {
     using System;
-    using System.Text;
     using AprsSharp.Shared;
 
     /// <summary>
@@ -14,26 +13,25 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// Initializes a new instance of the <see cref="TcpTNC"/> class.
         /// </summary>
-        /// <param name="server">Server hostname of the remote TNC.</param>
-        /// <param name="port">Server TCP port of the remote TNC.</param>
+        /// <param name="tcpConnection">A <see cref="ITcpConnection"/> to communicate with the TNC.</param>
         /// <param name="tncPort">Por the remote TNC should use to communicate to the radio.</param>
-        public TcpTNC(string server, int port, byte tncPort)
+        public TcpTNC(ITcpConnection tcpConnection, byte tncPort)
             : base(tncPort)
         {
-            tcpConnection = new TcpConnection();
-            tcpConnection.Connect(server, port);
-            tcpConnection.AsyncReceive(bytes => DecodeReceivedData(bytes));
+            this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
+
+            if (!this.tcpConnection.Connected)
+            {
+                throw new ArgumentException("TCP connection is not yet connected.", nameof(tcpConnection));
+            }
+
+            this.tcpConnection.AsyncReceive(bytes => DecodeReceivedData(bytes));
         }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-
-            if (disposing)
-            {
-                tcpConnection.Dispose();
-            }
         }
 
         /// <inheritdoc/>

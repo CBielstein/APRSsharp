@@ -89,23 +89,7 @@
         }
 
         /// <summary>
-        /// Specifies different formats for a <see cref="Packet"/>.
-        /// </summary>
-        public enum Format
-        {
-            /// <summary>
-            /// The TNC2 format.
-            /// </summary>
-            TNC2,
-
-            /// <summary>
-            /// The AX.25 packet format.
-            /// </summary>
-            AX25,
-        }
-
-        /// <summary>
-        /// Special values used in <see cref="Format.AX25"/> encoding.
+        /// Special values used in AX.25 encoding.
         /// </summary>
         private enum Ax25Control : byte
         {
@@ -207,7 +191,7 @@
         }
 
         /// <summary>
-        /// Attempts to get a callsign from an encoded <see cref="Format.AX25"/> packet.
+        /// Attempts to get a callsign from an encoded AX.25 packet.
         /// </summary>
         /// <param name="encodedPacket">The bytes of the encoded packet.</param>
         /// <param name="callsignNumber">The number of the callsign (in order in the packet encoding) to attempt to fetch.</param>

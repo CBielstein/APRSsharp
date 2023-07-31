@@ -114,5 +114,15 @@ namespace AprsSharp.Parsers.Aprs
         ///     MessageId (excludes `{`).
         /// </summary>
         public const string MessageWithId = @"^:(.{9}):([^:~{]+)?({([a-zA-Z0-9]{1,5}))?$";
+
+        /// <summary>
+        /// Matches a callsign with optional SSID
+        /// 4 matches:
+        ///     Full
+        ///     Callsign (no SSID)
+        ///     SSID suffix (include dash) (optional)
+        ///     SSID number (optional).
+        /// </summary>
+        public const string CallsignWithOptionalSsid = @"^([a-zA-Z0-9]{1,6})(-([0-9]{1,2}))?$";
     }
 }

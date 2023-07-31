@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.Applications.Console
 {
     using System;
+    using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.Linq;
@@ -54,6 +55,7 @@
             Console.WriteLine($"Received type: {p.InfoField.Type}");
 
             Console.WriteLine($"    Sender: {p.Sender}");
+            Console.WriteLine($"    Destination: {p.Destination}");
             Console.WriteLine($"    Path: {string.Join(',', p.Path)}");
             Console.WriteLine($"    Received At: {p.ReceivedTime} {p.ReceivedTime?.Kind}");
             Console.WriteLine($"    Type: {p.InfoField.Type}");
@@ -229,17 +231,27 @@
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();
-                        Console.WriteLine(Encoding.UTF8.GetString(byteArray));
+                        var packet = new Packet(byteArray);
+                        PrintPacket(packet);
                     };
 
-                    Console.WriteLine("Press Q to quit");
-                    ConsoleKey key;
+                    tnc.SetTxDelay(50);
+                    tnc.SetTxTail(50);
+
+                    Console.WriteLine("Enter status to send, else q to quit");
 
                     do
                     {
-                        key = Console.ReadKey().Key;
+                        var input = Console.ReadLine();
+                        if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
+                        {
+                            break;
+                        }
+
+                        var packet = new Packet(callsign, callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
+                        tnc.SendData(packet.EncodeAx25());
                     }
-                    while (key != ConsoleKey.Q);
+                    while (true);
 
                     break;
                 }

@@ -7,8 +7,8 @@
     using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
-    using AprsSharp.KissTnc;
     using AprsSharp.AprsParser;
+    using AprsSharp.KissTnc;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging;
 

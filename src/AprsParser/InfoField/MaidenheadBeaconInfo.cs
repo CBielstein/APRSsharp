@@ -1,9 +1,9 @@
-namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.AprsParser
 {
     using System;
     using System.Text;
     using System.Text.RegularExpressions;
-    using AprsSharp.Parsers.Aprs.Extensions;
+    using AprsSharp.AprsParser.Extensions;
 
     /// <summary>
     /// Represents an info field for packet type <see cref="PacketType.MaidenheadGridLocatorBeacon"/>.

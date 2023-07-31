@@ -1,10 +1,10 @@
-﻿namespace AprsSharp.Parsers.Aprs
+﻿namespace AprsSharp.AprsParser
 {
     using System;
     using System.Globalization;
     using System.Text;
     using System.Text.RegularExpressions;
-    using AprsSharp.Parsers.Aprs.Extensions;
+    using AprsSharp.AprsParser.Extensions;
     using GeoCoordinatePortable;
 
     /// <summary>

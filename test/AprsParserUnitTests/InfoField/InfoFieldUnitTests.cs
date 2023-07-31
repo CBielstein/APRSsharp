@@ -1,6 +1,6 @@
-﻿namespace AprsSharpUnitTests.Parsers.Aprs
+﻿namespace AprsSharpUnitTests.AprsParser
 {
-    using AprsSharp.Parsers.Aprs;
+    using AprsSharp.AprsParser;
     using Xunit;
 
     /// <summary>

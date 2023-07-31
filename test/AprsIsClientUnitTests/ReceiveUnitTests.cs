@@ -4,7 +4,7 @@ namespace AprsSharpUnitTests.AprsIsClient
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
-    using AprsSharp.Parsers.Aprs;
+    using AprsSharp.AprsParser;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging.Abstractions;
     using Moq;

@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs.Extensions
+namespace AprsSharp.AprsParser.Extensions
 {
     using System;
     using System.Collections.Generic;

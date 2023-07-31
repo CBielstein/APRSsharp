@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.AprsParser
 {
     /// <summary>
     /// Used to specify format during decode of raw GPS data packets.

@@ -3,7 +3,7 @@ namespace AprsSharpUnitTests.Protocols;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AprsSharp.Protocols.KISS;
+using AprsSharp.KissTnc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 /// <summary>

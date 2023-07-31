@@ -1,6 +1,6 @@
 namespace AprsSharpUnitTests.Protocols;
 
-using AprsSharp.Protocols.KISS;
+using AprsSharp.KissTnc;
 using AprsSharp.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

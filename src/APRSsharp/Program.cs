@@ -9,7 +9,7 @@
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
     using AprsSharp.Parsers.Aprs;
-    using AprsSharp.Protocols.KISS;
+    using AprsSharp.KissTnc;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging;
 

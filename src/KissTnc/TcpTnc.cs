@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols.KISS
+namespace AprsSharp.KissTnc
 {
     using System;
     using AprsSharp.Shared;

@@ -5,11 +5,10 @@
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
-    using AprsSharp.Parsers.Aprs;
     using AprsSharp.KissTnc;
+    using AprsSharp.Parsers.Aprs;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging;
 

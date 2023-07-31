@@ -1,4 +1,4 @@
-﻿namespace AprsSharp.Parsers.Aprs
+﻿namespace AprsSharp.AprsParser
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
-    using AprsSharp.Parsers.Aprs.Extensions;
+    using AprsSharp.AprsParser.Extensions;
 
     /// <summary>
     /// Represents a full APRS packet.

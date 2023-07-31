@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.AprsParser
 {
     /// <summary>
     /// Holds strings for regex comparisons for reuse.

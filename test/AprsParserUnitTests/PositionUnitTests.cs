@@ -1,7 +1,7 @@
-﻿namespace AprsSharpUnitTests.Parsers.Aprs
+﻿namespace AprsSharpUnitTests.AprsParser
 {
     using System;
-    using AprsSharp.Parsers.Aprs;
+    using AprsSharp.AprsParser;
     using GeoCoordinatePortable;
     using Xunit;
 

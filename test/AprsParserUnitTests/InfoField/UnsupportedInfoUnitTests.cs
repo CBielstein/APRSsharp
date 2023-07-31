@@ -1,8 +1,8 @@
-namespace AprsSharpUnitTests.Parsers.Aprs;
+namespace AprsSharpUnitTests.AprsParser;
 
 using System;
 using System.Linq;
-using AprsSharp.Parsers.Aprs;
+using AprsSharp.AprsParser;
 using Xunit;
 
 /// <summary>

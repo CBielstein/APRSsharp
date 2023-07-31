@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.AprsParser
 {
     /// <summary>
     /// Specifies whether a function is referring to latitude or longitude during Maidenhead gridsquare encode/decode.

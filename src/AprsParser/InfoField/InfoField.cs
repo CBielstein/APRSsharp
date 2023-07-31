@@ -1,7 +1,7 @@
-﻿namespace AprsSharp.Parsers.Aprs
+﻿namespace AprsSharp.AprsParser
 {
     using System;
-    using AprsSharp.Parsers.Aprs.Extensions;
+    using AprsSharp.AprsParser.Extensions;
 
     /// <summary>
     /// A representation of an info field on an APRS packet.

@@ -1,9 +1,9 @@
-namespace AprsSharpUnitTests.Parsers.Aprs
+namespace AprsSharpUnitTests.AprsParser
 {
     using System;
     using System.Collections.Generic;
-    using AprsSharp.Parsers.Aprs;
-    using AprsSharp.Parsers.Aprs.Extensions;
+    using AprsSharp.AprsParser;
+    using AprsSharp.AprsParser.Extensions;
     using GeoCoordinatePortable;
     using Xunit;
 

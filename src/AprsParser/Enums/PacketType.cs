@@ -1,4 +1,4 @@
-namespace AprsSharp.Parsers.Aprs
+namespace AprsSharp.AprsParser
 {
     /// <summary>
     /// The APRS packet type.

@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>AprsSharp.KissTnc</PackageId>
+    <Description>Library for interfacing with Terminal Node Controllers (TNC) with the KISS protocol used frequently in the Automatic Packet Reporting System (APRS).</Description>
+    <PackageTags>ham radio;amateur radio;packet radio;radio;APRS;Automatic Packet Reporting System;kiss;tnc;Terminal Node Controller;</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

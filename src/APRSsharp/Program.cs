@@ -227,7 +227,7 @@
 
                     using TcpConnection tcp = new TcpConnection();
                     tcp.Connect(server, port);
-                    using TNCInterface tnc = new TcpTNC(tcp, 0);
+                    using Tnc tnc = new TcpTNC(tcp, 0);
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();

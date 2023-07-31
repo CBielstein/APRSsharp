@@ -6,7 +6,7 @@ namespace AprsSharp.KissTnc
     /// <summary>
     /// Represents an interface through a TCP/IP connection to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class TcpTNC : TNCInterface
+    public sealed class TcpTNC : Tnc
     {
         private readonly ITcpConnection tcpConnection;
 

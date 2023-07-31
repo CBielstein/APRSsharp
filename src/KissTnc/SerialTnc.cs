@@ -6,7 +6,7 @@ namespace AprsSharp.KissTnc
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class SerialTNC : TNCInterface
+    public sealed class SerialTNC : Tnc
     {
         /// <summary>
         /// The serial port to which the TNC is connected.

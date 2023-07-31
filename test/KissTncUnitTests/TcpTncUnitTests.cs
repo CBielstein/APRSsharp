@@ -6,13 +6,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 /// <summary>
-/// Test <see cref="TcpTNC"/> class.
+/// Test <see cref="TcpTnc"/> class.
 /// </summary>
 [TestClass]
-public class TcpTNCUnitTests : BaseTNCUnitTests<TcpTNC>
+public class TcpTncUnitTests : BaseTNCUnitTests<TcpTnc>
 {
     /// <inheritdoc/>
-    public override TcpTNC BuildTestTnc()
+    public override TcpTnc BuildTestTnc()
     {
         var mockConn = new Mock<ITcpConnection>();
         mockConn.SetupGet(mock => mock.Connected).Returns(true);
@@ -20,6 +20,6 @@ public class TcpTNCUnitTests : BaseTNCUnitTests<TcpTNC>
         mockConn.Setup(mock => mock.SendBytes(It.IsAny<byte[]>()));
         mockConn.Setup(mock => mock.SendString(It.IsAny<string>()));
 
-        return new TcpTNC(mockConn.Object, 0);
+        return new TcpTnc(mockConn.Object, 0);
     }
 }

@@ -1,4 +1,4 @@
-namespace AprsSharpUnitTests.Protocols;
+namespace AprsSharpUnitTests.KissTnc;
 
 using AprsSharp.KissTnc;
 using AprsSharp.Shared;

@@ -1,4 +1,4 @@
-namespace AprsSharpUnitTests.Protocols;
+namespace AprsSharpUnitTests.KissTnc;
 
 using System.Collections.Generic;
 using System.Linq;

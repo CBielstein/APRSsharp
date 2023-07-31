@@ -1,6 +1,6 @@
-namespace AprsSharpUnitTests.Connections.AprsIs
+namespace AprsSharpUnitTests.AprsIsClient
 {
-    using AprsSharp.Connections.AprsIs;
+    using AprsSharp.AprsIsClient;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging.Abstractions;
     using Moq;

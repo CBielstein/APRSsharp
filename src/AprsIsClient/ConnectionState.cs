@@ -1,4 +1,4 @@
-﻿namespace AprsSharp.Connections.AprsIs
+﻿namespace AprsSharp.AprsIsClient
 {
     /// <summary>
     /// Tracks the state of an <see cref="AprsIsClient"/>.

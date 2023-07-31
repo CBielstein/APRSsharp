@@ -1,9 +1,9 @@
-namespace AprsSharpUnitTests.Connections.AprsIs
+namespace AprsSharpUnitTests.AprsIsClient
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using AprsSharp.Connections.AprsIs;
+    using AprsSharp.AprsIsClient;
     using AprsSharp.Parsers.Aprs;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging.Abstractions;

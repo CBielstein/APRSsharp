@@ -6,7 +6,7 @@
     using System.CommandLine.Invocation;
     using System.Linq;
     using System.Threading.Tasks;
-    using AprsSharp.Connections.AprsIs;
+    using AprsSharp.AprsIsClient;
     using AprsSharp.KissTnc;
     using AprsSharp.Parsers.Aprs;
     using AprsSharp.Shared;

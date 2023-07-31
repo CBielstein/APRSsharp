@@ -1,4 +1,4 @@
-﻿namespace AprsSharp.Connections.AprsIs
+﻿namespace AprsSharp.AprsIsClient
 {
     using System;
     using System.Reflection;

@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols.KISS
+namespace AprsSharp.KissTnc
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Abstracts an interface to a TNC using the KISS protocol.
     /// </summary>
-    public abstract class TNCInterface : IDisposable
+    public abstract class Tnc : IDisposable
     {
         /// <summary>
         /// A queue of received bytes waiting to be delivered (at the end of a frame).
@@ -34,10 +34,10 @@ namespace AprsSharp.Protocols.KISS
         private bool disposed;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TNCInterface"/> class.
+        /// Initializes a new instance of the <see cref="Tnc"/> class.
         /// </summary>
         /// <param name="port">The port on the TNC used for communication.</param>
-        public TNCInterface(byte port = 0)
+        public Tnc(byte port = 0)
         {
             SetTncPort(port);
         }
@@ -45,7 +45,7 @@ namespace AprsSharp.Protocols.KISS
         /// <summary>
         /// Delegate function that will be called when a full frame is received and ready to be delivered.
         /// </summary>
-        /// <param name="sender">The TNCInterface which received the frame.</param>
+        /// <param name="sender">The <see cref="Tnc"/> which received the frame.</param>
         /// <param name="a">The event argument, which includes the received data.</param>
         public delegate void FrameReceivedEventHandler(object sender, FrameReceivedEventArgs a);
 

@@ -1,23 +1,23 @@
-namespace AprsSharpUnitTests.Protocols;
+namespace AprsSharpUnitTests.KissTnc;
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using AprsSharp.Protocols.KISS;
+using AprsSharp.KissTnc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 /// <summary>
-/// Base class for testing <see cref="TNCInterface"/> implementations.
+/// Base class for testing <see cref="Tnc"/> implementations.
 /// </summary>
-/// <typeparam name="T">Implementation of <see cref="TNCInterface"/> for test.</typeparam>
+/// <typeparam name="T">Implementation of <see cref="Tnc"/> for test.</typeparam>
 public abstract class BaseTNCUnitTests<T>
-    where T : TNCInterface
+    where T : Tnc
 {
     /// <summary>
-    /// Builds and returns a <see cref="TNCInterface"/> of type T with a mocked
+    /// Builds and returns a <see cref="Tnc"/> of type T with a mocked
     /// underlying connection.
     /// </summary>
-    /// <returns>A <see cref="TNCInterface"/> with a mocked connection.</returns>
+    /// <returns>A <see cref="Tnc"/> with a mocked connection.</returns>
     public abstract T BuildTestTnc();
 
     /// <summary>

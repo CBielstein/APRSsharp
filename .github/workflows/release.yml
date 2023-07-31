@@ -37,8 +37,14 @@ jobs:
       - name: Pack AprsSharp.AprsIsClient
         run: dotnet pack src/AprsIsClient/AprsIsClient.csproj --configuration Release --no-build
 
-      - name: Publish AprsShar.AprsParser
+      - name: Pack AprsSharp.KissTnc
+        run: dotnet pack src/KissTnc/KissTnc.csproj --configuration Release --no-build
+
+      - name: Publish AprsSharp.AprsParser
         run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
 
-      - name: Publish AprsShar.AprsIsClient
+      - name: Publish AprsSharp.AprsIsClient
         run: dotnet nuget push src/AprsIsClient/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+
+      - name: Publish AprsSharp.KissTnc
+        run: dotnet nuget push src/KissTnc/bin/Release/AprsSharp.KissTnc.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

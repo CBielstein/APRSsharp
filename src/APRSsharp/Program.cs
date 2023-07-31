@@ -5,11 +5,10 @@
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
     using AprsSharp.Connections.AprsIs;
+    using AprsSharp.KissTnc;
     using AprsSharp.Parsers.Aprs;
-    using AprsSharp.Protocols.KISS;
     using AprsSharp.Shared;
     using Microsoft.Extensions.Logging;
 
@@ -227,7 +226,7 @@
 
                     using TcpConnection tcp = new TcpConnection();
                     tcp.Connect(server, port);
-                    using TNCInterface tnc = new TcpTNC(tcp, 0);
+                    using Tnc tnc = new TcpTnc(tcp, 0);
                     tnc.FrameReceivedEvent += (sender, args) =>
                     {
                         var byteArray = args.Data.ToArray();

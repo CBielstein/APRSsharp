@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols.KISS
+namespace AprsSharp.KissTnc
 {
     using System;
     using System.IO.Ports;
@@ -6,7 +6,7 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Represents an interface through a serial connection to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class SerialTNC : TNCInterface
+    public sealed class SerialTnc : Tnc
     {
         /// <summary>
         /// The serial port to which the TNC is connected.
@@ -14,11 +14,11 @@ namespace AprsSharp.Protocols.KISS
         private readonly ISerialConnection serialPort;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SerialTNC"/> class.
+        /// Initializes a new instance of the <see cref="SerialTnc"/> class.
         /// </summary>
         /// <param name="serialPort">The SerialPort to use for connection to the TNC.</param>
         /// <param name="tncPort">The port on the TNC used for communication.</param>
-        public SerialTNC(ISerialConnection serialPort, byte tncPort)
+        public SerialTnc(ISerialConnection serialPort, byte tncPort)
             : base(tncPort)
         {
             if (serialPort == null)

@@ -1,4 +1,4 @@
-namespace AprsSharp.Protocols.KISS
+namespace AprsSharp.KissTnc
 {
     using System;
     using AprsSharp.Shared;
@@ -6,16 +6,16 @@ namespace AprsSharp.Protocols.KISS
     /// <summary>
     /// Represents an interface through a TCP/IP connection to a TNC using the KISS protocol.
     /// </summary>
-    public sealed class TcpTNC : TNCInterface
+    public sealed class TcpTnc : Tnc
     {
         private readonly ITcpConnection tcpConnection;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TcpTNC"/> class.
+        /// Initializes a new instance of the <see cref="TcpTnc"/> class.
         /// </summary>
         /// <param name="tcpConnection">A <see cref="ITcpConnection"/> to communicate with the TNC.</param>
         /// <param name="tncPort">Por the remote TNC should use to communicate to the radio.</param>
-        public TcpTNC(ITcpConnection tcpConnection, byte tncPort)
+        public TcpTnc(ITcpConnection tcpConnection, byte tncPort)
             : base(tncPort)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));

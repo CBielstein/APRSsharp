@@ -40,6 +40,9 @@ jobs:
       - name: Pack AprsSharp.KissTnc
         run: dotnet pack src/KissTnc/KissTnc.csproj --configuration Release --no-build
 
+      - name: Pack AprsSharp.Shared
+        run: dotnet pack src/Shared/Shared.csproj --configuration Release --no-build
+
       - name: Publish AprsSharp.AprsParser
         run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
 
@@ -48,3 +51,6 @@ jobs:
 
       - name: Publish AprsSharp.KissTnc
         run: dotnet nuget push src/KissTnc/bin/Release/AprsSharp.KissTnc.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+
+      - name: Publish AprsSharp.Shared
+        run: dotnet nuget push src/Shared/bin/Release/AprsSharp.Shared.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json

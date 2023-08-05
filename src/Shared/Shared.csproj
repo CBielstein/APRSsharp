@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <PackageId>AprsSharp.Shared</PackageId>
+    <Description>Shared code common to other AprsSharp packages.</Description>
   </PropertyGroup>
 
 </Project>

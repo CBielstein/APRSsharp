@@ -41,7 +41,7 @@ this project.
 
 ### Dependencies
 
-The target is .NET 6.0 for development.
+The target is .NET 8.0 for development.
 
 ### Building
 

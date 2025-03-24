@@ -144,7 +144,7 @@
                 new Option<string>(
                     aliases: new string[] { "--filter", "-f" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
-                    description: "A user filter parsed as a string"),
+                    description: "A user filter parsed as a string. Should not include the word 'filter', just the logic string."),
                 new Option<LogLevel>(
                     aliases: new string[] { "--verbosity", "-v" },
                     getDefaultValue: () => LogLevel.Warning,

@@ -24,7 +24,7 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task ReceivedTcpMessageEvent()
         {
-            IList<string> tcpMessagesReceived = new List<string>();
+            List<string> tcpMessagesReceived = new List<string>();
             TaskCompletionSource eventHandled = new TaskCompletionSource();
 
             // Mock underlying TCP connection
@@ -48,7 +48,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             await eventHandled.Task;
 
             // Assert the callback was triggered and that the expected message was received.
-            Assert.Equal(1, tcpMessagesReceived.Count);
+            Assert.Single(tcpMessagesReceived);
             Assert.Contains(testMessage, tcpMessagesReceived);
         }
 
@@ -59,8 +59,8 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task ReceiveHandlesLogin()
         {
-            IList<string> tcpMessagesReceived = new List<string>();
-            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            List<string> tcpMessagesReceived = new List<string>();
+            List<ConnectionState> stateChangesReceived = new List<ConnectionState>();
             TaskCompletionSource loggedIn = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.3.1 filter r/50.5039/4.4699/50";
@@ -196,24 +196,18 @@ namespace AprsSharpUnitTests.AprsIsClient
             await eventHandled.Task;
 
             // Assert the callback was triggered and that the expected message was received.
-            if (receivedPacket == null)
-            {
-                Assert.NotNull(receivedPacket);
-            }
-            else
-            {
-                Assert.Equal(PacketType.Status, receivedPacket.InfoField.Type);
-                Assert.IsType<StatusInfo>(receivedPacket.InfoField);
+            Assert.NotNull(receivedPacket);
+            Assert.Equal(PacketType.Status, receivedPacket.InfoField.Type);
+            Assert.IsType<StatusInfo>(receivedPacket.InfoField);
 
-                StatusInfo si = (StatusInfo)receivedPacket.InfoField;
+            StatusInfo si = (StatusInfo)receivedPacket.InfoField;
 
-                Assert.NotNull(si.Position);
-                Assert.Equal("CN76wv", si.Position?.EncodeGridsquare(6, false), ignoreCase: true);
-                Assert.Equal('\\', si.Position?.SymbolTableIdentifier);
-                Assert.Equal('L', si.Position?.SymbolCode);
-                Assert.Null(si.Timestamp);
-                Assert.Equal("Lighthouse!", si.Comment);
-            }
+            Assert.NotNull(si.Position);
+            Assert.Equal("CN76wv", si.Position.EncodeGridsquare(6, false), ignoreCase: true);
+            Assert.Equal('\\', si.Position.SymbolTableIdentifier);
+            Assert.Equal('L', si.Position.SymbolCode);
+            Assert.Null(si.Timestamp);
+            Assert.Equal("Lighthouse!", si.Comment);
         }
 
         /// <summary>
@@ -224,14 +218,16 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task FailureToConnectSetsDisconnectedState()
         {
-            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            List<ConnectionState> stateChangesReceived = new List<ConnectionState>();
             TaskCompletionSource disconnected = new TaskCompletionSource();
 
             // Mock underlying TCP connection
             var mockTcpConnection = new Mock<ITcpConnection>();
+#pragma warning disable CA2201 // Do not raise reserved exception types
             mockTcpConnection.SetupSequence(
                 mock => mock.Connect(It.IsAny<string>(), It.IsAny<int>()))
                     .Throws(new Exception("Mock exception connecting!"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callback
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
@@ -252,7 +248,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             await disconnected.Task;
 
             // Assert the state change event was triggered with the correct state
-            Assert.Equal(1, stateChangesReceived.Count);
+            Assert.Single(stateChangesReceived);
             Assert.Equal(ConnectionState.Disconnected, stateChangesReceived[0]);
             Assert.Equal(ConnectionState.Disconnected, aprsIs.State);
 
@@ -270,7 +266,7 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task FailureToReceiveSetsDisconnectedState()
         {
-            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            List<ConnectionState> stateChangesReceived = new List<ConnectionState>();
             TaskCompletionSource disconnected = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";
@@ -281,10 +277,12 @@ namespace AprsSharpUnitTests.AprsIsClient
             var mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
+#pragma warning disable CA2201 // Do not raise reserved exception types
             mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
                 .Returns(firstMessage)
                 .Returns(loginResponse)
                 .Throws(new Exception("Something happened to the connection!"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callbacks
             using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
@@ -319,7 +317,7 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task ServerDisconnectSetsDisconnectedState()
         {
-            IList<ConnectionState> stateChangesReceived = new List<ConnectionState>();
+            List<ConnectionState> stateChangesReceived = new List<ConnectionState>();
             TaskCompletionSource disconnected = new TaskCompletionSource();
 
             string expectedLoginMessage = $"user N0CALL pass -1 vers AprsSharp 0.1 filter r/50.5039/4.4699/50";

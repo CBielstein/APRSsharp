@@ -12,6 +12,7 @@
     <ProjectReference Include="..\AprsParser\AprsParser.csproj" />
     <ProjectReference Include="..\AprsIsClient\AprsIsClient.csproj" />
     <ProjectReference Include="..\KissTnc\KissTnc.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

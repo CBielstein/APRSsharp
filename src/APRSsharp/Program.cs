@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
-    using System.IO.Ports;
     using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
@@ -145,7 +144,11 @@
                     description: "A serial port for use with serial TNCs."),
                 };
 #pragma warning restore CA1861 // Avoid constant arrays as arguments
-            rootCommand.Description = "AprsSharp Console App";
+            rootCommand.Name = "APRSsharp";
+            rootCommand.Description = $@"AprsSharp Console App
+                Version: {Utilities.GetAssemblyVersion()}
+                GitHub: https://github.com/CBielstein/APRSsharp
+                Author: Cameron Bielstein";
 
             // The parameters of the handler method are matched according to the names of the options
             rootCommand.Handler = CommandHandler

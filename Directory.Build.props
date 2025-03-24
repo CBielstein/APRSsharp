@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <NullableReferenceTypes>true</NullableReferenceTypes>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

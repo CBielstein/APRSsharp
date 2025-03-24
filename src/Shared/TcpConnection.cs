@@ -10,6 +10,10 @@
     /// </summary>
     public sealed class TcpConnection : ITcpConnection
     {
+        /// <summary>
+        /// End-of-line bytes that servers expect at the end of a message.
+        /// </summary>
+        private static byte[] eolBytes = Encoding.ASCII.GetBytes("\r\n");
         private readonly TcpClient tcpClient = new TcpClient();
         private NetworkStream? stream;
         private StreamWriter? writer;
@@ -70,6 +74,7 @@
             }
 
             writer.BaseStream.Write(bytes);
+            writer.BaseStream.Write(eolBytes);
         }
 
         /// <inheritdoc/>

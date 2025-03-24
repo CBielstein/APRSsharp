@@ -11,7 +11,12 @@ public enum Mode
     APRSIS,
 
     /// <summary>
-    /// Interfaces with a TNC via TCP
+    /// Interfaces with a KISS TNC via TCP
     /// </summary>
     TCPTNC,
+
+    /// <summary>
+    /// Interfaces with a KISS TNC via serial connection
+    /// </summary>
+    SERIAL_TNC,
 }

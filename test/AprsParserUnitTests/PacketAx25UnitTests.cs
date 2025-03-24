@@ -30,13 +30,13 @@ public class PacketAx25UnitTests
         Assert.Equal(destination, decodedPacket.Destination);
         Assert.Equal(path, decodedPacket.Path);
 
-        Assert.IsType<StatusInfo>(decodedPacket.InfoField);
-        var si = (StatusInfo)decodedPacket.InfoField;
-        Assert.NotNull(si);
-        Assert.Equal(DateTimeKind.Utc, si.Timestamp?.DateTime.Kind);
-        Assert.Equal(info.Timestamp?.DateTime.Day, si.Timestamp?.DateTime.Day);
-        Assert.Equal(info.Timestamp?.DateTime.Hour, si.Timestamp?.DateTime.Hour);
-        Assert.Equal(info.Timestamp?.DateTime.Minute, si.Timestamp?.DateTime.Minute);
+        var si = Assert.IsType<StatusInfo>(decodedPacket.InfoField);
+        Assert.NotNull(si.Timestamp);
+
+        Assert.Equal(DateTimeKind.Utc, si.Timestamp.DateTime.Kind);
+        Assert.Equal(info.Timestamp!.DateTime.Day, si.Timestamp.DateTime.Day);
+        Assert.Equal(info.Timestamp!.DateTime.Hour, si.Timestamp.DateTime.Hour);
+        Assert.Equal(info.Timestamp!.DateTime.Minute, si.Timestamp.DateTime.Minute);
         Assert.Equal(info.Comment, si.Comment);
         Assert.Equal(info.Position?.Coordinates, si.Position?.Coordinates);
     }

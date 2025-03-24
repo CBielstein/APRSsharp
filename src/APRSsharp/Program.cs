@@ -24,22 +24,6 @@
         private static bool displayUnsupported = false;
 
         /// <summary>
-        /// The modes in which this program can operate.
-        /// </summary>
-        public enum Mode
-        {
-            /// <summary>
-            /// Receives packets from APRS-IS
-            /// </summary>
-            APRSIS,
-
-            /// <summary>
-            /// Interfaces with a TNC via TCP
-            /// </summary>
-            TCPTNC,
-        }
-
-        /// <summary>
         /// A function matching the delegate event to print the received packet.
         /// </summary>
         /// <param name="p">A <see cref="Packet"/> to be printed.</param>

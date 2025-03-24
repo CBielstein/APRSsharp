@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.CommandLine;
     using System.CommandLine.Invocation;
+    using System.IO.Ports;
     using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
@@ -22,22 +23,6 @@
         /// If true, display unsupported <see cref="InfoField"/> types as raw encoding.
         /// </summary>
         private static bool displayUnsupported = false;
-
-        /// <summary>
-        /// The modes in which this program can operate.
-        /// </summary>
-        public enum Mode
-        {
-            /// <summary>
-            /// Receives packets from APRS-IS
-            /// </summary>
-            APRSIS,
-
-            /// <summary>
-            /// Interfaces with a TNC via TCP
-            /// </summary>
-            TCPTNC,
-        }
 
         /// <summary>
         /// A function matching the delegate event to print the received packet.
@@ -152,15 +137,53 @@
                 new Option(
                     aliases: new string[] { "--display-unsupported" },
                     description: "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed."),
+                new Option<string?>(
+                    aliases: new string[] { "--serialPort" },
+                    getDefaultValue: () => null,
+                    description: "A serial port for use with serial TNCs."),
                 };
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
             rootCommand.Handler = CommandHandler
-                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, LogLevel verbosity, bool displayUnsupported)
-                        => await Execute(mode, callsign, password, server, port, filter, verbosity, displayUnsupported));
+                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, LogLevel verbosity, bool displayUnsupported, string? serialPort)
+                        => await Execute(mode, callsign, password, server, port, filter, verbosity, displayUnsupported, serialPort));
 
             rootCommand.Invoke(args);
+        }
+
+        private static void RunTncMode(Tnc tnc, string callsign)
+        {
+            tnc.FrameReceivedEvent += (sender, args) =>
+            {
+                var byteArray = args.Data.ToArray();
+                var packet = new Packet(byteArray);
+                PrintPacket(packet);
+            };
+
+            tnc.SetTxDelay(50);
+            tnc.SetTxTail(50);
+
+            Console.WriteLine("Enter status to send, else q to quit");
+
+            do
+            {
+                var input = Console.ReadLine();
+                if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
+                {
+                    break;
+                }
+                else if (string.Equals(callsign, "N0CALL", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    Console.WriteLine("You must supply your callsign to send packets.");
+                }
+                else
+                {
+                    var packet = new Packet(callsign, callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
+                    tnc.SendData(packet.EncodeAx25());
+                }
+            }
+            while (true);
         }
 
         /// <summary>
@@ -170,13 +193,14 @@
         /// <param name="callsign">The user callsign that they should input.</param>
         /// <param name="password">The user password.</param>
         /// <param name="server">The specified server to connect (either APRS-IS or TCP TNC).</param>
-        /// <param name="port">A port to use for connection in TCP TNC.</param>
+        /// <param name="port">A port to use for connection to a TNC via TCP.</param>
         /// <param name="filter">The filter that will be used for receiving the packets.
         /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
         /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <param name="displayUnsupported">If true, display packets with unsupported info field types. If false, such packets are not displayed.</param>
+        /// <param name="serialPort">A serial port to use for connection to a TNC via serial connection.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task Execute(
+        private static async Task Execute(
             Mode mode,
             string callsign,
             string password,
@@ -184,7 +208,8 @@
             int port,
             string filter,
             LogLevel verbosity,
-            bool displayUnsupported)
+            bool displayUnsupported,
+            string? serialPort)
         {
             using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
             {
@@ -223,35 +248,31 @@
 
                 case Mode.TCPTNC:
                 {
-                    Console.WriteLine($"Connecting to TNC via TCP: {server}:{port}");
+                    Console.WriteLine($"Connecting to KISS TNC via TCP: {server}:{port}");
 
                     using TcpConnection tcp = new TcpConnection();
                     tcp.Connect(server, port);
                     using Tnc tnc = new TcpTnc(tcp, 0);
-                    tnc.FrameReceivedEvent += (sender, args) =>
+
+                    RunTncMode(tnc, callsign);
+
+                    break;
+                }
+
+                case Mode.SERIAL_TNC:
+                {
+                    if (serialPort == null)
                     {
-                        var byteArray = args.Data.ToArray();
-                        var packet = new Packet(byteArray);
-                        PrintPacket(packet);
-                    };
-
-                    tnc.SetTxDelay(50);
-                    tnc.SetTxTail(50);
-
-                    Console.WriteLine("Enter status to send, else q to quit");
-
-                    do
-                    {
-                        var input = Console.ReadLine();
-                        if (string.Equals(input, "q", StringComparison.OrdinalIgnoreCase))
-                        {
-                            break;
-                        }
-
-                        var packet = new Packet(callsign, callsign, new List<string>(), new StatusInfo((Timestamp?)null, input));
-                        tnc.SendData(packet.EncodeAx25());
+                        Console.WriteLine("You must specify a serial port to use serial TNC mode.");
+                        return;
                     }
-                    while (true);
+
+                    Console.WriteLine($"Connecting to KISS TNC via serial: {serialPort}");
+
+                    using SerialConnection serial = new SerialConnection(serialPort);
+                    using Tnc tnc = new SerialTnc(serial, 0);
+
+                    RunTncMode(tnc, callsign);
 
                     break;
                 }

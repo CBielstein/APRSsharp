@@ -55,7 +55,7 @@ To generate the console application binary, go to the APRSsharp folder
 (`AprsSharp\src\APRSsharp`) and run the command `dotnet publish -c Release` to generate
 the console application.
 The resulting binary will be placed in
-`bin\Release\net8.0\win-x86\publish`.
+`bin/Release/net8.0/<platform>/publish`.
 Alternatively, use `dotnet publish -c Release -o <outputfolder>` to specify the
 output directory.
 

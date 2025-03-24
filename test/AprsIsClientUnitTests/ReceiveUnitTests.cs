@@ -13,7 +13,7 @@ namespace AprsSharpUnitTests.AprsIsClient
     /// <summary>
     /// Unit tests for <see cref="AprsIsClient.Receive(string, string, string, string?)"/>.
     /// </summary>
-    [Collection(nameof(TimedTestCollection))]
+    [Collection(nameof(TimedTests))]
     public class ReceiveUnitTests
     {
         /// <summary>

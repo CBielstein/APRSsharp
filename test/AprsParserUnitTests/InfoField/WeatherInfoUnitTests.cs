@@ -317,10 +317,7 @@ namespace AprsSharpUnitTests.AprsParser
             int? expectedSnow,
             PacketType expectedPacketType)
         {
-            if (actual == null)
-            {
-                throw new ArgumentNullException(nameof(actual));
-            }
+            ArgumentNullException.ThrowIfNull(actual);
 
             Assert.Equal(expectedPacketType, actual.Type);
             Assert.Equal(expectedHasMessaging, actual.HasMessaging);
@@ -332,11 +329,11 @@ namespace AprsSharpUnitTests.AprsParser
             else
             {
                 Assert.NotNull(actual.Timestamp);
-                Assert.Equal(expectedTimestamp?.DecodedType, actual.Timestamp?.DecodedType);
-                Assert.Equal(expectedTimestamp?.DateTime.Day, actual.Timestamp?.DateTime.Day);
-                Assert.Equal(expectedTimestamp?.DateTime.Hour, actual.Timestamp?.DateTime.Hour);
-                Assert.Equal(expectedTimestamp?.DateTime.Minute, actual.Timestamp?.DateTime.Minute);
-                Assert.Equal(expectedTimestamp?.DateTime.Kind, actual.Timestamp?.DateTime.Kind);
+                Assert.Equal(expectedTimestamp.DecodedType, actual.Timestamp?.DecodedType);
+                Assert.Equal(expectedTimestamp.DateTime.Day, actual.Timestamp?.DateTime.Day);
+                Assert.Equal(expectedTimestamp.DateTime.Hour, actual.Timestamp?.DateTime.Hour);
+                Assert.Equal(expectedTimestamp.DateTime.Minute, actual.Timestamp?.DateTime.Minute);
+                Assert.Equal(expectedTimestamp.DateTime.Kind, actual.Timestamp?.DateTime.Kind);
             }
 
             Assert.Equal(expectedPosition.SymbolTableIdentifier, actual.Position.SymbolTableIdentifier);

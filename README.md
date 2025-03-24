@@ -101,5 +101,7 @@ To force terminate the application, press the command `Ctrl + c`
 Serial port permissions are often protected.
 In Linux, communicating with a serial port may require one of the following steps:
 
-1. Adding your user to the appropriate group. Read [this StackExchange](https://unix.stackexchange.com/questions/14354/read-write-to-a-serial-port-without-root) thread for details.
+1. Adding your user to the appropriate group. Read
+[this StackExchange](https://unix.stackexchange.com/questions/14354/read-write-to-a-serial-port-without-root)
+thread for details.
 2. Running as root or using `sudo`.

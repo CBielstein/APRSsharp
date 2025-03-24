@@ -14,6 +14,7 @@
     <PackageId>AprsSharp.AprsIsClient</PackageId>
     <Description>Library for sending and receiving packets through the Automatic Packet Reporting System Internet Service (APRS-IS)</Description>
     <PackageTags>ham radio;amateur radio;packet radio;radio;APRS;Automatic Packet Reporting System;Automatic Packet Reporting System Internet System;APRS-IS;</PackageTags>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
 </Project>

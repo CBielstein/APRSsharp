@@ -28,14 +28,15 @@ namespace AprsSharpUnitTests.AprsParser
             if (p.InfoField is StatusInfo si)
             {
                 // Coordinates not precise when coming from gridhead
-                double latitude = si?.Position?.Coordinates.Latitude ?? throw new Exception("Latitude should not be null");
-                double longitude = si?.Position?.Coordinates.Longitude ?? throw new Exception("Longitude should not be null");
+                Assert.NotNull(si.Position);
+                double latitude = si.Position.Coordinates.Latitude;
+                double longitude = si.Position.Coordinates.Longitude;
                 Assert.Equal(51.98, Math.Round(latitude, 2));
                 Assert.Equal(-0.46, Math.Round(longitude, 2));
-                Assert.Equal("IO91SX", si?.Position?.EncodeGridsquare(6, false));
-                Assert.Equal('/', si?.Position?.SymbolTableIdentifier);
-                Assert.Equal('G', si?.Position?.SymbolCode);
-                Assert.Equal("My house", si?.Comment);
+                Assert.Equal("IO91SX", si.Position.EncodeGridsquare(6, false));
+                Assert.Equal('/', si.Position.SymbolTableIdentifier);
+                Assert.Equal('G', si.Position.SymbolCode);
+                Assert.Equal("My house", si.Comment);
             }
             else
             {

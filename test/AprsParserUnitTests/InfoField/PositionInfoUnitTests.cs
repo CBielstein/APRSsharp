@@ -29,19 +29,19 @@ namespace AprsSharpUnitTests.AprsParser
 
             if (p.InfoField is PositionInfo pi)
             {
-                Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pi?.Position?.Coordinates);
-                Assert.Equal('/', pi?.Position?.SymbolTableIdentifier);
-                Assert.Equal('>', pi?.Position?.SymbolCode);
+                Assert.Equal(new GeoCoordinate(49.0583, -72.0292), pi.Position?.Coordinates);
+                Assert.Equal('/', pi.Position?.SymbolTableIdentifier);
+                Assert.Equal('>', pi.Position?.SymbolCode);
 
                 // This is using day/hour/minute encoding, so only check those
-                Assert.Equal(9, pi?.Timestamp?.DateTime.Day);
-                Assert.Equal(23, pi?.Timestamp?.DateTime.Hour);
-                Assert.Equal(45, pi?.Timestamp?.DateTime.Minute);
-                Assert.Equal(TimestampType.DHMz, pi?.Timestamp?.DecodedType);
-                Assert.Equal(DateTimeKind.Utc, pi?.Timestamp?.DateTime.Kind);
+                Assert.Equal(9, pi.Timestamp?.DateTime.Day);
+                Assert.Equal(23, pi.Timestamp?.DateTime.Hour);
+                Assert.Equal(45, pi.Timestamp?.DateTime.Minute);
+                Assert.Equal(TimestampType.DHMz, pi.Timestamp?.DecodedType);
+                Assert.Equal(DateTimeKind.Utc, pi.Timestamp?.DateTime.Kind);
 
-                Assert.Equal("Test1234", pi?.Comment);
-                Assert.False(pi?.HasMessaging);
+                Assert.Equal("Test1234", pi.Comment);
+                Assert.False(pi.HasMessaging);
             }
             else
             {

@@ -32,15 +32,15 @@
                 Assert.NotNull(mbi.Position);
 
                 // Coordinates not precise when coming from gridhead
-                double latitude = mbi?.Position?.Coordinates.Latitude ?? throw new Exception("Latitude should not be null");
-                double longitude = mbi?.Position?.Coordinates.Longitude ?? throw new Exception("Longitude should not be null");
+                double latitude = mbi.Position.Coordinates.Latitude;
+                double longitude = mbi.Position.Coordinates.Longitude;
                 Assert.Equal(51.98, Math.Round(latitude, 2));
                 Assert.Equal(-0.46, Math.Round(longitude, 2));
 
-                Assert.Equal("IO91SX", mbi?.Position?.EncodeGridsquare(6, false));
-                Assert.Equal('\\', mbi?.Position?.SymbolTableIdentifier);
-                Assert.Equal('.', mbi?.Position?.SymbolCode);
-                Assert.Equal("35 miles NNW of London", mbi?.Comment);
+                Assert.Equal("IO91SX", mbi.Position.EncodeGridsquare(6, false));
+                Assert.Equal('\\', mbi.Position.SymbolTableIdentifier);
+                Assert.Equal('.', mbi.Position.SymbolCode);
+                Assert.Equal("35 miles NNW of London", mbi.Comment);
             }
             else
             {

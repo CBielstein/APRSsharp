@@ -17,7 +17,7 @@
     /// The public class that will be called when building the console application.
     /// It is the main class that will have functionality of calling and decoding the packets.
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
         /// If true, display unsupported <see cref="InfoField"/> types as raw encoding.
@@ -30,6 +30,7 @@
         /// <param name="p">A <see cref="Packet"/> to be printed.</param>
         public static void PrintPacket(Packet p)
         {
+            ArgumentNullException.ThrowIfNull(p);
             if (!Program.displayUnsupported && p.InfoField is UnsupportedInfo)
             {
                 return;
@@ -104,6 +105,7 @@
         public static void Main(string[] args)
         {
             // Create a root command with some options
+#pragma warning disable CA1861 // Avoid constant arrays as arguments
             var rootCommand = new RootCommand
                 {
                 new Option<Mode>(
@@ -142,6 +144,7 @@
                     getDefaultValue: () => null,
                     description: "A serial port for use with serial TNCs."),
                 };
+#pragma warning restore CA1861 // Avoid constant arrays as arguments
             rootCommand.Description = "AprsSharp Console App";
 
             // The parameters of the handler method are matched according to the names of the options
@@ -173,7 +176,7 @@
                 {
                     break;
                 }
-                else if (string.Equals(callsign, "N0CALL", StringComparison.InvariantCultureIgnoreCase))
+                else if (string.Equals(callsign, "N0CALL", StringComparison.OrdinalIgnoreCase))
                 {
                     Console.WriteLine("You must supply your callsign to send packets.");
                 }
@@ -259,7 +262,7 @@
                     break;
                 }
 
-                case Mode.SERIAL_TNC:
+                case Mode.SERIALTNC:
                 {
                     if (serialPort == null)
                     {

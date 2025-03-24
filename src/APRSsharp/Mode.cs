@@ -18,5 +18,5 @@ public enum Mode
     /// <summary>
     /// Interfaces with a KISS TNC via serial connection
     /// </summary>
-    SERIAL_TNC,
+    SERIALTNC,
 }

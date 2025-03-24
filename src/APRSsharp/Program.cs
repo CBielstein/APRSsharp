@@ -144,7 +144,7 @@
                 new Option<string>(
                     aliases: new string[] { "--filter", "-f" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
-                    description: "A user filter parsed as a string"),
+                    description: "A user filter parsed as a string. Should not include the word 'filter', just the logic string."),
                 new Option<LogLevel>(
                     aliases: new string[] { "--verbosity", "-v" },
                     getDefaultValue: () => LogLevel.Warning,
@@ -171,7 +171,8 @@
         /// <param name="password">The user password.</param>
         /// <param name="server">The specified server to connect (either APRS-IS or TCP TNC).</param>
         /// <param name="port">A port to use for connection in TCP TNC.</param>
-        /// <param name="filter">The filter that will be used for receiving the packets.</param>
+        /// <param name="filter">The filter that will be used for receiving the packets.
+        /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
         /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <param name="displayUnsupported">If true, display packets with unsupported info field types. If false, such packets are not displayed.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

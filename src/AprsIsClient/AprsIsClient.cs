@@ -113,7 +113,8 @@
         /// <param name="password">The users password string.</param>
         /// <param name="server">The APRS-IS server to contact.</param>
         /// <param name="filter">The APRS-IS filter string for server-side filtering.
-        /// Null sends no filter, which is not recommended for most clients and servers.</param>
+        /// Null sends no filter, which is not recommended for most clients and servers.
+        /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
         /// <returns>An async task.</returns>
         public async Task Receive(string callsign, string password, string server, string? filter)
         {
@@ -206,7 +207,8 @@
         /// <param name="callsign">The users callsign string.</param>
         /// <param name="password">The users password string.</param>
         /// <param name="filter">The APRS-IS filter string for server-side filtering.
-        /// Null sends no filter, which is not recommended for most clients and servers.</param>
+        /// Null sends no filter, which is not recommended for most clients and servers.
+        /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
         private void SendLogin(string callsign, string password, string? filter)
         {
             logger.LogInformation("Logging in to server.");
@@ -290,7 +292,7 @@
             /// <summary>
             /// This defines the default filter.
             /// </summary>
-            public const string DefaultFilter = "filter r/50.5039/4.4699/50";
+            public const string DefaultFilter = "r/50.5039/4.4699/50";
         }
     }
 }

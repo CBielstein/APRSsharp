@@ -261,7 +261,12 @@
 
                 case Mode.SERIAL_TNC:
                 {
-                    ArgumentException.ThrowIfNullOrWhiteSpace(serialPort, nameof(serialPort));
+                    if (serialPort == null)
+                    {
+                        Console.WriteLine("You must specify a serial port to use serial TNC mode.");
+                        return;
+                    }
+
                     Console.WriteLine($"Connecting to KISS TNC via serial: {serialPort}");
 
                     using SerialConnection serial = new SerialConnection(serialPort);

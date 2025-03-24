@@ -1,0 +1,4 @@
+# Don't want to ConfigureAwait(false) in application code
+# Also want to allow the test synchronization context to work, so don't do this in tests.
+[{src/APRSsharp/Program.cs,test/**.cs}]
+dotnet_diagnostic.CA2007.severity = none

@@ -5,6 +5,7 @@
     using System.CommandLine;
     using System.CommandLine.Invocation;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
     using AprsSharp.AprsParser;
@@ -131,10 +132,6 @@
                     aliases: new string[] { "--filter", "-f" },
                     getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
                     description: "A user filter parsed as a string. Should not include the word 'filter', just the logic string."),
-                new Option<LogLevel>(
-                    aliases: new string[] { "--verbosity", "-v" },
-                    getDefaultValue: () => LogLevel.Warning,
-                    description: "Set the verbosity of console logging."),
                 new Option(
                     aliases: new string[] { "--display-unsupported" },
                     description: "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed."),
@@ -142,6 +139,10 @@
                     aliases: new string[] { "--serialPort" },
                     getDefaultValue: () => null,
                     description: "A serial port for use with serial TNCs."),
+                new Option(
+                    aliases: new string[] { "--print-parse-failures" },
+                    description: "If specified, prints packets that failed to parse. Helpful for development."
+                ),
                 };
 #pragma warning restore CA1861 // Avoid constant arrays as arguments
             rootCommand.Name = "APRSsharp";
@@ -152,8 +153,8 @@
 
             // The parameters of the handler method are matched according to the names of the options
             rootCommand.Handler = CommandHandler
-                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, LogLevel verbosity, bool displayUnsupported, string? serialPort)
-                        => await Execute(mode, callsign, password, server, port, filter, verbosity, displayUnsupported, serialPort));
+                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, bool displayUnsupported, string? serialPort, bool printParseFailures)
+                        => await Execute(mode, callsign, password, server, port, filter, displayUnsupported, serialPort, printParseFailures));
 
             rootCommand.Invoke(args);
         }
@@ -202,9 +203,9 @@
         /// <param name="port">A port to use for connection to a TNC via TCP.</param>
         /// <param name="filter">The filter that will be used for receiving the packets.
         /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
-        /// <param name="verbosity">The minimum level for an event to be logged to the console.</param>
         /// <param name="displayUnsupported">If true, display packets with unsupported info field types. If false, such packets are not displayed.</param>
         /// <param name="serialPort">A serial port to use for connection to a TNC via serial connection.</param>
+        /// <param name="printParseFailures">Whether to print parse failures.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private static async Task Execute(
             Mode mode,
@@ -213,17 +214,10 @@
             string server,
             int port,
             string filter,
-            LogLevel verbosity,
             bool displayUnsupported,
-            string? serialPort)
+            string? serialPort,
+            bool printParseFailures)
         {
-            using ILoggerFactory loggerFactory = LoggerFactory.Create(config =>
-            {
-                config.ClearProviders()
-                    .AddConsole()
-                    .SetMinimumLevel(verbosity);
-            });
-
             Program.displayUnsupported = displayUnsupported;
 
             switch (mode)

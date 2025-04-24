@@ -6,7 +6,6 @@ namespace AprsSharpUnitTests.AprsIsClient
     using AprsSharp.AprsIsClient;
     using AprsSharp.AprsParser;
     using AprsSharp.Shared;
-    using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;
 

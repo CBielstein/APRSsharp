@@ -373,5 +373,15 @@ namespace AprsSharpUnitTests.AprsIsClient
             mockTcpConnection.VerifyGet(mock => mock.Connected, Times.Exactly(5));
             mockTcpConnection.Verify(mock => mock.ReceiveString(), Times.Exactly(4));
         }
+
+        /// <summary>
+        /// Tests that an event is raised on a failed decode.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact(Timeout = 500)]
+        public async Task EventRaisedOnFailedDecode()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

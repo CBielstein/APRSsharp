@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.AprsIsClient
 {
     using System;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.AprsParser;
@@ -38,6 +39,7 @@
     /// </summary>
     public sealed class AprsIsClient : IDisposable
     {
+        private static string loginResponseRegex = @"^# logresp (.+) (unverified|verified), server (\S+)";
         private readonly ITcpConnection tcpConnection;
         private readonly bool disposeITcpConnection;
         private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
@@ -146,7 +148,7 @@
 
                             if (received.StartsWith('#'))
                             {
-                                if (received.Contains("logresp"))
+                                if (received.StartsWith("# logresp"))
                                 {
                                     ConnectedServer = GetConnectedServer(received);
                                     State = ConnectionState.LoggedIn;
@@ -207,23 +209,17 @@
         /// Gets the connected server from a login response. Null if server name cannot be parsed.
         /// </summary>
         /// <param name="loginResponse">The login response string from the APRS server.</param>
-        private static string? GetConnectedServer(string? loginResponse)
+        private static string GetConnectedServer(string loginResponse)
         {
-            string? server = null;
-
-            if (!string.IsNullOrWhiteSpace(loginResponse) && loginResponse.Contains("server"))
+            Match match = Regex.Match(loginResponse, loginResponseRegex);
+            if (match.Success)
             {
-                // The server name should be the next word after "server" in the login response string.
-                server = loginResponse.Substring(loginResponse.IndexOf("server")).Split(" ")[1].Trim();
+                return match.Groups[3].Value;
             }
-
-            // If ConnectedServer returns with an empty or blank string for some reason, we want to return null.
-            if (string.IsNullOrWhiteSpace(server))
+            else
             {
-                server = null;
+                throw new ArgumentException($"Could not parse server login response message: {loginResponse}");
             }
-
-            return server;
         }
 
         /// <summary>

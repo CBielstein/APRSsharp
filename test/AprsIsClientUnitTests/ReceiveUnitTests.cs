@@ -128,10 +128,10 @@ namespace AprsSharpUnitTests.AprsIsClient
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory(Timeout = 500)]
         [InlineData("# logresp N0CALL unverified, server T2ONTARIO", "T2ONTARIO")]
+        [InlineData("# logresp N0CALL verified, server T2ONTARIO", "T2ONTARIO")]
         [InlineData("# logresp N0CALL unverified, server T2BRAZIL", "T2BRAZIL")]
-        [InlineData("# logresp N0CALL unverified, server", null)]
-        [InlineData("# logresp", null)]
-        public async Task ReceiveSetConnectedServerProperty(string loginResponse, string? expected)
+        [InlineData("# logresp N0CALL unverified, server T2BRAZIL serverCommand", "T2BRAZIL")]
+        public async Task ReceiveSetConnectedServerProperty(string loginResponse, string expected)
         {
             // Mock underlying TCP connection
             var mockTcpConnection = new Mock<ITcpConnection>();
@@ -158,7 +158,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             // Wait to ensure the messages are sent and received
             await loggedIn.Task;
 
-            // Assert the ConnectedServer property was set to the correct server or null as appropriate.
+            // Assert the ConnectedServer property was set to the correct server name.
             Assert.Equal(expected, aprsIs.ConnectedServer);
         }
 

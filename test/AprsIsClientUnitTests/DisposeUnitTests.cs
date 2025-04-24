@@ -24,7 +24,7 @@ namespace AprsSharpUnitTests.AprsIsClient
         {
             var mockTcpConnection = new Mock<ITcpConnection>();
 
-            using (AprsIsClient connection = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object, clientShouldDispose))
+            using (AprsIsClient connection = new AprsIsClient(mockTcpConnection.Object, clientShouldDispose))
             {
             }
 

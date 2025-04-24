@@ -34,7 +34,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -76,7 +76,7 @@ namespace AprsSharpUnitTests.AprsIsClient
                 .Returns(loginResponse);
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -144,7 +144,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             TaskCompletionSource loggedIn = new TaskCompletionSource();
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 if (newState == ConnectionState.LoggedIn)
@@ -182,7 +182,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedPacket += (Packet p) =>
             {
                 receivedPacket = p;
@@ -230,7 +230,7 @@ namespace AprsSharpUnitTests.AprsIsClient
 #pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
@@ -285,7 +285,7 @@ namespace AprsSharpUnitTests.AprsIsClient
 #pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
@@ -345,7 +345,7 @@ namespace AprsSharpUnitTests.AprsIsClient
                 .Returns(false);
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);

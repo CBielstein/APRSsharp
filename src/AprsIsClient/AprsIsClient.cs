@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using AprsSharp.AprsParser;
     using AprsSharp.Shared;
-    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// Delegate for handling a full string from a TCP client.
@@ -63,8 +62,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsClient"/> class.
         /// </summary>
-        /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
-        public AprsIsClient(ILogger<AprsIsClient> logger)
+        public AprsIsClient()
             : this(new TcpConnection(), true)
         {
         }

@@ -1,7 +1,6 @@
 ﻿namespace AprsSharp.AprsIsClient
 {
     using System;
-    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using AprsSharp.AprsParser;
@@ -27,6 +26,13 @@
     public delegate void HandleStateChange(ConnectionState state);
 
     /// <summary>
+    /// Delegate for handling a failed packet decode.
+    /// </summary>
+    /// <param name="ex">The <see cref="Exception"/> that occurred.</param>
+    /// <param name="encodedPacket">The string that failed to decode..</param>
+    public delegate void HandleParseExcpetion(Exception ex, string encodedPacket);
+
+    /// <summary>
     /// This class initiates connections and performs authentication
     /// to the APRS internet service for receiving packets.
     /// </summary>
@@ -35,25 +41,21 @@
         private readonly ITcpConnection tcpConnection;
         private readonly bool disposeITcpConnection;
         private readonly TimeSpan loginPeriod = TimeSpan.FromHours(6);
-        private readonly ILogger<AprsIsClient> logger;
         private bool receiving = true;
         private ConnectionState state = ConnectionState.NotConnected;
-        private Timer? timer;
+        private Timer? keepAliveTimer;
         private bool disposed;
-        private string loginMessage = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AprsIsClient"/> class.
         /// </summary>
-        /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
         /// <param name="tcpConnection">An <see cref="ITcpConnection"/> to use for communication.</param>
         /// <param name="disposeConnection">`true` if the <see cref="ITcpConnection"/> should be disposed by <see cref="Dispose"/>,
         ///     `false` if you intend to reuse the <see cref="ITcpConnection"/>.</param>
-        public AprsIsClient(ILogger<AprsIsClient> logger, ITcpConnection tcpConnection, bool disposeConnection = true)
+        public AprsIsClient(ITcpConnection tcpConnection, bool disposeConnection = true)
         {
             this.tcpConnection = tcpConnection ?? throw new ArgumentNullException(nameof(tcpConnection));
             disposeITcpConnection = disposeConnection;
-            this.logger = logger;
         }
 
         /// <summary>
@@ -61,7 +63,7 @@
         /// </summary>
         /// <param name="logger">An <see cref="ILogger{AprsIsClient}"/> for error/debug logging.</param>
         public AprsIsClient(ILogger<AprsIsClient> logger)
-            : this(logger, new TcpConnection(), true)
+            : this(new TcpConnection(), true)
         {
         }
 
@@ -79,6 +81,11 @@
         /// Event raised when <see cref="State"/> changes.
         /// </summary>
         public event HandleStateChange? ChangedState;
+
+        /// <summary>
+        /// Event raised when an error or exception is encountered during packet parsing.
+        /// </summary>
+        public event HandleParseExcpetion? ParseFailure;
 
         /// <summary>
         /// Gets the state of this connection.
@@ -124,8 +131,8 @@
                 tcpConnection.Connect(server, 14580);
                 State = ConnectionState.Connected;
 
-                timer?.Dispose();
-                timer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
+                keepAliveTimer?.Dispose();
+                keepAliveTimer = new Timer((object _) => SendLogin(callsign, password, filter), null, loginPeriod, loginPeriod);
 
                 // Receive
                 await Task.Run(() =>
@@ -141,7 +148,7 @@
                             {
                                 if (received.Contains("logresp"))
                                 {
-                                    SetConnectedServer(received);
+                                    ConnectedServer = GetConnectedServer(received);
                                     State = ConnectionState.LoggedIn;
                                 }
 
@@ -159,21 +166,16 @@
                                 }
                                 catch (Exception ex)
                                 {
-                                    logger.LogDebug(ex, "Failed to decode packet {encodedPacked}", received);
+                                    ParseFailure?.Invoke(ex, received);
                                 }
                             }
                         }
                     }
                 });
             }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Exception encountered during receive.");
-                throw;
-            }
             finally
             {
-                timer?.Change(Timeout.Infinite, Timeout.Infinite);
+                keepAliveTimer?.Change(Timeout.Infinite, Timeout.Infinite);
                 tcpConnection.Disconnect();
                 State = ConnectionState.Disconnected;
             }
@@ -197,8 +199,31 @@
                 tcpConnection.Dispose();
             }
 
-            timer?.Change(Timeout.Infinite, Timeout.Infinite);
-            timer?.Dispose();
+            keepAliveTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            keepAliveTimer?.Dispose();
+        }
+
+        /// <summary>
+        /// Gets the connected server from a login response. Null if server name cannot be parsed.
+        /// </summary>
+        /// <param name="loginResponse">The login response string from the APRS server.</param>
+        private static string? GetConnectedServer(string? loginResponse)
+        {
+            string? server = null;
+
+            if (!string.IsNullOrWhiteSpace(loginResponse) && loginResponse.Contains("server"))
+            {
+                // The server name should be the next word after "server" in the login response string.
+                server = loginResponse.Substring(loginResponse.IndexOf("server")).Split(" ")[1].Trim();
+            }
+
+            // If ConnectedServer returns with an empty or blank string for some reason, we want to return null.
+            if (string.IsNullOrWhiteSpace(server))
+            {
+                server = null;
+            }
+
+            return server;
         }
 
         /// <summary>
@@ -211,8 +236,6 @@
         /// This parameter shouldn't include the `filter` at the start, just the logic string itself.</param>
         private void SendLogin(string callsign, string password, string? filter)
         {
-            logger.LogInformation("Logging in to server.");
-
             string version = Utilities.GetAssemblyVersion();
             var loginMessage = $"user {callsign} pass {password} vers AprsSharp {version}";
 
@@ -222,39 +245,6 @@
             }
 
             tcpConnection.SendString(loginMessage);
-        }
-
-        /// <summary>
-        /// Sets the ConnectedServer property to the connected server; null if server name cannot be parsed.
-        /// </summary>
-        /// <param name="loginResponse">The login response string from the APRS server.</param>
-        private void SetConnectedServer(string? loginResponse)
-        {
-            try
-            {
-                ConnectedServer = null;
-
-                if (!string.IsNullOrWhiteSpace(loginResponse) && loginResponse.Contains("server"))
-                {
-                    // The server name should be the next word after "server" in the login response string.
-                    ConnectedServer = loginResponse.Substring(loginResponse.IndexOf("server")).Split(" ")[1].Trim();
-                }
-
-                // If ConnectedServer returns with an empty or blank string for some reason, we want to return null.
-                if (string.IsNullOrWhiteSpace(ConnectedServer))
-                {
-                    ConnectedServer = null;
-                }
-
-                logger.LogInformation("Connected to server {0}.", ConnectedServer ?? "N/A");
-            }
-
-            // Swallow the exception here and set ConnectedServer to null.
-            catch (Exception ex)
-            {
-                ConnectedServer = null;
-                logger.LogDebug(ex, "Failed to get logged in server name with parameter: {0}.", loginResponse ?? "<Parameter was null>");
-            }
         }
 
         /// <summary>

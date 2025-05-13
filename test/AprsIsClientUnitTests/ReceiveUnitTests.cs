@@ -400,12 +400,15 @@ namespace AprsSharpUnitTests.AprsIsClient
 
             // Create connection and register a callback
             using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
-            aprsIs.ParseFailure += (Exception ex, string s) =>
+            aprsIs.DecodeFailed += (Exception ex, string s) =>
             {
                 reportedExceptions.Add(ex);
                 failedDecodes.Add(s);
                 eventHandled.SetResult();
             };
+
+            // Create a received callback to trigger decode
+            aprsIs.ReceivedPacket += (p) => { };
 
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);

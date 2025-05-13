@@ -85,7 +85,7 @@
         /// <summary>
         /// Event raised when an error or exception is encountered during packet parsing.
         /// </summary>
-        public event HandleParseExcpetion? ParseFailure;
+        public event HandleParseExcpetion? DecodeFailed;
 
         /// <summary>
         /// Gets the state of this connection.
@@ -157,16 +157,19 @@
                                     SendLogin(callsign, password, filter);
                                 }
                             }
-                            else
+                            else if (ReceivedPacket != null)
                             {
+                                // Only attempt to decode if the user
+                                // wants to receive packets instead of
+                                // only TCP messages
                                 try
                                 {
                                     Packet p = new Packet(received);
-                                    ReceivedPacket?.Invoke(p);
+                                    ReceivedPacket.Invoke(p);
                                 }
                                 catch (Exception ex)
                                 {
-                                    ParseFailure?.Invoke(ex, received);
+                                    DecodeFailed?.Invoke(ex, received);
                                 }
                             }
                         }

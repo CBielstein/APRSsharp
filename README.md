@@ -30,6 +30,7 @@ See supplemental documentation for APRS# constituent projects:
 
 * [AprsParser](src/AprsParser/AprsParser.md)
 * [KissTnc](src/KissTnc/KissTnc.md)
+* [AprsIsClient](src/AprsIsClient/AprsIsClient.md)
 
 ## Contributions
 

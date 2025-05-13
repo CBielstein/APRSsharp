@@ -157,15 +157,14 @@
                                     SendLogin(callsign, password, filter);
                                 }
                             }
-                            else if (ReceivedPacket != null)
+                            else if (ReceivedPacket != null || DecodeFailed != null)
                             {
                                 // Only attempt to decode if the user
-                                // wants to receive packets instead of
-                                // only TCP messages
+                                // wants results from decode.
                                 try
                                 {
                                     Packet p = new Packet(received);
-                                    ReceivedPacket.Invoke(p);
+                                    ReceivedPacket?.Invoke(p);
                                 }
                                 catch (Exception ex)
                                 {

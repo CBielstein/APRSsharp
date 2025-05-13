@@ -407,9 +407,6 @@ namespace AprsSharpUnitTests.AprsIsClient
                 eventHandled.SetResult();
             };
 
-            // Create a received callback to trigger decode
-            aprsIs.ReceivedPacket += (p) => { };
-
             // Receive some packets from it.
             _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
 

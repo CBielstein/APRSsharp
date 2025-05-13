@@ -232,7 +232,7 @@
                 {
                     Console.WriteLine($"Connecting to APRS-IS server: {server}");
 
-                    using AprsIsClient n = new AprsIsClient(loggerFactory.CreateLogger<AprsIsClient>());
+                    using AprsIsClient n = new AprsIsClient();
                     n.ReceivedPacket += PrintPacket;
 
                     Task receive = n.Receive(callsign, password, server, filter);

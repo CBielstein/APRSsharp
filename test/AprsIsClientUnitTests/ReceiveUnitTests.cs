@@ -2,11 +2,11 @@ namespace AprsSharpUnitTests.AprsIsClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
     using AprsSharp.AprsParser;
     using AprsSharp.Shared;
-    using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Xunit;
 
@@ -34,7 +34,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -76,7 +76,7 @@ namespace AprsSharpUnitTests.AprsIsClient
                 .Returns(loginResponse);
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedTcpMessage += (string message) =>
             {
                 tcpMessagesReceived.Add(message);
@@ -129,10 +129,10 @@ namespace AprsSharpUnitTests.AprsIsClient
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Theory(Timeout = 500)]
         [InlineData("# logresp N0CALL unverified, server T2ONTARIO", "T2ONTARIO")]
+        [InlineData("# logresp N0CALL verified, server T2ONTARIO", "T2ONTARIO")]
         [InlineData("# logresp N0CALL unverified, server T2BRAZIL", "T2BRAZIL")]
-        [InlineData("# logresp N0CALL unverified, server", null)]
-        [InlineData("# logresp", null)]
-        public async Task ReceiveSetConnectedServerProperty(string loginResponse, string? expected)
+        [InlineData("# logresp N0CALL unverified, server T2BRAZIL serverCommand", "T2BRAZIL")]
+        public async Task ReceiveSetConnectedServerProperty(string loginResponse, string expected)
         {
             // Mock underlying TCP connection
             var mockTcpConnection = new Mock<ITcpConnection>();
@@ -144,7 +144,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             TaskCompletionSource loggedIn = new TaskCompletionSource();
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 if (newState == ConnectionState.LoggedIn)
@@ -159,7 +159,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             // Wait to ensure the messages are sent and received
             await loggedIn.Task;
 
-            // Assert the ConnectedServer property was set to the correct server or null as appropriate.
+            // Assert the ConnectedServer property was set to the correct server name.
             Assert.Equal(expected, aprsIs.ConnectedServer);
         }
 
@@ -171,7 +171,6 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task ReceivedPacketEvent()
         {
-            IList<string> tcpMessagesReceived = new List<string>();
             TaskCompletionSource eventHandled = new TaskCompletionSource();
             Packet? receivedPacket = null;
 
@@ -182,7 +181,7 @@ namespace AprsSharpUnitTests.AprsIsClient
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
 
             // Create connection and register a callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ReceivedPacket += (Packet p) =>
             {
                 receivedPacket = p;
@@ -230,7 +229,7 @@ namespace AprsSharpUnitTests.AprsIsClient
 #pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callback
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
@@ -285,7 +284,7 @@ namespace AprsSharpUnitTests.AprsIsClient
 #pragma warning restore CA2201 // Do not raise reserved exception types
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
@@ -345,7 +344,7 @@ namespace AprsSharpUnitTests.AprsIsClient
                 .Returns(false);
 
             // Create connection and register callbacks
-            using var aprsIs = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
             aprsIs.ChangedState += (ConnectionState newState) =>
             {
                 stateChangesReceived.Add(newState);
@@ -373,6 +372,54 @@ namespace AprsSharpUnitTests.AprsIsClient
             // Assert we only checked connection and receive the correct number of times
             mockTcpConnection.VerifyGet(mock => mock.Connected, Times.Exactly(5));
             mockTcpConnection.Verify(mock => mock.ReceiveString(), Times.Exactly(4));
+        }
+
+        /// <summary>
+        /// Tests that an event is raised on a failed decode.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact(Timeout = 500)]
+        public async Task EventRaisedOnFailedDecode()
+        {
+            List<string> failedDecodes = new List<string>();
+            List<Exception> reportedExceptions = new List<Exception>();
+            TaskCompletionSource eventHandled = new TaskCompletionSource();
+
+            // Mock underlying TCP connection
+            string encodedPacket = @"BAD_PKT";
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
+
+            string firstMessage = "# server first message";
+            string loginResponse = "# logresp N0CALL unverified, server TEST";
+
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
+                .Returns(firstMessage)
+                .Returns(loginResponse)
+                .Returns(encodedPacket);
+
+            // Create connection and register a callback
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
+            aprsIs.DecodeFailed += (Exception ex, string s) =>
+            {
+                reportedExceptions.Add(ex);
+                failedDecodes.Add(s);
+                eventHandled.SetResult();
+            };
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
+
+            // Wait to ensure the message is received
+            await eventHandled.Task;
+
+            // Assert the callback was triggered and that the expected message was received.
+            Assert.Single(failedDecodes);
+            Assert.Equal(encodedPacket, failedDecodes.Single());
+
+            // Assert that the correct exception was raised
+            Assert.Single(reportedExceptions);
+            Assert.IsType<ArgumentOutOfRangeException>(reportedExceptions.Single());
         }
     }
 }

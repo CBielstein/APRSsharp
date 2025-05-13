@@ -21,7 +21,7 @@ namespace AprsSharpUnitTests.AprsIsClient
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
-            using AprsIsClient client = new AprsIsClient(NullLogger<AprsIsClient>.Instance, mockTcpConnection.Object);
+            using AprsIsClient client = new AprsIsClient(mockTcpConnection.Object);
 
             Task receiveTask = client.Receive("callsign", "password", "server", "filter");
 

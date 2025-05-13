@@ -141,8 +141,7 @@
                     description: "A serial port for use with serial TNCs."),
                 new Option(
                     aliases: new string[] { "--display-parse-failures" },
-                    description: "If specified, prints packets that failed to parse. Helpful for development."
-                ),
+                    description: "If specified, prints packets that failed to parse. Helpful for development."),
                 };
 #pragma warning restore CA1861 // Avoid constant arrays as arguments
             rootCommand.Name = "APRSsharp";

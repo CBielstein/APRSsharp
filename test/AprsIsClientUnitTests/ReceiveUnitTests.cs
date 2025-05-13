@@ -2,6 +2,7 @@ namespace AprsSharpUnitTests.AprsIsClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using AprsSharp.AprsIsClient;
     using AprsSharp.AprsParser;
@@ -170,7 +171,6 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task ReceivedPacketEvent()
         {
-            IList<string> tcpMessagesReceived = new List<string>();
             TaskCompletionSource eventHandled = new TaskCompletionSource();
             Packet? receivedPacket = null;
 
@@ -381,7 +381,45 @@ namespace AprsSharpUnitTests.AprsIsClient
         [Fact(Timeout = 500)]
         public async Task EventRaisedOnFailedDecode()
         {
-            throw new NotImplementedException();
+            List<string> failedDecodes = new List<string>();
+            List<Exception> reportedExceptions = new List<Exception>();
+            TaskCompletionSource eventHandled = new TaskCompletionSource();
+
+            // Mock underlying TCP connection
+            string encodedPacket = @"BAD_PKT";
+            var mockTcpConnection = new Mock<ITcpConnection>();
+            mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);
+
+            string firstMessage = "# server first message";
+            string loginResponse = "# logresp N0CALL unverified, server TEST";
+
+            mockTcpConnection.SetupSequence(mock => mock.ReceiveString())
+                .Returns(firstMessage)
+                .Returns(loginResponse)
+                .Returns(encodedPacket);
+
+            // Create connection and register a callback
+            using var aprsIs = new AprsIsClient(mockTcpConnection.Object);
+            aprsIs.ParseFailure += (Exception ex, string s) =>
+            {
+                reportedExceptions.Add(ex);
+                failedDecodes.Add(s);
+                eventHandled.SetResult();
+            };
+
+            // Receive some packets from it.
+            _ = aprsIs.Receive("N0CALL", "-1", "example.com", null);
+
+            // Wait to ensure the message is received
+            await eventHandled.Task;
+
+            // Assert the callback was triggered and that the expected message was received.
+            Assert.Single(failedDecodes);
+            Assert.Equal(encodedPacket, failedDecodes.Single());
+
+            // Assert that the correct exception was raised
+            Assert.Single(reportedExceptions);
+            Assert.IsType<ArgumentOutOfRangeException>(reportedExceptions.Single());
         }
     }
 }

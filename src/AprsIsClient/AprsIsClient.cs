@@ -157,12 +157,12 @@
                                     SendLogin(callsign, password, filter);
                                 }
                             }
-                            else if (ReceivedPacket != null)
+                            else
                             {
                                 try
                                 {
                                     Packet p = new Packet(received);
-                                    ReceivedPacket.Invoke(p);
+                                    ReceivedPacket?.Invoke(p);
                                 }
                                 catch (Exception ex)
                                 {

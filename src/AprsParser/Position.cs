@@ -1,6 +1,7 @@
 ﻿namespace AprsSharp.AprsParser
 {
     using System;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -167,16 +168,54 @@
                 throw new ArgumentNullException(nameof(coords));
             }
 
-            Match match = Regex.Match(coords, RegexStrings.PositionLatLongWithSymbols);
-            match.AssertSuccess("Coordinates", nameof(coords));
-
             Ambiguity = 0;
-            double latitude = DecodeLatitude(match.Groups[1].Value);
-            double longitude = DecodeLongitude(match.Groups[3].Value);
 
-            SymbolTableIdentifier = match.Groups[2].Value[0];
-            SymbolCode = match.Groups[4].Value[0];
-            Coordinates = new GeoCoordinate(latitude, longitude);
+            // first try uncompressed
+            Match match = Regex.Match(coords, RegexStrings.PositionLatLongWithSymbols);
+
+            if (match.Success)
+            {
+                double latitude = DecodeLatitude(match.Groups[1].Value);
+                double longitude = DecodeLongitude(match.Groups[3].Value);
+
+                SymbolTableIdentifier = match.Groups[2].Value[0];
+                SymbolCode = match.Groups[4].Value[0];
+                Coordinates = new GeoCoordinate(latitude, longitude);
+                return;
+            }
+
+            // next try compressed
+            match = Regex.Match(coords, RegexStrings.CompressedPosition);
+
+            if (match.Success)
+            {
+                double latitude = DecodeCompressedLatitude(match.Groups[2].Value);
+                double longitude = DecodeCompressedLongitude(match.Groups[3].Value);
+                SymbolTableIdentifier = match.Groups[1].Value[0];
+                SymbolCode = match.Groups[4].Value[0];
+                Coordinates = new GeoCoordinate(latitude, longitude);
+                return;
+            }
+        }
+
+        private static double DecodeCompressedLatitude(string coords)
+        {
+            Debug.Assert(coords.Length == 4, "Compressed latitude must be 4 characters");
+            var latitude = 90 - ((((Convert.ToByte(coords[0]) - 33) * 753571) +
+                                ((Convert.ToByte(coords[1]) - 33) * 8281) +
+                                ((Convert.ToByte(coords[2]) - 33) * 91) +
+                                (Convert.ToByte(coords[3]) - 33)) / 380926.0);
+            return Math.Round(latitude, 4);
+        }
+
+        private static double DecodeCompressedLongitude(string coords)
+        {
+            Debug.Assert(coords.Length == 4, "Compressed longitude must be 4 characters");
+            var longitude = -180 + ((((Convert.ToByte(coords[0]) - 33) * 753571) +
+                                   ((Convert.ToByte(coords[1]) - 33) * 8281) +
+                                   ((Convert.ToByte(coords[2]) - 33) * 91) +
+                                   (Convert.ToByte(coords[3]) - 33)) / 190463.0);
+            return Math.Round(longitude, 4);
         }
 
         /// <summary>

@@ -198,23 +198,32 @@
             }
         }
 
+        private static int DecodeBase91(string encoded)
+        {
+            var bytes = Encoding.ASCII.GetBytes(encoded);
+
+            var result = 0;
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                result += i == bytes.Length - 1
+                    ? bytes[i] - 33
+                    : (bytes[i] - 33) * (int)Math.Pow(91, bytes.Length - i - 1);
+            }
+
+            return result;
+        }
+
         private static double DecodeCompressedLatitude(string coords)
         {
             Debug.Assert(coords.Length == 4, "Compressed latitude must be 4 characters");
-            var latitude = 90 - ((((Convert.ToByte(coords[0]) - 33) * 753571) +
-                                ((Convert.ToByte(coords[1]) - 33) * 8281) +
-                                ((Convert.ToByte(coords[2]) - 33) * 91) +
-                                (Convert.ToByte(coords[3]) - 33)) / 380926.0);
+            var latitude = 90 - (DecodeBase91(coords) / 380926.0);
             return Math.Round(latitude, 4);
         }
 
         private static double DecodeCompressedLongitude(string coords)
         {
             Debug.Assert(coords.Length == 4, "Compressed longitude must be 4 characters");
-            var longitude = -180 + ((((Convert.ToByte(coords[0]) - 33) * 753571) +
-                                   ((Convert.ToByte(coords[1]) - 33) * 8281) +
-                                   ((Convert.ToByte(coords[2]) - 33) * 91) +
-                                   (Convert.ToByte(coords[3]) - 33)) / 190463.0);
+            var longitude = -180 + (DecodeBase91(coords) / 190463.0);
             return Math.Round(longitude, 4);
         }
 

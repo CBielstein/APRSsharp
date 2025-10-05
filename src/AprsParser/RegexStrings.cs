@@ -35,6 +35,18 @@ namespace AprsSharp.AprsParser
         public const string PositionLatLongWithSymbols = @"([0-9 \.NS]{8})(.)([0-9 \.EW]{9})(.)";
 
         /// <summary>
+        /// Matchdes a compressed latitude and longitude with optional additional data
+        /// Six matches:
+        ///     Symbol table ID
+        ///     Compressed Latitude
+        ///     Compressed Longitude
+        ///     Symbol code
+        ///     Compressed one of: course/speed, radio range, or altitude
+        ///     Compressed data type
+        /// </summary>
+        public const string CompressedPosition = @"(.)(.{4})(.{4})(.)(.{2})(.)";
+
+        /// <summary>
         /// Same as <see cref="MaidenheadGridWithOptionalSymbols"/> but forces full line match.
         /// </summary>
         /// <value></value>

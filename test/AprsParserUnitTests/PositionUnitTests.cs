@@ -293,6 +293,7 @@
         [InlineData(null, '\\', '.', 0, 0)] // defaults
         [InlineData("4903.50N/07201.75W-", '/', '-', 49.0583, -72.0292)] // from APRS spec
         [InlineData("4903.50S/07201.75E-", '/', '-', -49.0583, 72.0292)] // Ensure south and east work
+        [InlineData("/5L!!<*e7>7P[", '/', '>', 49.5, -72.7500)] // from the APRS spec
         public void Decode(
             string? encodedPosition,
             char expectedSymbolTable,

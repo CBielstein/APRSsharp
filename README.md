@@ -29,13 +29,15 @@ community for the community.
 Currently, all packages from this repo change version together.
 Although that isn't fully ideal, it is easy and works for now.
 
-The goal is for v1.0.0 to come when the APRS v1 spec is implemented, then increment up from there.
+The goal is for v1.0.0 to come when the APRS v1 spec is implemented, then
+increment up from there.
 
 Until then, this packages from this repo use a slightly modified [semver](https://semver.org/).
 For version x.y.z:
 
 * x stays 0 for pre-release (again, until the APRSv1 spec is implemented).
-* y updates for any breaking changes (and there may be breaking changes during pre-release development).
+* y updates for any breaking changes (and there may be breaking changes during
+pre-release development).
 * z updates with new non-breaking functionality, bug fixes, or other changes.
 
 This is essentially semver shifted to the right.

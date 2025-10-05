@@ -285,10 +285,7 @@
                 {
                     Console.WriteLine($"Connecting to KISS TNC via TCP: {server}:{port}");
 
-                    using TcpConnection tcp = new TcpConnection();
-                    tcp.Connect(server, port);
-                    using Tnc tnc = new TcpTnc(tcp, 0);
-
+                    using Tnc tnc = new TcpTnc(server, port, 0);
                     RunTncMode(tnc, callsign, displayParseFailures);
 
                     break;

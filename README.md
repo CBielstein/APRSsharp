@@ -24,6 +24,14 @@ visualizing APRS digital packets in a straight-forward manner.
 This project is provided as [open source](LICENSE) and developed by the
 community for the community.
 
+### Further Documentation
+
+See supplemental documentation for APRS# constituent projects:
+
+* [AprsParser](src/AprsParser/AprsParser.md)
+* [KissTnc](src/KissTnc/KissTnc.md)
+* [AprsIsClient](src/AprsIsClient/AprsIsClient.md)
+
 ## Note on Versioning
 
 Currently, all packages from this repo change version together.
@@ -41,14 +49,6 @@ pre-release development).
 * z updates with new non-breaking functionality, bug fixes, or other changes.
 
 This is essentially semver shifted to the right.
-
-### Further Documentation
-
-See supplemental documentation for APRS# constituent projects:
-
-* [AprsParser](src/AprsParser/AprsParser.md)
-* [KissTnc](src/KissTnc/KissTnc.md)
-* [AprsIsClient](src/AprsIsClient/AprsIsClient.md)
 
 ## Contributions
 

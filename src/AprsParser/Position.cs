@@ -198,35 +198,6 @@
             }
         }
 
-        private static int DecodeBase91(string encoded)
-        {
-            var bytes = Encoding.ASCII.GetBytes(encoded);
-
-            var result = 0;
-            for (var i = 0; i < bytes.Length; i++)
-            {
-                result += i == bytes.Length - 1
-                    ? bytes[i] - 33
-                    : (bytes[i] - 33) * (int)Math.Pow(91, bytes.Length - i - 1);
-            }
-
-            return result;
-        }
-
-        private static double DecodeCompressedLatitude(string coords)
-        {
-            Debug.Assert(coords.Length == 4, "Compressed latitude must be 4 characters");
-            var latitude = 90 - (DecodeBase91(coords) / 380926.0);
-            return Math.Round(latitude, 4);
-        }
-
-        private static double DecodeCompressedLongitude(string coords)
-        {
-            Debug.Assert(coords.Length == 4, "Compressed longitude must be 4 characters");
-            var longitude = -180 + (DecodeBase91(coords) / 190463.0);
-            return Math.Round(longitude, 4);
-        }
-
         /// <summary>
         /// Decode from Maidenhead Location System gridsquare to a point in the middle of the gridsquare.
         /// </summary>
@@ -475,6 +446,35 @@
         public string EncodeLongitude()
         {
             return EncodeCoordinates(CoordinateSystem.Longitude);
+        }
+
+        private static int DecodeBase91(string encoded)
+        {
+            var bytes = Encoding.ASCII.GetBytes(encoded);
+
+            var result = 0;
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                result += i == bytes.Length - 1
+                    ? bytes[i] - 33
+                    : (bytes[i] - 33) * (int)Math.Pow(91, bytes.Length - i - 1);
+            }
+
+            return result;
+        }
+
+        private static double DecodeCompressedLatitude(string coords)
+        {
+            Debug.Assert(coords.Length == 4, "Compressed latitude must be 4 characters");
+            var latitude = 90 - (DecodeBase91(coords) / 380926.0);
+            return Math.Round(latitude, 4);
+        }
+
+        private static double DecodeCompressedLongitude(string coords)
+        {
+            Debug.Assert(coords.Length == 4, "Compressed longitude must be 4 characters");
+            var longitude = -180 + (DecodeBase91(coords) / 190463.0);
+            return Math.Round(longitude, 4);
         }
 
         /// <summary>

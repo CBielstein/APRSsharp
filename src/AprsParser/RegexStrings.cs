@@ -42,7 +42,7 @@ namespace AprsSharp.AprsParser
         ///     Compressed Longitude
         ///     Symbol code
         ///     Compressed one of: course/speed, radio range, or altitude
-        ///     Compressed data type
+        ///     Compressed data type.
         /// </summary>
         public const string CompressedPosition = @"(.)(.{4})(.{4})(.)(.{2})(.)";
 

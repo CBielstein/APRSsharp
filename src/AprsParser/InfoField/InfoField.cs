@@ -1,6 +1,8 @@
 ﻿namespace AprsSharp.AprsParser
 {
     using System;
+    using System.Data.SqlTypes;
+    using System.Text;
     using AprsSharp.AprsParser.Extensions;
 
     /// <summary>
@@ -68,6 +70,11 @@
         {
             PacketType type = GetPacketType(encodedInfoField);
 
+            if (type.IsMicEType())
+            {
+                throw new NotImplementedException("Mic-E types cannot be decoded from just the info field. Use the specific class for decoding Mic-E");
+            }
+
             switch (type)
             {
                 case PacketType.PositionWithoutTimestampNoMessaging:
@@ -92,17 +99,19 @@
         }
 
         /// <summary>
-        /// Encodes an APRS info field to a string.
+        /// Gets the <see cref="PacketType"/> of a string representation of an APRS info field.
         /// </summary>
-        /// <returns>String representation of the packet.</returns>
-        public abstract string Encode();
+        /// <param name="encodedInfoField">A string-encoded APRS info field.</param>
+        /// <returns><see cref="PacketType"/> of the info field.</returns>
+        public static PacketType GetPacketType(string encodedInfoField)
+            => GetPacketType(Encoding.ASCII.GetBytes(encodedInfoField));
 
         /// <summary>
         /// Gets the <see cref="PacketType"/> of a string representation of an APRS info field.
         /// </summary>
         /// <param name="encodedInfoField">A string-encoded APRS info field.</param>
         /// <returns><see cref="PacketType"/> of the info field.</returns>
-        private static PacketType GetPacketType(string encodedInfoField)
+        public static PacketType GetPacketType(byte[] encodedInfoField)
         {
             if (encodedInfoField == null)
             {
@@ -111,9 +120,15 @@
 
             // TODO Issue #67: This isn't always true.
             // '!' can come up to the 40th position.
-            char dataTypeIdentifier = char.ToUpperInvariant(encodedInfoField[0]);
+            char dataTypeIdentifier = char.ToUpperInvariant((char)encodedInfoField[0]);
 
             return dataTypeIdentifier.ToPacketType();
         }
+
+        /// <summary>
+        /// Encodes an APRS info field to a string.
+        /// </summary>
+        /// <returns>String representation of the packet.</returns>
+        public abstract string Encode();
     }
 }

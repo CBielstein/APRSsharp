@@ -48,8 +48,16 @@
                 Path.Add(pathEntry);
             }
 
-            var infoBytes = encodedPacket.Skip(((Path.Count + 2) * 7) + 2);
-            InfoField = InfoField.FromString(Encoding.ASCII.GetString(infoBytes.ToArray()));
+            // Mic-E erquires some serious special case...
+            var infoBytes = encodedPacket.Skip(((Path.Count + 2) * 7) + 2).ToArray();
+            if (InfoField.GetPacketType(infoBytes).IsMicEType())
+            {
+                DecodeMicE(Destination, infoBytes);
+            }
+            else
+            {
+                InfoField = InfoField.FromString(Encoding.ASCII.GetString(infoBytes));
+            }
         }
 
         /// <summary>
@@ -122,7 +130,7 @@
         /// <summary>
         /// Gets the destination callsign.
         /// </summary>
-        public string? Destination { get; }
+        public string? Destination { get; private set; }
 
         /// <summary>
         /// Gets the time this packet was decoded.
@@ -255,6 +263,22 @@
 
             var shiftedBytes = Encoding.ASCII.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
             return shiftedBytes.Append(ssidByte).ToArray();
+        }
+
+        /// <summary>
+        /// Handle special logic to decode a Mic-E packet.
+        /// </summary>
+        /// <param name="destinationField">A string representation of the desination field.</param>
+        /// <param name="informationField">Byte encoding of the information field.</param>
+        /// <exception cref="NotImplementedException">Not yet implemented, duh.</exception>
+        private void DecodeMicE(string destinationField, byte[] informationField)
+        {
+            Destination = null;
+
+            // decode destination fields
+
+            // decode 
+            throw new NotImplementedException();
         }
     }
 }

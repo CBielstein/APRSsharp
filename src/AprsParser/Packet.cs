@@ -48,7 +48,6 @@
                 Path.Add(pathEntry);
             }
 
-            // Mic-E erquires some serious special case...
             var infoBytes = encodedPacket.Skip(((Path.Count + 2) * 7) + 2).ToArray();
             InfoField = InfoField.FromBytes(Destination, infoBytes);
         }

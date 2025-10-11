@@ -1,6 +1,7 @@
 namespace AprsSharp.AprsParser;
 
 using System;
+using GeoCoordinatePortable;
 
 /// <summary>
 /// Represents an info field for Mic-E encoded packets.
@@ -17,8 +18,23 @@ public class MicEInfo : InfoField
     public MicEInfo(string destinationField, byte[] encodedInfoField)
         : base(encodedInfoField)
     {
+        if (encodedInfoField.Length < 9)
+        {
+            throw new ArgumentException("Mic-E info field should be at least 9 bytes long.", nameof(encodedInfoField));
+        }
+
+        double latitude = 0; // TODO
+        double longitude = 0; // TODO
+        GeoCoordinate coords = new GeoCoordinate(latitude, longitude); // TODO: Altitude
+        Position = new Position()
+
         throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// Gets the position from which the message was sent.
+    /// </summary>
+    public Position Position { get; }
 
     /// <inheritdoc/>
     public override string Encode()

@@ -50,14 +50,7 @@
 
             // Mic-E erquires some serious special case...
             var infoBytes = encodedPacket.Skip(((Path.Count + 2) * 7) + 2).ToArray();
-            if (InfoField.GetPacketType(infoBytes).IsMicEType())
-            {
-                DecodeMicE(Destination, infoBytes);
-            }
-            else
-            {
-                InfoField = InfoField.FromString(Encoding.ASCII.GetString(infoBytes));
-            }
+            InfoField = InfoField.FromBytes(Destination, infoBytes);
         }
 
         /// <summary>
@@ -263,22 +256,6 @@
 
             var shiftedBytes = Encoding.ASCII.GetBytes(call).Select(raw => (byte)(raw << 1)).ToArray();
             return shiftedBytes.Append(ssidByte).ToArray();
-        }
-
-        /// <summary>
-        /// Handle special logic to decode a Mic-E packet.
-        /// </summary>
-        /// <param name="destinationField">A string representation of the desination field.</param>
-        /// <param name="informationField">Byte encoding of the information field.</param>
-        /// <exception cref="NotImplementedException">Not yet implemented, duh.</exception>
-        private void DecodeMicE(string destinationField, byte[] informationField)
-        {
-            Destination = null;
-
-            // decode destination fields
-
-            // decode 
-            throw new NotImplementedException();
         }
     }
 }

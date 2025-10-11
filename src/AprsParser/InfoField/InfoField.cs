@@ -23,6 +23,15 @@
         /// </summary>
         /// <param name="encodedInfoField">An encoded InfoField from which to pull the Type.</param>
         public InfoField(string encodedInfoField)
+            : this(Encoding.ASCII.GetBytes(encodedInfoField))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfoField"/> class from encoded bytes.
+        /// </summary>
+        /// <param name="encodedInfoField">An encoded InfoField from which to pull the Type.</param>
+        public InfoField(byte[] encodedInfoField)
         {
             if (encodedInfoField == null)
             {
@@ -70,13 +79,14 @@
         {
             PacketType type = GetPacketType(encodedInfoField);
 
-            if (type.IsMicEType())
-            {
-                throw new NotImplementedException("Mic-E types cannot be decoded from just the info field. Use the specific class for decoding Mic-E");
-            }
-
             switch (type)
             {
+                case PacketType.OldMicEData:
+                case PacketType.OldMicEDataCurrentTMD700:
+                case PacketType.CurrentMicEData:
+                case PacketType.CurrentMicEDataNotTMD700:
+                    throw new ArgumentException($"Cannot decode Mic-E from a string as there are some unprintable characters. Call {nameof(FromBytes)}", nameof(encodedInfoField));
+
                 case PacketType.PositionWithoutTimestampNoMessaging:
                 case PacketType.PositionWithoutTimestampWithMessaging:
                 case PacketType.PositionWithTimestampNoMessaging:
@@ -95,6 +105,30 @@
 
                 default:
                     return new UnsupportedInfo(encodedInfoField);
+            }
+        }
+
+        /// <summary>
+        /// Instantiates a type of <see cref="InfoField"/> from the byte encoding.
+        /// </summary>
+        /// <param name="destinationField">Optionally, the string encoding of the destination field.
+        /// This is required for Mic-E packets which include some information in the destination.</param>
+        /// <param name="encodedInfoField">Byte representation of the APRS info field.</param>
+        /// <returns>A class extending <see cref="InfoField"/>.</returns>
+        public static InfoField FromBytes(string destinationField, byte[] encodedInfoField)
+        {
+            PacketType type = GetPacketType(encodedInfoField);
+
+            switch (type)
+            {
+                case PacketType.OldMicEData:
+                case PacketType.OldMicEDataCurrentTMD700:
+                case PacketType.CurrentMicEData:
+                case PacketType.CurrentMicEDataNotTMD700:
+                    return new MicEInfo(destinationField, encodedInfoField);
+
+                default:
+                    return FromString(Encoding.ASCII.GetString(encodedInfoField));
             }
         }
 

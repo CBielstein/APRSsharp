@@ -1,5 +1,7 @@
 ﻿namespace AprsSharpUnitTests.AprsParser
 {
+    using System;
+    using System.Text;
     using AprsSharp.AprsParser;
     using Xunit;
 
@@ -22,6 +24,19 @@
         {
             InfoField infoField = InfoField.FromString(informationField);
             Assert.Equal(expectedDataType, infoField.Type);
+        }
+
+        /// <summary>
+        /// Validates that Mic-E packets with an info field less than 9 bytes
+        /// results in an <see cref="ArgumentException"/> via the
+        /// <see cref="InfoField.FromBytes(string, byte[])"/> method.
+        /// </summary>
+        [Fact]
+        public void InfoFieldMustBe9BytesFromBytes()
+        {
+            string destination = "N0CALL-0";
+            byte[] info = Encoding.ASCII.GetBytes("/1234567");
+            Assert.Throws<ArgumentException>(() => InfoField.FromBytes(destination, info));
         }
     }
 }

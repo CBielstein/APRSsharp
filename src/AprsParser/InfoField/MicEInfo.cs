@@ -26,7 +26,7 @@ public class MicEInfo : InfoField
         double latitude = 0; // TODO
         double longitude = 0; // TODO
         GeoCoordinate coords = new GeoCoordinate(latitude, longitude); // TODO: Altitude
-        Position = new Position()
+        Position = new Position();
 
         throw new NotImplementedException();
     }

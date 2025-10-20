@@ -1,6 +1,7 @@
 namespace AprsSharp.AprsParser;
 
 using System;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -33,6 +34,8 @@ public class MicEDestination
         {
             throw new ArgumentException("Mic-E encoding does not use A-K in bytes 4-6.", nameof(encodedString));
         }
+
+        Quadrant = DecodeQuadrant(micEBytes[3], micEBytes[5]);
     }
 
     /// <summary>
@@ -59,4 +62,62 @@ public class MicEDestination
     /// Gets the digipath.
     /// </summary>
     public DigipeaterPaths Digipath { get; }
+
+    private static GeoQuadrant DecodeQuadrant(char northSouth, char eastWest)
+    {
+        ValidateHemisphereIndicator(northSouth);
+        ValidateHemisphereIndicator(eastWest);
+
+        bool north = northSouth > 'L';
+        bool east = eastWest <= 'L';
+
+        if (north && east)
+        {
+            return GeoQuadrant.Northeast;
+        }
+        else if (north && !east)
+        {
+            return GeoQuadrant.Northwest;
+        }
+        else if (!north && east)
+        {
+            return GeoQuadrant.Southeast;
+        }
+        else
+        {
+            return GeoQuadrant.Southwest;
+        }
+    }
+
+    /// <summary>
+    /// Validates if the hemsiphere indicators (north/sound vs east/west)
+    /// are in valid ranges.
+    /// </summary>
+    /// <param name="indicator">Indicator to check.</param>
+    /// <exception cref="ArgumentException">Thrown if not a valid indicator value.</exception>
+    private static void ValidateHemisphereIndicator(char indicator)
+    {
+        if (!CharInRange(indicator, 'L', 'Z') && !CharInRange(indicator, '0', '9'))
+        {
+            throw new ArgumentException("Hemisphere (e.g. north/south, east/west) indicator needs to be in in ranges [0-9] or [L-Z]");
+        }
+    }
+
+    /// <summary>
+    /// Checks if a `check` variable is in an inclusive range of characters
+    /// in ASCII encodings.
+    /// </summary>
+    /// <param name="check">The value to check.</param>
+    /// <param name="a">The starting value (inclusive).</param>
+    /// <param name="b">The closing vlaue (inclusive).</param>
+    /// <returns>True, if check is in range [a,b]. Else, false.</returns>
+    private static bool CharInRange(char check, char a, char b)
+    {
+        if (b < a)
+        {
+            throw new ArgumentException("a must be less than or equal to b.");
+        }
+
+        return a <= check && check <= b;
+    }
 }

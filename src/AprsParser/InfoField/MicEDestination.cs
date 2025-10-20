@@ -30,12 +30,13 @@ public class MicEDestination
         string micEBytes = match.Groups[0].Value;
 
         // Some sanity checking against the encoding rules
-        if (micEBytes[3..].Any(b => b >= 'A' && b <= 'K'))
+        if (micEBytes[3..].Any(b => CharInRange(b, 'A', 'K')))
         {
             throw new ArgumentException("Mic-E encoding does not use A-K in bytes 4-6.", nameof(encodedString));
         }
 
         Quadrant = DecodeQuadrant(micEBytes[3], micEBytes[5]);
+        LongitudeOffset = DecodeLongitudeOffset(micEBytes[4]);
     }
 
     /// <summary>
@@ -56,13 +57,20 @@ public class MicEDestination
     /// <summary>
     /// Gets the offset to apply to longitude coordinates encoded in the info field.
     /// </summary>
-    public double LongitudeOffset { get; }
+    public uint LongitudeOffset { get; }
 
     /// <summary>
     /// Gets the digipath.
     /// </summary>
     public DigipeaterPaths Digipath { get; }
 
+    /// <summary>
+    /// Decodes the quadrant of the message, based on given charaters.
+    /// </summary>
+    /// <param name="northSouth">The north/south indicator char.</param>
+    /// <param name="eastWest">The east/west indicator char.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if not a valid indicator value.</exception>
+    /// <returns>A <see cref="GeoQuadrant"/> represented by the given indicators.</returns>
     private static GeoQuadrant DecodeQuadrant(char northSouth, char eastWest)
     {
         ValidateHemisphereIndicator(northSouth);
@@ -94,12 +102,12 @@ public class MicEDestination
     /// are in valid ranges.
     /// </summary>
     /// <param name="indicator">Indicator to check.</param>
-    /// <exception cref="ArgumentException">Thrown if not a valid indicator value.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if not a valid indicator value.</exception>
     private static void ValidateHemisphereIndicator(char indicator)
     {
         if (!CharInRange(indicator, 'L', 'Z') && !CharInRange(indicator, '0', '9'))
         {
-            throw new ArgumentException("Hemisphere (e.g. north/south, east/west) indicator needs to be in in ranges [0-9] or [L-Z]");
+            throw new ArgumentOutOfRangeException(nameof(indicator), "Hemisphere (e.g. north/south, east/west) indicator needs to be in in ranges [0-9] or [L-Z]");
         }
     }
 
@@ -119,5 +127,21 @@ public class MicEDestination
         }
 
         return a <= check && check <= b;
+    }
+
+    /// <summary>
+    /// Decodes the longitude offset.
+    /// </summary>
+    /// <param name="indicator">The character indicating a value.</param>
+    /// <returns>Either 0 or 100, depending on the value.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if not a valid indicator value.</exception>
+    private static uint DecodeLongitudeOffset(char indicator)
+    {
+        if (!CharInRange(indicator, '0', '9') && !CharInRange(indicator, 'L', 'Z'))
+        {
+            throw new ArgumentOutOfRangeException(nameof(indicator), "Longitude offset indicator must not be in range A-K");
+        }
+
+        return indicator < 'P' ? 0u : 100u;
     }
 }

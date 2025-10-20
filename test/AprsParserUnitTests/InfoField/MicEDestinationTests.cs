@@ -21,7 +21,7 @@ public class MicEDestinationTests
         Assert.Equal(MicEMessageIdentifier.Returning, dest.Message);
         Assert.Equal(33.427333, dest.Latitude);
         Assert.Equal(33.427333, dest.Latitude);
-        Assert.Equal(0, dest.LongitudeOffset);
+        Assert.Equal(0u, dest.LongitudeOffset);
         Assert.Equal(GeoQuadrant.Northwest, dest.Quadrant);
         Assert.Equal(DigipeaterPaths.WIDE11, dest.Digipath);
     }

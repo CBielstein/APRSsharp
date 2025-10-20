@@ -25,4 +25,25 @@ public class MicEDestinationTests
         Assert.Equal(GeoQuadrant.Northwest, dest.Quadrant);
         Assert.Equal(DigipeaterPaths.WIDE11, dest.Digipath);
     }
+
+    /// <summary>
+    /// Mic-E encoding doesn't allow chars A-K in the 4th, 5th, or 6th location.
+    /// Validate that an exception is thrown.
+    /// </summary>
+    /// <param name="encodedBytes">The encoded string to check.</param>
+    [Theory]
+    [InlineData("AAAAAA-0")]
+    [InlineData("000A00-0")]
+    [InlineData("000B00-0")]
+    [InlineData("000C00-0")]
+    [InlineData("000D00-0")]
+    [InlineData("000E00-0")]
+    [InlineData("0000F0-0")]
+    [InlineData("0000G0-0")]
+    [InlineData("0000H0-0")]
+    [InlineData("00000I-0")]
+    [InlineData("00000J-0")]
+    [InlineData("00000K-0")]
+    public void CharatersOutOfPlace(string encodedBytes)
+        => Assert.Throws<ArgumentException>(() => new MicEDestination(encodedBytes));
 }

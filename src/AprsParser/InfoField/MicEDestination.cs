@@ -1,6 +1,8 @@
 namespace AprsSharp.AprsParser;
 
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 /// <summary>
 /// Encodes and decodes the information in the destination field
@@ -15,7 +17,22 @@ public class MicEDestination
     /// <param name="encodedString">A string encoding of the destination field of a Mic-E packet.</param>
     public MicEDestination(string encodedString)
     {
-        throw new NotImplementedException();
+        Match match = Regex.Match(encodedString, RegexStrings.CallsignWithOptionalSsid);
+        if (!match.Success || match.Groups[2] == null)
+        {
+            throw new ArgumentException("Encoded destination should be a 6-char callsign plus SSID (e.g. N0CALL-0)", nameof(encodedString));
+        }
+
+        // Convert from SSID to path
+        Digipath = (DigipeaterPaths)double.Parse(match.Groups[2].Value);
+
+        string micEBytes = match.Groups[0].Value;
+
+        // Some sanity checking against the encoding rules
+        if (micEBytes[3..].Any(b => b >= 'A' && b <= 'K'))
+        {
+            throw new ArgumentException("Mic-E encoding does not use A-K in bytes 4-6.", nameof(encodedString));
+        }
     }
 
     /// <summary>

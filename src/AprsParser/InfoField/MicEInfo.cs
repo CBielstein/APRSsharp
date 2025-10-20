@@ -11,7 +11,8 @@ using GeoCoordinatePortable;
 public class MicEInfo : InfoField
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="MicEInfo"/> class.
+    /// Initializes a new instance of the <see cref="MicEInfo"/> class
+    /// by decoding the encoded destination and information fields.
     /// </summary>
     /// <param name="destinationField">A string encoding of the information field of a Mic-E packet.</param>
     /// <param name="encodedInfoField">Byte encoding of the information field of a Mic-E packet.</param>
@@ -23,10 +24,14 @@ public class MicEInfo : InfoField
             throw new ArgumentException("Mic-E info field should be at least 9 bytes long.", nameof(encodedInfoField));
         }
 
-        double latitude = 0; // TODO
-        double longitude = 0; // TODO
+        MicEDestination decodedDestination = new MicEDestination(destinationField);
+
+        double latitude = decodedDestination.Latitude;
+        double longitude = 0 + decodedDestination.LongitudeOffset;
         GeoCoordinate coords = new GeoCoordinate(latitude, longitude); // TODO: Altitude
-        Position = new Position();
+        Position = new Position(coords);
+
+        Message = decodedDestination.Message;
 
         throw new NotImplementedException();
     }
@@ -35,6 +40,11 @@ public class MicEInfo : InfoField
     /// Gets the position from which the message was sent.
     /// </summary>
     public Position Position { get; }
+
+    /// <summary>
+    /// Gets the mic-e message type.
+    /// </summary>
+    public MicEMessageIdentifier Message { get; }
 
     /// <inheritdoc/>
     public override string Encode()

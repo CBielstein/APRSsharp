@@ -1,7 +1,6 @@
 ﻿namespace AprsSharp.AprsParser
 {
     using System;
-    using System.Data.SqlTypes;
     using System.Text;
     using AprsSharp.AprsParser.Extensions;
 

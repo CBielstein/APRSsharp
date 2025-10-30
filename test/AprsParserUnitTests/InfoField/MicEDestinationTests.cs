@@ -18,10 +18,11 @@ public class MicEDestinationTests
     {
         // APRS 1.01 specifies "S32U6T", I added "-1" so that it would be representative of the full encoding.
         MicEDestination dest = new MicEDestination("S32U6T-1");
-        Assert.Equal(MicEMessageType.Returning, dest.Message);
-        Assert.Equal(33.427333, dest.Latitude);
-        Assert.Equal(33.427333, dest.Latitude);
+
+        // should be 33.427333, but added an extra 3 and allowing for floating point stuff
+        Assert.Equal(33.4273333, dest.Latitude, 0.0000001);
         Assert.Equal(0u, dest.LongitudeOffset);
+        Assert.Equal(MicEMessageType.Returning, dest.Message);
         Assert.Equal(GeoQuadrant.Northwest, dest.Quadrant);
         Assert.Equal(DigipeaterPaths.WIDE11, dest.Digipath);
     }

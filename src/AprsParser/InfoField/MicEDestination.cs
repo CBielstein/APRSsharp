@@ -40,6 +40,7 @@ public class MicEDestination
         Quadrant = DecodeQuadrant(micEBytes[3], micEBytes[5]);
         LongitudeOffset = DecodeLongitudeOffset(micEBytes[4]);
         Message = DecodeMessage(micEBytes[..3]);
+        Latitude = DecodeLatitude(micEBytes[..6]);
     }
 
     /// <summary>
@@ -208,5 +209,46 @@ public class MicEDestination
         }
 
         return indicator < 'P' ? 0u : 100u;
+    }
+
+    /// <summary>
+    /// Decodes the latitude from the encoded mic-e bytes.
+    /// </summary>
+    /// <param name="bytes">Encoded mic-e destination string.</param>
+    /// <returns>Decoded latitude.</returns>
+    private static double DecodeLatitude(string bytes)
+    {
+        if (!Regex.IsMatch(bytes, @"^[0-9A-Z]{6}$"))
+        {
+            throw new ArgumentException($"Bytes for latitude decode must be 6 bytes long and in [0,9] or [A,Z]. Was given {bytes}", nameof(bytes));
+        }
+
+        var numbers = bytes.Select(b =>
+        {
+            if (b == 'K' || b == 'L' || b == 'Z')
+            {
+                // Space
+                // TODO: Veify that it is okay to replace space with 0.
+                // If not, what _should_ it be? Perhaps it's about ambiguity?
+                return 0;
+            }
+            else if (b <= '9')
+            {
+                return b - '0';
+            }
+            else if (b <= 'J')
+            {
+                return b - 'J';
+            }
+            else
+            {
+                return b - 'P';
+            }
+        }).ToArray();
+
+        int degrees = (numbers[0] * 10) + numbers[1];
+        double minutes = (numbers[2] * 10) + numbers[3] + (numbers[4] / 10.0) + (numbers[5] / 100.0);
+
+        return degrees + (minutes / 60.0);
     }
 }

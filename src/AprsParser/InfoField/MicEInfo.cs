@@ -44,7 +44,7 @@ public class MicEInfo : InfoField
     /// <summary>
     /// Gets the mic-e message type.
     /// </summary>
-    public MicEMessageIdentifier Message { get; }
+    public MicEMessageType Message { get; }
 
     /// <inheritdoc/>
     public override string Encode()

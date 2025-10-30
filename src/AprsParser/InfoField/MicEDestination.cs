@@ -2,6 +2,7 @@ namespace AprsSharp.AprsParser;
 
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,6 +12,8 @@ using System.Text.RegularExpressions;
 /// </summary>
 public class MicEDestination
 {
+    private const string AddressEncodedCharacters = @"^[0-9A-Z]{3}$";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MicEDestination"/> class
     /// by decoding the encoded string of a Mic-E-encoded destination field.
@@ -37,6 +40,7 @@ public class MicEDestination
 
         Quadrant = DecodeQuadrant(micEBytes[3], micEBytes[5]);
         LongitudeOffset = DecodeLongitudeOffset(micEBytes[4]);
+        Message = DecodeMessage(micEBytes[..3]);
     }
 
     /// <summary>
@@ -47,7 +51,7 @@ public class MicEDestination
     /// <summary>
     /// Gets the message type.
     /// </summary>
-    public MicEMessageIdentifier Message { get; }
+    public MicEMessageType Message { get; }
 
     /// <summary>
     /// Gets the goegraphical quadrant of coordinates.
@@ -63,6 +67,68 @@ public class MicEDestination
     /// Gets the digipath.
     /// </summary>
     public DigipeaterPaths Digipath { get; }
+
+    /// <summary>
+    /// Decodes the incidator bytes to get the <see cref="MicEMessageType"/>
+    /// from the encoded packet.
+    /// </summary>
+    /// <param name="bytes">The relevant characters to decode for a message type.</param>
+    /// <returns>An enum value representing the message encoded in the packet.</returns>
+    private static MicEMessageType DecodeMessage(string bytes)
+    {
+        if (!Regex.IsMatch(bytes, AddressEncodedCharacters) || bytes.Length != 3)
+        {
+            throw new ArgumentException($"Characters must be 0-9 or A-Z and have length of 3. Was given {bytes}", nameof(bytes));
+        }
+
+        // If the message contained one or more "standard" indicator
+        bool standard = false;
+
+        // If the message contained one or more "custom" indicator
+        bool custom = false;
+
+        var indicators = bytes.Select<char, byte>(b =>
+        {
+            if (b <= '9' || b == 'L')
+            {
+                return 0;
+            }
+            else if (b <= 'K')
+            {
+                custom = true;
+                return 1;
+            }
+            else
+            {
+                standard = true;
+                return 1;
+            }
+        }).ToArray();
+
+        if (standard && custom)
+        {
+            // Conflicting indicators, this is unknown type
+            return MicEMessageType.Unknown;
+        }
+
+        var indicatorByte =
+            indicators[0] << 2 |
+            indicators[1] << 1 |
+            indicators[2] << 0;
+
+        return indicatorByte switch
+        {
+            7 => standard ? MicEMessageType.OffDuty : MicEMessageType.Custom0,
+            6 => standard ? MicEMessageType.EnRoute : MicEMessageType.Custom1,
+            5 => standard ? MicEMessageType.InService : MicEMessageType.Custom2,
+            4 => standard ? MicEMessageType.Returning : MicEMessageType.Custom3,
+            3 => standard ? MicEMessageType.Committed : MicEMessageType.Custom4,
+            2 => standard ? MicEMessageType.Special : MicEMessageType.Custom5,
+            1 => standard ? MicEMessageType.Priority : MicEMessageType.Custom6,
+            0 => MicEMessageType.Emergency,
+            _ => throw new ArgumentException("Unsupported message value."),
+        };
+    }
 
     /// <summary>
     /// Decodes the quadrant of the message, based on given charaters.

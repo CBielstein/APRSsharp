@@ -27,7 +27,7 @@ public class MicEDestination
         }
 
         // Convert from SSID to path
-        Digipath = (DigipeaterPaths)double.Parse(match.Groups[2].Value);
+        Digipath = (DigipeaterPaths)double.Parse(match.Groups[3].Value);
 
         string micEBytes = match.Groups[0].Value;
 

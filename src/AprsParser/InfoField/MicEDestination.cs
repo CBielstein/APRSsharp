@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 /// <summary>
@@ -12,8 +13,6 @@ using System.Text.RegularExpressions;
 /// </summary>
 public class MicEDestination
 {
-    private const string AddressEncodedCharacters = @"^[0-9A-Z]{3}$";
-
     /// <summary>
     /// Initializes a new instance of the <see cref="MicEDestination"/> class
     /// by decoding the encoded string of a Mic-E-encoded destination field.
@@ -76,7 +75,7 @@ public class MicEDestination
     /// <returns>An enum value representing the message encoded in the packet.</returns>
     private static MicEMessageType DecodeMessage(string bytes)
     {
-        if (!Regex.IsMatch(bytes, AddressEncodedCharacters) || bytes.Length != 3)
+        if (!Regex.IsMatch(bytes, @"^[0-9A-Z]{3}$"))
         {
             throw new ArgumentException($"Characters must be 0-9 or A-Z and have length of 3. Was given {bytes}", nameof(bytes));
         }

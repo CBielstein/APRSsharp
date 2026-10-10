@@ -16,8 +16,9 @@ namespace AprsSharpUnitTests.AprsIsClient
         /// Tests that the Disconnect() method on <see cref="AprsIsClient"/>
         /// succesfully stops receiving and the Receive() Task returns.
         /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async void TestDisconnect()
+        public async Task TestDisconnect()
         {
             Mock<ITcpConnection> mockTcpConnection = new Mock<ITcpConnection>();
             mockTcpConnection.SetupGet(mock => mock.Connected).Returns(true);

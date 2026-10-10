@@ -198,7 +198,7 @@ namespace AprsSharpUnitTests.AprsParser
             Assert.Equal('/', pi.Position.SymbolTableIdentifier);
             Assert.Equal('>', pi.Position.SymbolCode);
 
-            Assert.True(false, "Not yet handling data extension.");
+            Assert.Fail("Not yet handling data extension.");
         }
 
         /// <summary>
@@ -237,7 +237,7 @@ namespace AprsSharpUnitTests.AprsParser
             Assert.Equal('/', pi.Position.SymbolTableIdentifier);
             Assert.Equal('\\', pi.Position.SymbolCode);
 
-            Assert.True(false, "Not yet handling DF Report, bearing, course, and/or speed.");
+            Assert.Fail("Not yet handling DF Report, bearing, course, and/or speed.");
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace AprsSharpUnitTests.AprsParser
             Assert.Equal(23, pi.Timestamp?.DateTime.Hour);
             Assert.Equal(45, pi.Timestamp?.DateTime.Minute);
 
-            Assert.True(false, "Not yet handling compressed latlong position report format.");
+            Assert.Fail("Not yet handling compressed latlong position report format.");
         }
 
         /// <summary>

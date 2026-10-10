@@ -104,46 +104,46 @@
         /// <param name="args"> Parameters to be passed as commandline arguments.</param>
         public static void Main(string[] args)
         {
-            Option<Mode> modeOption = new("--mode", "-m")
+            Option<Mode> modeOption = new ("--mode", "-m")
             {
                 DefaultValueFactory = _ => Mode.APRSIS,
                 Description = "The mode of operation for this program",
             };
-            Option<string> callsignOption = new("--callsign", "-c", "--cgn")
+            Option<string> callsignOption = new ("--callsign", "-c", "--cgn")
             {
                 DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultCallsign,
                 Description = "A user callsign parsed as a string",
             };
-            Option<string> passwordOption = new("--password", "-p", "--pwd", "--pass")
+            Option<string> passwordOption = new ("--password", "-p", "--pwd", "--pass")
             {
                 DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultPassword,
                 Description = "A user password whose argument is parsed as a string",
             };
-            Option<string> serverOption = new("--server", "-s", "--svr")
+            Option<string> serverOption = new ("--server", "-s", "--svr")
             {
                 DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultServerName,
                 Description = "A specified server parsed as a string, used for APRS-IS or TCP TNCs",
             };
-            Option<int> portOption = new("--port")
+            Option<int> portOption = new ("--port")
             {
                 DefaultValueFactory = _ => 8001,
                 Description = "A TCP port for use with TCP TNCs",
             };
-            Option<string> filterOption = new("--filter", "-f")
+            Option<string> filterOption = new ("--filter", "-f")
             {
                 DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultFilter,
                 Description = "A user filter parsed as a string. Should not include the word 'filter', just the logic string.",
             };
-            Option<bool> displayUnsupportedOption = new("--display-unsupported")
+            Option<bool> displayUnsupportedOption = new ("--display-unsupported")
             {
                 Description = "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed.",
             };
-            Option<string?> serialPortOption = new("--serialPort")
+            Option<string?> serialPortOption = new ("--serialPort")
             {
                 DefaultValueFactory = _ => null,
                 Description = "A serial port for use with serial TNCs.",
             };
-            Option<bool> displayParseFailuresOption = new("--display-parse-failures")
+            Option<bool> displayParseFailuresOption = new ("--display-parse-failures")
             {
                 Description = "If specified, prints packets that failed to parse. Helpful for development.",
             };

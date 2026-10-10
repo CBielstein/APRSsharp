@@ -10,8 +10,6 @@ jobs:
     name: release
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    env:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
       - name: Clone
@@ -43,14 +41,21 @@ jobs:
       - name: Pack AprsSharp.Shared
         run: dotnet pack src/Shared/Shared.csproj --configuration Release --no-build
 
+      # Get a short-lived NuGet API key
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Publish AprsSharp.AprsParser
-        run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push src/AprsParser/bin/Release/AprsSharp.AprsParser.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Publish AprsSharp.AprsIsClient
-        run: dotnet nuget push src/AprsIsClient/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push src/AprsIsClient/bin/Release/AprsSharp.AprsIsClient.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Publish AprsSharp.KissTnc
-        run: dotnet nuget push src/KissTnc/bin/Release/AprsSharp.KissTnc.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push src/KissTnc/bin/Release/AprsSharp.KissTnc.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
 
       - name: Publish AprsSharp.Shared
-        run: dotnet nuget push src/Shared/bin/Release/AprsSharp.Shared.*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push src/Shared/bin/Release/AprsSharp.Shared.*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json

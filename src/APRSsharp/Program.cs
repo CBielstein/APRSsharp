@@ -104,58 +104,80 @@
         /// <param name="args"> Parameters to be passed as commandline arguments.</param>
         public static void Main(string[] args)
         {
+            Option<Mode> modeOption = new("--mode", "-m")
+            {
+                DefaultValueFactory = _ => Mode.APRSIS,
+                Description = "The mode of operation for this program",
+            };
+            Option<string> callsignOption = new("--callsign", "-c", "--cgn")
+            {
+                DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultCallsign,
+                Description = "A user callsign parsed as a string",
+            };
+            Option<string> passwordOption = new("--password", "-p", "--pwd", "--pass")
+            {
+                DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultPassword,
+                Description = "A user password whose argument is parsed as a string",
+            };
+            Option<string> serverOption = new("--server", "-s", "--svr")
+            {
+                DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultServerName,
+                Description = "A specified server parsed as a string, used for APRS-IS or TCP TNCs",
+            };
+            Option<int> portOption = new("--port")
+            {
+                DefaultValueFactory = _ => 8001,
+                Description = "A TCP port for use with TCP TNCs",
+            };
+            Option<string> filterOption = new("--filter", "-f")
+            {
+                DefaultValueFactory = _ => AprsIsClient.AprsIsConstants.DefaultFilter,
+                Description = "A user filter parsed as a string. Should not include the word 'filter', just the logic string.",
+            };
+            Option<bool> displayUnsupportedOption = new("--display-unsupported")
+            {
+                Description = "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed.",
+            };
+            Option<string?> serialPortOption = new("--serialPort")
+            {
+                DefaultValueFactory = _ => null,
+                Description = "A serial port for use with serial TNCs.",
+            };
+            Option<bool> displayParseFailuresOption = new("--display-parse-failures")
+            {
+                Description = "If specified, prints packets that failed to parse. Helpful for development.",
+            };
+
             // Create a root command with some options
-#pragma warning disable CA1861 // Avoid constant arrays as arguments
-            var rootCommand = new RootCommand
-                {
-                new Option<Mode>(
-                    aliases: new string[] { "--mode", "-m" },
-                    getDefaultValue: () => Mode.APRSIS,
-                    description: "The mode of operation for this program"),
-                new Option<string>(
-                    aliases: new string[] { "--callsign", "-c", "--cgn" },
-                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultCallsign,
-                    description: "A user callsign parsed as a string"),
-                new Option<string>(
-                    aliases: new string[] { "--password", "-p", "--pwd", "--pass" },
-                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultPassword,
-                    description: "A user password whose argument is parsed as a string"),
-                new Option<string>(
-                    aliases: new string[] { "--server", "-s", "--svr" },
-                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultServerName,
-                    description: "A specified server parsed as a string, used for APRS-IS or TCP TNCs"),
-                new Option<int>(
-                    aliases: new string[] { "--port" },
-                    getDefaultValue: () => 8001,
-                    description: "A TCP port for use with TCP TNCs"),
-                new Option<string>(
-                    aliases: new string[] { "--filter", "-f" },
-                    getDefaultValue: () => AprsIsClient.AprsIsConstants.DefaultFilter,
-                    description: "A user filter parsed as a string. Should not include the word 'filter', just the logic string."),
-                new Option(
-                    aliases: new string[] { "--display-unsupported" },
-                    description: "If specified, includes output of unknown or unsupported info types values. If not, such packets are not displayed."),
-                new Option<string?>(
-                    aliases: new string[] { "--serialPort" },
-                    getDefaultValue: () => null,
-                    description: "A serial port for use with serial TNCs."),
-                new Option(
-                    aliases: new string[] { "--display-parse-failures" },
-                    description: "If specified, prints packets that failed to parse. Helpful for development."),
-                };
-#pragma warning restore CA1861 // Avoid constant arrays as arguments
-            rootCommand.Name = "APRSsharp";
-            rootCommand.Description = $@"AprsSharp Console App
+            var rootCommand = new RootCommand($@"AprsSharp Console App
                 Version: {Utilities.GetAssemblyVersion()}
                 GitHub: https://github.com/CBielstein/APRSsharp
-                Author: Cameron Bielstein";
+                Author: Cameron Bielstein")
+            {
+                modeOption,
+                callsignOption,
+                passwordOption,
+                serverOption,
+                portOption,
+                filterOption,
+                displayUnsupportedOption,
+                serialPortOption,
+                displayParseFailuresOption,
+            };
 
-            // The parameters of the handler method are matched according to the names of the options
-            rootCommand.Handler = CommandHandler
-                .Create(async (Mode mode, string callsign, string password, string server, int port, string filter, bool displayUnsupported, string? serialPort, bool displayParseFailures)
-                        => await Execute(mode, callsign, password, server, port, filter, displayUnsupported, serialPort, displayParseFailures));
+            rootCommand.SetAction(async (parseResult, cancellationToken) =>
+                await Execute(
+                    parseResult.GetRequiredValue(modeOption),
+                    parseResult.GetRequiredValue(callsignOption),
+                    parseResult.GetRequiredValue(passwordOption),
+                    parseResult.GetRequiredValue(serverOption),
+                    parseResult.GetValue(portOption),
+                    parseResult.GetRequiredValue(filterOption),
+                    parseResult.GetValue(displayUnsupportedOption),
+                    parseResult.GetValue(serialPortOption),
+                    parseResult.GetValue(displayParseFailuresOption)));
 
-            rootCommand.Invoke(args);
+            rootCommand.Parse(args).Invoke();
         }
 
         /// <summary>

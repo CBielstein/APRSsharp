@@ -41,8 +41,6 @@ public abstract class BaseTNCUnitTests<T>
         {
             Assert.AreEqual(correctAnswer[i], encodedBytes[i], "At position " + i);
         }
-
-        Assert.IsTrue(true);
     }
 
     /// <summary>

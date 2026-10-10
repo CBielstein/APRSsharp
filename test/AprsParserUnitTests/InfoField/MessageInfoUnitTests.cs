@@ -53,7 +53,7 @@ namespace AprsSharpUnitTests.AprsParser
         public void DecodeMessageFormat(
             string informationField,
             string expectedAddressee,
-            string expectedContent,
+            string? expectedContent,
             string? expectedId)
         {
             MessageInfo mi = new MessageInfo(informationField);

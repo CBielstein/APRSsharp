@@ -99,6 +99,15 @@
         }
 
         /// <summary>
+        /// A function matching the delegate event to print the raw message.
+        /// </summary>
+        /// <param name="rawMessage">Raw Message to be printed.</param>
+        public static void PrintRawMessage(string rawMessage)
+        {
+            Console.WriteLine(rawMessage);
+        }
+
+        /// <summary>
         /// Main method that takes in raw packet strings.
         /// </summary>
         /// <param name="args"> Parameters to be passed as commandline arguments.</param>
@@ -145,7 +154,11 @@
             };
             Option<bool> displayParseFailuresOption = new ("--display-parse-failures")
             {
-                Description = "If specified, prints packets that failed to parse. Helpful for development.",
+                Description = "If specified, prints packets that failed to parse. Helpful for development. Ignored if -r/--raw is provided.",
+            };
+            Option<bool> printRawMessageOption = new ("-r", "--raw")
+            {
+                Description = "Prints all raw messages from APRS-IS and disables packet decoding. Only applicable to APRSIS mode.",
             };
 
             // Create a root command with some options
@@ -163,6 +176,7 @@
                 displayUnsupportedOption,
                 serialPortOption,
                 displayParseFailuresOption,
+                printRawMessageOption,
             };
 
             rootCommand.SetAction(async (parseResult, cancellationToken) =>
@@ -175,7 +189,8 @@
                     parseResult.GetRequiredValue(filterOption),
                     parseResult.GetValue(displayUnsupportedOption),
                     parseResult.GetValue(serialPortOption),
-                    parseResult.GetValue(displayParseFailuresOption)));
+                    parseResult.GetValue(displayParseFailuresOption),
+                    parseResult.GetValue(printRawMessageOption)));
 
             rootCommand.Parse(args).Invoke();
         }
@@ -258,6 +273,7 @@
         /// <param name="displayUnsupported">If true, display packets with unsupported info field types. If false, such packets are not displayed.</param>
         /// <param name="serialPort">A serial port to use for connection to a TNC via serial connection.</param>
         /// <param name="displayParseFailures">Whether to print parse failures.</param>
+        /// <param name="printRawMessage">Whether to print raw messages.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private static async Task Execute(
             Mode mode,
@@ -268,7 +284,8 @@
             string filter,
             bool displayUnsupported,
             string? serialPort,
-            bool displayParseFailures)
+            bool displayParseFailures,
+            bool printRawMessage)
         {
             Program.displayUnsupported = displayUnsupported;
 
@@ -279,11 +296,18 @@
                     Console.WriteLine($"Connecting to APRS-IS server: {server}");
 
                     using AprsIsClient n = new AprsIsClient();
-                    n.ReceivedPacket += PrintPacket;
 
-                    if (displayParseFailures)
+                    if (printRawMessage)
                     {
-                        n.DecodeFailed += PrintParseFailure;
+                        n.ReceivedTcpMessage += PrintRawMessage;
+                    }
+                    else
+                    {
+                        n.ReceivedPacket += PrintPacket;
+                        if (displayParseFailures)
+                        {
+                            n.DecodeFailed += PrintParseFailure;
+                        }
                     }
 
                     Task receive = n.Receive(callsign, password, server, filter);

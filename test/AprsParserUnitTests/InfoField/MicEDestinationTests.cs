@@ -28,6 +28,21 @@ public class MicEDestinationTests
     }
 
     /// <summary>
+    /// Validates the message type encoding based on the examples in APRS 1.01.
+    /// </summary>
+    /// <param name="firstThree">The first three bytes of the encoded destination field.</param>
+    /// <param name="type">The expected message type.</param>
+    [Theory]
+    [InlineData("S32", MicEMessageType.Returning)]
+    [InlineData("F2D", MicEMessageType.Custom2)]
+    [InlineData("234", MicEMessageType.Emergency)]
+    public void DecodeMessageTypesFromAprs101(string firstThree, MicEMessageType type)
+    {
+        MicEDestination dest = new MicEDestination($"{firstThree}U6T-0");
+        Assert.Equal(type, dest.Message);
+    }
+
+    /// <summary>
     /// Mic-E encoding doesn't allow chars A-K in the 4th, 5th, or 6th location.
     /// Validate that an exception is thrown.
     /// </summary>

@@ -1,6 +1,8 @@
 namespace AprsSharp.AprsParser;
 
 using System;
+using System.Text;
+using System.Linq;
 using GeoCoordinatePortable;
 
 /// <summary>
@@ -28,12 +30,57 @@ public class MicEInfo : InfoField
 
         double latitude = decodedDestination.Latitude;
         double longitude = 0 + decodedDestination.LongitudeOffset;
-        GeoCoordinate coords = new GeoCoordinate(latitude, longitude); // TODO: Altitude
-        Position = new Position(coords);
+        double? altitude = null;
 
         Message = decodedDestination.Message;
 
-        throw new NotImplementedException();
+        if (encodedInfoField.Length > 9 && (encodedInfoField[9] == '‘' || encodedInfoField[9] == '\'' || encodedInfoField[9] == 0x1d))
+        {
+            // This is telemetry data
+        }
+        else
+        {
+            // This is status data
+
+            // check if this is a standard position info field encoding wut
+            try
+            {
+                PositionInfo positionInfo = new PositionInfo(Encoding.ASCII.GetString(encodedInfoField));
+                Position = positionInfo.Position;
+            }
+            catch
+            {
+            }
+
+            // if it isn't...
+            // Check for maidenhead locator
+            // if (encodedInfoField.Contains("/G"))
+            // {
+            //     Position = new Position.DecodeMaidenhead();
+            // }
+
+            // Check for altitude
+            int i = Array.IndexOf(encodedInfoField, "}");
+
+            // There needs to be 3 characters before the indicator: xxx}
+            if (i >= 3)
+            {
+                // Subtract 33 from each byte from the encoding...
+                byte[] altitudeBytes = encodedInfoField[(i-3)..(i+1)].Select(b => (byte)(b - 33)).ToArray();
+
+                // Altitude in meters above 10km below sea level
+                int altitudeAboveDatum = Position.DecodeBase91(altitudeBytes);
+
+                altitude = altitudeAboveDatum - 10000;
+            }
+        }
+
+        GeoCoordinate coords = altitude is not null ?
+            new GeoCoordinate(latitude, longitude, altitude.Value) :
+            new GeoCoordinate(latitude, longitude);
+
+        // Position set by an encoded PositionInfo takes priority over the mic-e position
+        Position ??= new Position(coords);
     }
 
     /// <summary>

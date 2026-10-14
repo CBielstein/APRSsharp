@@ -21,4 +21,19 @@ public class MicEInfoTests
         byte[] info = Encoding.ASCII.GetBytes("12345678");
         Assert.Throws<ArgumentException>(() => new MicEInfo(destination, info));
     }
+
+    /// <summary>
+    /// Validates that a Mic-e destination can decode altitude
+    /// TODO: Currently adding 9 'x' chars at the front to pad out the expected length.
+    ///     This should probably be replaced with real expected values.
+    /// </summary>
+    [Theory]
+    [InlineData("xxxxxxxxx>\"4T}")]
+    [InlineData("xxxxxxxxx\"4T}")]
+    [InlineData("xxxxxxxxx]\"4T}")]
+    public void DecodeAltitudeAprs101(string infoField)
+    {
+        MicEInfo info = new MicEInfo("S32U6T-1", Encoding.ASCII.GetBytes(infoField));
+        Assert.Equal(200, info.Position.Coordinates.Altitude);
+    }
 }

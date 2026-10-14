@@ -448,10 +448,11 @@
             return EncodeCoordinates(CoordinateSystem.Longitude);
         }
 
-        private static int DecodeBase91(string encoded)
-        {
-            var bytes = Encoding.ASCII.GetBytes(encoded);
+        internal static int DecodeBase91(string encoded)
+            => DecodeBase91(Encoding.ASCII.GetBytes(encoded));
 
+        internal static int DecodeBase91(byte[] bytes)
+        {
             var result = 0;
             for (var i = 0; i < bytes.Length; i++)
             {
